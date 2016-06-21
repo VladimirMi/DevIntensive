@@ -18,7 +18,7 @@
     <dimen name="spacing_normal_16">16dp</dimen>
     <dimen name="spacing_small_8">8dp</dimen>
     <dimen name="spacing_tiny_4">4dp</dimen>
-    
+
     <!-- Sizes -->
     <dimen name="size_large_72">72dp</dimen>
     <dimen name="size_medium_56">56dp</dimen>
