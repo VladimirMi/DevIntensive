@@ -14,7 +14,7 @@
         android:layout_width="0dp"
         android:layout_height="@dimen/spacing_larger_72"
         android:layout_marginLeft="@dimen/spacing_medium_32"
-        android:layout_marginRight="@dimen/spacing_normal_16"
+        android:layout_marginRight="@dimen/spacing_medium_32"
         android:layout_weight="1"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -26,14 +26,14 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Мобильный телефон"
-                android:inputType="phone"/>
+                android:hint="@string/about_me_hint"
+                android:inputType="text"
+                android:enabled="false"
+                android:focusable="false"
+                android:textColor="@color/black"
+                android:textColorHint="@color/grey"/>
 
         </android.support.design.widget.TextInputLayout>
 
     </LinearLayout>
-
-    <ImageView
-        style="@style/icon.right"
-        android:src="@drawable/ic_visibility_black_24dp"/>
 </LinearLayout>
