@@ -10,26 +10,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include layout="@layout/phone_item"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <include layout="@layout/dividing_line"/>
+            <include layout="@layout/phone_item"/>
 
-        <include layout="@layout/mail_item"/>
+            <include layout="@layout/dividing_line"/>
 
-        <include layout="@layout/dividing_line"/>
+            <include layout="@layout/mail_item"/>
 
-        <include layout="@layout/vk_item"/>
+            <include layout="@layout/dividing_line"/>
 
-        <include layout="@layout/dividing_line"/>
+            <include layout="@layout/vk_item"/>
 
-        <include layout="@layout/github_item"/>
+            <include layout="@layout/dividing_line"/>
 
-        <include layout="@layout/dividing_line"/>
+            <include layout="@layout/github_item"/>
 
-        <include layout="@layout/aboutme_item"/>
+            <include layout="@layout/dividing_line"/>
+
+            <include layout="@layout/aboutme_item"/>
+        </LinearLayout>
+
 
     </android.support.v4.widget.NestedScrollView>
-
 
 
 </LinearLayout>
