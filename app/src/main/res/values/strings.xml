@@ -3,4 +3,5 @@
     <string name="phone_hint">Мобильный</string>
     <string name="mail_hint">E-mail</string>
     <string name="vk_hint">Профиль в VK</string>
+    <string name="github_hint">РЕпозиторий</string>
 </resources>
