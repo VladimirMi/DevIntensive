@@ -6,38 +6,30 @@
               android:orientation="vertical"
               tools:context="com.softdesign.devintensive.ui.activities.MainActivity">
 
-    <include layout="@layout/phone_item"/>
-
-    <View
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="@dimen/line_size"
-        android:layout_marginLeft="@dimen/spacing_larger_72"
-        android:background="@color/grey_light"/>
+        android:layout_height="match_parent">
 
-    <include layout="@layout/mail_item"/>
+        <include layout="@layout/phone_item"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/line_size"
-        android:layout_marginLeft="@dimen/spacing_larger_72"
-        android:background="@color/grey_light"/>
+        <include layout="@layout/dividing_line"/>
 
-    <include layout="@layout/vk_item"/>
+        <include layout="@layout/mail_item"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/line_size"
-        android:layout_marginLeft="@dimen/spacing_larger_72"
-        android:background="@color/grey_light"/>
+        <include layout="@layout/dividing_line"/>
 
-    <include layout="@layout/github_item"/>
+        <include layout="@layout/vk_item"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/line_size"
-        android:layout_marginLeft="@dimen/spacing_larger_72"
-        android:background="@color/grey_light"/>
+        <include layout="@layout/dividing_line"/>
 
-    <include layout="@layout/aboutme_item"/>
+        <include layout="@layout/github_item"/>
+
+        <include layout="@layout/dividing_line"/>
+
+        <include layout="@layout/aboutme_item"/>
+
+    </android.support.v4.widget.NestedScrollView>
+
+
 
 </LinearLayout>
