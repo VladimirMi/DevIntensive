@@ -12,9 +12,7 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="@dimen/size_small_24"
-            android:layout_height="@dimen/size_small_24"
-            android:layout_gravity="center_vertical"
+            style="@style/icon.left"
             android:src="@drawable/ic_call_black_24dp"/>
 
         <LinearLayout
@@ -40,9 +38,7 @@
         </LinearLayout>
 
         <ImageView
-            android:layout_width="@dimen/size_small_24"
-            android:layout_height="@dimen/size_small_24"
-            android:layout_gravity="center_vertical"
+            style="@style/icon.right"
             android:src="@drawable/ic_phone_in_talk_black_24dp"/>
 
     </LinearLayout>
