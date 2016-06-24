@@ -27,8 +27,12 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Мобильный телефон"
-                android:inputType="phone"/>
+                android:hint="Мобильный"
+                android:inputType="phone"
+                android:enabled="false"
+                android:focusable="false"
+                android:textColor="@color/black"
+                android:textColorHint="@color/grey"/>
 
         </android.support.design.widget.TextInputLayout>
 
