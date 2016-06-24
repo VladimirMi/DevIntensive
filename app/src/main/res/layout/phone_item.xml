@@ -32,7 +32,8 @@
                 android:enabled="false"
                 android:focusable="false"
                 android:textColor="@color/black"
-                android:textColorHint="@color/grey"/>
+                android:textColorHint="@color/grey"
+                android:text="@string/phone"/>
 
         </android.support.design.widget.TextInputLayout>
 

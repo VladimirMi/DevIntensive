@@ -31,7 +31,8 @@
                 android:enabled="false"
                 android:focusable="false"
                 android:textColor="@color/black"
-                android:textColorHint="@color/grey"/>
+                android:textColorHint="@color/grey"
+                android:text="@string/vk"/>
 
         </android.support.design.widget.TextInputLayout>
 

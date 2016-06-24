@@ -12,7 +12,7 @@
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="@dimen/spacing_larger_72"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/spacing_medium_32"
         android:layout_marginRight="@dimen/spacing_medium_32"
         android:layout_weight="1"
@@ -27,11 +27,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/about_me_hint"
-                android:inputType="text"
+                android:inputType="textMultiLine"
                 android:enabled="false"
                 android:focusable="false"
                 android:textColor="@color/black"
-                android:textColorHint="@color/grey"/>
+                android:textColorHint="@color/grey"
+                android:text="@string/about_me"/>
 
         </android.support.design.widget.TextInputLayout>
 

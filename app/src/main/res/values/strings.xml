@@ -3,6 +3,15 @@
     <string name="phone_hint">Мобильный</string>
     <string name="mail_hint">E-mail</string>
     <string name="vk_hint">Профиль в VK</string>
-    <string name="github_hint">РЕпозиторий</string>
+    <string name="github_hint">Репозиторий</string>
     <string name="about_me_hint">О себе</string>
+    <string name="about_me">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Donec metus ligula, semper vitae sapien et, venenatis tempor tortor.
+        Aliquam sed
+    </string>
+    <string name="github">https://github.com/VladimirMi/DevIntensive</string>
+    <string name="vk">https://new.vk.com/id3567703</string>
+    <string name="email">vladimirmsm@yandex.ru</string>
+    <string name="phone">+7(904)536-79-68</string>
 </resources>
