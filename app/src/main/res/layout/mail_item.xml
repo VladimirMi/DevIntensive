@@ -11,6 +11,7 @@
         android:src="@drawable/ic_mail_black_24dp"/>
 
     <LinearLayout
+        android:id="@+id/email_et"
         android:layout_width="0dp"
         android:layout_height="@dimen/size_large_72"
         android:layout_marginLeft="@dimen/spacing_medium_32"

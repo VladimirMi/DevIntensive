@@ -20,7 +20,6 @@
             android:textColor="@android:color/white"
             android:gravity="center_horizontal"
             android:text="@string/rating_value"
-            android:fontFamily="sans-serif-condensed"
             android:textSize="@dimen/font_large_18"/>
 
         <TextView
@@ -29,7 +28,6 @@
             android:textColor="@android:color/white"
             android:gravity="center_horizontal"
             android:text="@string/rating_title"
-            android:fontFamily="sans-serif-condensed"
             android:textSize="@dimen/font_small_13"/>
     </LinearLayout>
     
@@ -50,7 +48,6 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:text="@string/code_value"
-            android:fontFamily="sans-serif-condensed"
             android:textSize="@dimen/font_large_18"/>
 
         <TextView
@@ -58,7 +55,6 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:text="@string/code_title"
-            android:fontFamily="sans-serif-condensed"
             android:textSize="@dimen/font_small_13"
             />
     </LinearLayout>
@@ -81,7 +77,6 @@
             android:textColor="@android:color/white"
             android:text="@string/projects_value"
             android:gravity="center_horizontal"
-            android:fontFamily="sans-serif-condensed"
             android:textSize="@dimen/font_large_18"/>
 
         <TextView
@@ -90,7 +85,6 @@
             android:textColor="@android:color/white"
             android:text="@string/projects_title"
             android:gravity="center_horizontal"
-            android:fontFamily="sans-serif-condensed"
             android:textSize="@dimen/font_small_13"/>
     </LinearLayout>
 

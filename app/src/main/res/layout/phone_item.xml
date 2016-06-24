@@ -25,6 +25,7 @@
             android:layout_height="wrap_content">
 
             <EditText
+                android:id="@+id/phone_et"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/phone_hint"
