@@ -14,4 +14,10 @@
     <string name="vk">new.vk.com/id3567703</string>
     <string name="email">vladimirmsm@yandex.ru</string>
     <string name="phone">+7(904)536-79-68</string>
+    <string name="rating_value">73</string>
+    <string name="rating_title">Рейтинг</string>
+    <string name="code_value">999999</string>
+    <string name="code_title">Написано строк кода</string>
+    <string name="projects_value">73</string>
+    <string name="projects_title">Проектов</string>
 </resources>

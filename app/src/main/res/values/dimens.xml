@@ -14,6 +14,7 @@
     <dimen name="spacing_large_56">56dp</dimen>
     <dimen name="spacing_medium_48">48dp</dimen>
     <dimen name="spacing_medium_32">32dp</dimen>
+    <dimen name="spacing_medium_28">28dp</dimen>
     <dimen name="spacing_medium_24">24dp</dimen>
     <dimen name="spacing_normal_16">16dp</dimen>
     <dimen name="spacing_small_8">8dp</dimen>
@@ -25,6 +26,5 @@
     <dimen name="size_medium_48">48dp</dimen>
     <dimen name="size_small_24">24dp</dimen>
     <dimen name="line_size">2dp</dimen>
-
 
 </resources>
