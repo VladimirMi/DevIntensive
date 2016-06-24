@@ -12,16 +12,16 @@
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="@dimen/spacing_larger_72"
+        android:layout_height="@dimen/size_large_72"
         android:layout_marginLeft="@dimen/spacing_medium_32"
         android:layout_marginRight="@dimen/spacing_normal_16"
         android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:gravity="bottom"
+        android:orientation="vertical">
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <EditText
                 android:layout_width="match_parent"
@@ -32,7 +32,9 @@
                 android:focusable="false"
                 android:textColor="@color/black"
                 android:textColorHint="@color/grey"
-                android:text="@string/email"/>
+                android:text="@string/email"
+                android:fontFamily="sans-serif-condensed"
+                android:textSize="@dimen/font_normal_15"/>
 
         </android.support.design.widget.TextInputLayout>
 

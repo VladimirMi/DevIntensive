@@ -10,8 +10,8 @@
         Donec metus ligula, semper vitae sapien et, venenatis tempor tortor.
         Aliquam sed.
     </string>
-    <string name="github">https://github.com/VladimirMi/DevIntensive</string>
-    <string name="vk">https://new.vk.com/id3567703</string>
+    <string name="github">github.com/VladimirMi/DevIntensive</string>
+    <string name="vk">new.vk.com/id3567703</string>
     <string name="email">vladimirmsm@yandex.ru</string>
     <string name="phone">+7(904)536-79-68</string>
 </resources>
