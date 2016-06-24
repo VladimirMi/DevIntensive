@@ -27,7 +27,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Мобильный"
+                android:hint="@string/phone_hint"
                 android:inputType="phone"
                 android:enabled="false"
                 android:focusable="false"
