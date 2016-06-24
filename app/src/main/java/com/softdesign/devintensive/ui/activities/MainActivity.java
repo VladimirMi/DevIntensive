@@ -16,6 +16,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(TAG, "onCreate");
+
+        if (savedInstanceState == null) {
+            // first starting of the activity
+        } else {
+            // recreating activity
+        }
     }
 
     @Override
