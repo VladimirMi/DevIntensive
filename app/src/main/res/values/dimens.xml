@@ -25,6 +25,10 @@
     <dimen name="size_medium_56">56dp</dimen>
     <dimen name="size_medium_48">48dp</dimen>
     <dimen name="size_small_24">24dp</dimen>
+
+
     <dimen name="line_size">2dp</dimen>
+    <dimen name="profile_image_size">256dp</dimen>
+
 
 </resources>
