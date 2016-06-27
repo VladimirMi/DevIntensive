@@ -47,7 +47,6 @@ public class BaseActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                //TODO: выполнить с задержкой
                 hideProgress();
             }
         }, 5000);
