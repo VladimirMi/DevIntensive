@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.utils.ConstantManager;
 
 import java.util.ArrayList;
@@ -29,8 +30,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private DrawerLayout mNavigationDrawer;
     private FloatingActionButton mFab;
     private EditText mUserPhone, mUserMail, mUserGit, mUserVk, mUserAboutMe;
-    private List<EditText> mUserInfo;
+    private List<EditText> mUserInfoViews;
     private int mCurrentEditMode;
+    private DataManager mDataManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         setContentView(R.layout.activity_main);
         Log.d(TAG, "onCreate");
 
+        mDataManager = DataManager.getInstance();
         mCallImg = (ImageView) findViewById(R.id.call_img);
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_container);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -49,12 +52,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mUserVk = (EditText) findViewById(R.id.vk_et);
         mUserAboutMe = (EditText) findViewById(R.id.about_me_et);
 
-        mUserInfo = new ArrayList<>();
-        mUserInfo.add(mUserPhone);
-        mUserInfo.add(mUserMail);
-        mUserInfo.add(mUserGit);
-        mUserInfo.add(mUserVk);
-        mUserInfo.add(mUserAboutMe);
+        mUserInfoViews = new ArrayList<>();
+        mUserInfoViews.add(mUserPhone);
+        mUserInfoViews.add(mUserMail);
+        mUserInfoViews.add(mUserGit);
+        mUserInfoViews.add(mUserVk);
+        mUserInfoViews.add(mUserAboutMe);
 
         mCallImg.setOnClickListener(this);
         mFab.setOnClickListener(this);
@@ -89,12 +92,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
+        loadUserInfoValue();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause");
+        saveUserInfoValue();
     }
 
     @Override
@@ -173,14 +178,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private void changeEditorMode(int mode) {
         if (mode == 1) {
             mFab.setImageResource(R.drawable.ic_check_black_24dp);
-            for (EditText userValue : mUserInfo) {
+            for (EditText userValue : mUserInfoViews) {
                 userValue.setFocusable(true);
                 userValue.setEnabled(true);
                 userValue.setFocusableInTouchMode(true);
             }
         } else {
             mFab.setImageResource(R.drawable.ic_mode_edit_black_24dp);
-            for (EditText userValue : mUserInfo) {
+            for (EditText userValue : mUserInfoViews) {
                 userValue.setFocusable(false);
                 userValue.setEnabled(false);
                 userValue.setFocusableInTouchMode(false);
@@ -190,8 +195,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void loadUserInfoValue() {
+        List<String> userData = mDataManager.getPreferencesManager().loadUserProfileData();
+        for (int i = 0; i < userData.size(); i++) {
+            mUserInfoViews.get(i).setText(userData.get(i));
+        }
     }
 
     private void saveUserInfoValue() {
+        List<String> userData = new ArrayList<>();
+        for (EditText userInfoView : mUserInfoViews) {
+            userData.add(userInfoView.getText().toString());
+        }
+        mDataManager.getPreferencesManager().saveUserProfileData(userData);
     }
 }
