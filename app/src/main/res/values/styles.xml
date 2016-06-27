@@ -65,4 +65,19 @@
         <item name="android:fullDark">@android:color/transparent</item>
     </style>
 
+    <style name="drawer_header">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/font_small_14</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="drawer_header.user_name" parent="drawer_header">
+        <item name="android:fontFamily" tools:targetApi="jelly_bean">sans-serif</item>
+    </style>
+
+    <style name="drawer_header.email" parent="drawer_header">
+        <item name="android:fontFamily" tools:targetApi="jelly_bean">sans-serif-condensed</item>
+    </style>
+
 </resources>
