@@ -1,3 +1,24 @@
 <resources>
-    <string name="app_name">DevIntensive</string>
+    <string name="app_name">Михалев Владимир</string>
+    <string name="phone_hint">Мобильный</string>
+    <string name="mail_hint">E-mail</string>
+    <string name="vk_hint">Профиль в VK</string>
+    <string name="github_hint">Репозиторий</string>
+    <string name="about_me_hint">О себе</string>
+    <string name="about_me">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Integer id risus ante. Aenean tortor turpis, tincidunt eu odio et,
+        sagittis lacinia dolor. Aenean pellentesque felis metus,
+        sed egestas libero auctor.
+    </string>
+    <string name="github">github.com/VladimirMi/DevIntensive</string>
+    <string name="vk">new.vk.com/profile</string>
+    <string name="email">vladimirmsm@email.ru</string>
+    <string name="phone">+7(987)123-45-67</string>
+    <string name="rating_value">73</string>
+    <string name="rating_title">Рейтинг</string>
+    <string name="code_value">999999</string>
+    <string name="code_title">Написано строк кода</string>
+    <string name="projects_value">73</string>
+    <string name="projects_title">Проектов</string>
 </resources>
