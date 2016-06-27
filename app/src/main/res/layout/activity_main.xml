@@ -60,30 +60,15 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <include layout="@layout/user_info_item"/>
+                <include layout="@layout/user_ratings_item"/>
 
-                <include layout="@layout/phone_item"/>
-
-                <include layout="@layout/dividing_line"/>
-
-                <include layout="@layout/mail_item"/>
-
-                <include layout="@layout/dividing_line"/>
-
-                <include layout="@layout/vk_item"/>
-
-                <include layout="@layout/dividing_line"/>
-
-                <include layout="@layout/github_item"/>
-
-                <include layout="@layout/dividing_line"/>
-
-                <include layout="@layout/aboutme_item"/>
+                <include layout="@layout/user_info"/>
             </LinearLayout>
 
 
         </android.support.v4.widget.NestedScrollView>
         <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_mode_edit_black_24dp"

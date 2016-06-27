@@ -14,11 +14,11 @@
         android:orientation="vertical">
 
         <TextView
-            style="@style/user_info.value"
+            style="@style/user_ratings.value"
             android:text="@string/rating_value" />
 
         <TextView
-            style="@style/user_info.hint"
+            style="@style/user_ratings.hint"
             android:text="@string/rating_title" />
     </LinearLayout>
 
@@ -34,11 +34,11 @@
         android:orientation="vertical">
 
         <TextView
-            style="@style/user_info.value"
+            style="@style/user_ratings.value"
             android:text="@string/code_value" />
 
         <TextView
-            style="@style/user_info.hint"
+            style="@style/user_ratings.hint"
             android:text="@string/code_title" />
     </LinearLayout>
 
@@ -54,11 +54,11 @@
         android:orientation="vertical">
 
         <TextView
-            style="@style/user_info.value"
+            style="@style/user_ratings.value"
             android:text="@string/projects_value" />
 
         <TextView
-            style="@style/user_info.hint"
+            style="@style/user_ratings.hint"
             android:text="@string/projects_title" />
     </LinearLayout>
 
