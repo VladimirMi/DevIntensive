@@ -6,8 +6,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -75,8 +73,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if (savedInstanceState != null) {
             // recreating activity
             mCurrentEditMode = savedInstanceState.getInt(ConstantManager.EDIT_MODE_KEY, 0);
+            loadUserInfoValue();
         } else {
             // first starting of the activity
+            saveUserInfoValue();
         }
         changeEditorMode(mCurrentEditMode);
     }
@@ -99,14 +99,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        loadUserInfoValue();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause");
-        saveUserInfoValue();
     }
 
     @Override
@@ -148,6 +146,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(ConstantManager.EDIT_MODE_KEY, mCurrentEditMode);
+        saveUserInfoValue();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mNavigationDrawer.isDrawerOpen(GravityCompat.START)) {
+            mNavigationDrawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private void showSnackBar(String message) {
