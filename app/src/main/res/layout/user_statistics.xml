@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/grey"
-    android:orientation="horizontal"
-    android:paddingBottom="@dimen/spacing_medium_28"
-    android:paddingTop="@dimen/spacing_medium_28">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/grey"
+              android:orientation="horizontal"
+              android:minHeight="@dimen/size_medium_56"
+              android:paddingBottom="@dimen/spacing_medium_28"
+              android:paddingTop="@dimen/spacing_medium_28"
+              app:layout_behavior="com.softdesign.devintensive.ui.view.behaviors.UserRatingItemBeahavior">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -15,17 +18,17 @@
 
         <TextView
             style="@style/user_ratings.value"
-            android:text="@string/rating_value" />
+            android:text="@string/rating_value"/>
 
         <TextView
             style="@style/user_ratings.hint"
-            android:text="@string/rating_title" />
+            android:text="@string/rating_title"/>
     </LinearLayout>
 
     <View
         android:layout_width="@dimen/line_size"
         android:layout_height="@dimen/size_medium_56"
-        android:background="@color/grey_light" />
+        android:background="@color/grey_light"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -35,17 +38,17 @@
 
         <TextView
             style="@style/user_ratings.value"
-            android:text="@string/code_value" />
+            android:text="@string/code_value"/>
 
         <TextView
             style="@style/user_ratings.hint"
-            android:text="@string/code_title" />
+            android:text="@string/code_title"/>
     </LinearLayout>
 
     <View
         android:layout_width="@dimen/line_size"
         android:layout_height="@dimen/size_medium_56"
-        android:background="@color/grey_light" />
+        android:background="@color/grey_light"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -55,11 +58,11 @@
 
         <TextView
             style="@style/user_ratings.value"
-            android:text="@string/projects_value" />
+            android:text="@string/projects_value"/>
 
         <TextView
             style="@style/user_ratings.hint"
-            android:text="@string/projects_title" />
+            android:text="@string/projects_title"/>
     </LinearLayout>
 
 </LinearLayout>

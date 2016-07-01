@@ -37,5 +37,6 @@
     <string name="code_title">Написано строк кода</string>
     <string name="projects_value">73</string>
     <string name="projects_title">Проектов</string>
+    <string name="user_profile.placeholder.image">Изменить фотографию профиля</string>
 
 </resources>

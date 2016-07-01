@@ -1,7 +1,10 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -16,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
@@ -25,6 +29,9 @@ import com.softdesign.devintensive.utils.RoundedAvatarDrawable;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = ConstantManager.TAG_PREFIX + "Main Activity";
     private ImageView mCallImg;
@@ -32,16 +39,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private Toolbar mToolbar;
     private DrawerLayout mNavigationDrawer;
     private FloatingActionButton mFab;
+    @BindView(R.id.profile_placeholder) RelativeLayout mProfilePlaceholder;
+    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
+    @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
     private EditText mUserPhone, mUserMail, mUserGit, mUserVk, mUserAboutMe;
     private List<EditText> mUserInfoViews;
     private int mCurrentEditMode;
     private DataManager mDataManager;
+
+    private AppBarLayout.LayoutParams mAppBarParams;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(TAG, "onCreate");
+        ButterKnife.bind(this);
+
 
         mDataManager = DataManager.getInstance();
         mCallImg = (ImageView) findViewById(R.id.call_img);
@@ -158,6 +172,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
+    /**
+     * Полученте рузультата из другой Activity (фото из галлереи или камеры)
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     private void showSnackBar(String message) {
         Snackbar.make(mCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
@@ -165,6 +191,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private void setupToolbar() {
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
+
+        mAppBarParams = (AppBarLayout.LayoutParams) mCollapsingToolbar.getLayoutParams();
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -203,6 +231,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 userValue.setFocusable(true);
                 userValue.setEnabled(true);
                 userValue.setFocusableInTouchMode(true);
+                showProfilePlaceholder();
+                lockToolbar();
             }
         } else {
             mFab.setImageResource(R.drawable.ic_mode_edit_black_24dp);
@@ -210,6 +240,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 userValue.setFocusable(false);
                 userValue.setEnabled(false);
                 userValue.setFocusableInTouchMode(false);
+                hideProfilePlaceholder();
+                unlockToolbar();
             }
         }
 
@@ -228,5 +260,33 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             userData.add(userInfoView.getText().toString());
         }
         mDataManager.getPreferencesManager().saveUserProfileData(userData);
+    }
+
+    private void loadPhotoFromGallery() {
+
+    }
+
+    private void loadPhotoFromCamera() {
+
+    }
+
+    private void hideProfilePlaceholder() {
+        mProfilePlaceholder.setVisibility(View.GONE);
+    }
+
+    private void showProfilePlaceholder() {
+        mProfilePlaceholder.setVisibility(View.VISIBLE);
+    }
+
+    private void lockToolbar() {
+        mAppBarLayout.setExpanded(true, true);
+        mAppBarParams.setScrollFlags(0);
+        mCollapsingToolbar.setLayoutParams(mAppBarParams);
+    }
+
+    private void unlockToolbar() {
+        mAppBarParams.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL |
+                AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED);
+        mCollapsingToolbar.setLayoutParams(mAppBarParams) ;
     }
 }
