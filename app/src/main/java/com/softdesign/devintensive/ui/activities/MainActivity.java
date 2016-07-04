@@ -1,27 +1,106 @@
 package com.softdesign.devintensive.ui.activities;
 
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.utils.ConstantManager;
+import com.softdesign.devintensive.utils.RoundedAvatarDrawable;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = ConstantManager.TAG_PREFIX + "Main Activity";
+    private ImageView mCallImg;
+    private CoordinatorLayout mCoordinatorLayout;
+    private Toolbar mToolbar;
+    private DrawerLayout mNavigationDrawer;
+    private FloatingActionButton mFab;
+    @BindView(R.id.profile_placeholder) RelativeLayout mProfilePlaceholder;
+    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
+    @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
+    private EditText mUserPhone, mUserMail, mUserGit, mUserVk, mUserAboutMe;
+    private List<EditText> mUserInfoViews;
+    private int mCurrentEditMode;
+    private DataManager mDataManager;
+
+    private AppBarLayout.LayoutParams mAppBarParams;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(TAG, "onCreate");
+        ButterKnife.bind(this);
 
-        if (savedInstanceState == null) {
-            // first starting of the activity
-        } else {
+
+        mDataManager = DataManager.getInstance();
+        mCallImg = (ImageView) findViewById(R.id.call_img);
+
+        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_container);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mNavigationDrawer = (DrawerLayout) findViewById(R.id.navigation_drawer);
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mUserPhone = (EditText) findViewById(R.id.phone_et);
+        mUserMail = (EditText) findViewById(R.id.email_et);
+        mUserGit = (EditText) findViewById(R.id.github_et);
+        mUserVk = (EditText) findViewById(R.id.vk_et);
+        mUserAboutMe = (EditText) findViewById(R.id.about_me_et);
+
+        mUserInfoViews = new ArrayList<>();
+        mUserInfoViews.add(mUserPhone);
+        mUserInfoViews.add(mUserMail);
+        mUserInfoViews.add(mUserGit);
+        mUserInfoViews.add(mUserVk);
+        mUserInfoViews.add(mUserAboutMe);
+
+
+        mCallImg.setOnClickListener(this);
+        mFab.setOnClickListener(this);
+        setupToolbar();
+        setupDrawer();
+
+
+        if (savedInstanceState != null) {
             // recreating activity
+            mCurrentEditMode = savedInstanceState.getInt(ConstantManager.EDIT_MODE_KEY, 0);
+            loadUserInfoValue();
+        } else {
+            // first starting of the activity
+            saveUserInfoValue();
         }
+        changeEditorMode(mCurrentEditMode);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            mNavigationDrawer.openDrawer(GravityCompat.START);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -58,5 +137,156 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         Log.d(TAG, "onRestart");
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.call_img:
+                showProgress();
+                break;
+            case R.id.fab:
+                if (mCurrentEditMode == 0) {
+                    mCurrentEditMode = 1;
+                } else {
+                    mCurrentEditMode = 0;
+                }
+                changeEditorMode(mCurrentEditMode);
+                break;
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(ConstantManager.EDIT_MODE_KEY, mCurrentEditMode);
+        saveUserInfoValue();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mNavigationDrawer.isDrawerOpen(GravityCompat.START)) {
+            mNavigationDrawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    /**
+     * Полученте рузультата из другой Activity (фото из галлереи или камеры)
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void showSnackBar(String message) {
+        Snackbar.make(mCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
+    }
+
+    private void setupToolbar() {
+        setSupportActionBar(mToolbar);
+        ActionBar actionBar = getSupportActionBar();
+
+        mAppBarParams = (AppBarLayout.LayoutParams) mCollapsingToolbar.getLayoutParams();
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    private void setupDrawer() {
+        final NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        assert navigationView != null;
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                showSnackBar(item.getTitle().toString());
+                item.setChecked(true);
+                mNavigationDrawer.closeDrawer(GravityCompat.START);
+                return false;
+            }
+        });
+        // установка круглого аватара
+        ImageView userAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.user_avatar);
+        Bitmap avatar = BitmapFactory.decodeResource(getResources(), R.drawable.user_avatar);
+        RoundedAvatarDrawable roundedAvatar = new RoundedAvatarDrawable(avatar);
+        userAvatar.setImageDrawable(roundedAvatar);
+
+    }
+
+    /**
+     * переключает режим редактирования
+     *
+     * @param mode если 1 - режим редактирования, если 0 - режим просмотра
+     */
+    private void changeEditorMode(int mode) {
+        if (mode == 1) {
+            mFab.setImageResource(R.drawable.ic_check_black_24dp);
+            for (EditText userValue : mUserInfoViews) {
+                userValue.setFocusable(true);
+                userValue.setEnabled(true);
+                userValue.setFocusableInTouchMode(true);
+                showProfilePlaceholder();
+                lockToolbar();
+            }
+        } else {
+            mFab.setImageResource(R.drawable.ic_mode_edit_black_24dp);
+            for (EditText userValue : mUserInfoViews) {
+                userValue.setFocusable(false);
+                userValue.setEnabled(false);
+                userValue.setFocusableInTouchMode(false);
+                hideProfilePlaceholder();
+                unlockToolbar();
+            }
+        }
+
+    }
+
+    private void loadUserInfoValue() {
+        List<String> userData = mDataManager.getPreferencesManager().loadUserProfileData();
+        for (int i = 0; i < userData.size(); i++) {
+            mUserInfoViews.get(i).setText(userData.get(i));
+        }
+    }
+
+    private void saveUserInfoValue() {
+        List<String> userData = new ArrayList<>();
+        for (EditText userInfoView : mUserInfoViews) {
+            userData.add(userInfoView.getText().toString());
+        }
+        mDataManager.getPreferencesManager().saveUserProfileData(userData);
+    }
+
+    private void loadPhotoFromGallery() {
+
+    }
+
+    private void loadPhotoFromCamera() {
+
+    }
+
+    private void hideProfilePlaceholder() {
+        mProfilePlaceholder.setVisibility(View.GONE);
+    }
+
+    private void showProfilePlaceholder() {
+        mProfilePlaceholder.setVisibility(View.VISIBLE);
+    }
+
+    private void lockToolbar() {
+        mAppBarLayout.setExpanded(true, true);
+        mAppBarParams.setScrollFlags(0);
+        mCollapsingToolbar.setLayoutParams(mAppBarParams);
+    }
+
+    private void unlockToolbar() {
+        mAppBarParams.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL |
+                AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED);
+        mCollapsingToolbar.setLayoutParams(mAppBarParams) ;
     }
 }
