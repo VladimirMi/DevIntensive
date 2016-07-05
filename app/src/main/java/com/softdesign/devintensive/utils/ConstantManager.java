@@ -9,4 +9,9 @@ public interface ConstantManager {
     String USER_VK_KEY = "USER_KEY_3";
     String USER_GIT_KEY = "USER_KEY_4";
     String USER_ABOUT_KEY = "USER_KEY_5";
+    String USER_PHOTO_KEY = "USER_PHOTO_KEY";
+
+    int LOAD_PROFILE_PHOTO = 1;
+    int REQUEST_CAMERA_PICTURE = 101;
+    int REQUEST_GALLERY_PICTURE = 102;
 }

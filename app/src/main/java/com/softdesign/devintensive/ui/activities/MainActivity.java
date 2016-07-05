@@ -1,8 +1,14 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -13,6 +19,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -24,9 +31,15 @@ import android.widget.RelativeLayout;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.utils.ConstantManager;
+import com.softdesign.devintensive.utils.ExStorageState;
 import com.softdesign.devintensive.utils.RoundedAvatarDrawable;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -42,12 +55,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @BindView(R.id.profile_placeholder) RelativeLayout mProfilePlaceholder;
     @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
     @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
+    @BindView(R.id.profile_photo) ImageView mProfilePhoto;
     private EditText mUserPhone, mUserMail, mUserGit, mUserVk, mUserAboutMe;
     private List<EditText> mUserInfoViews;
     private int mCurrentEditMode;
     private DataManager mDataManager;
+    private File mPhotoFile = null;
+    private Uri mSelectedImage = null;
 
-    private AppBarLayout.LayoutParams mAppBarParams;
+    private AppBarLayout.LayoutParams mAppBarParams = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +96,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         mCallImg.setOnClickListener(this);
         mFab.setOnClickListener(this);
+        mProfilePlaceholder.setOnClickListener(this);
+
         setupToolbar();
         setupDrawer();
+
+        Picasso.with(this)
+                .load(mDataManager.getPreferencesManager().loadUserPhoto())
+                .into(mProfilePhoto);
 
 
         if (savedInstanceState != null) {
@@ -153,6 +175,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
                 changeEditorMode(mCurrentEditMode);
                 break;
+            case R.id.profile_placeholder:
+                // TODO: 7/5/2016 сделать выбор откуда загружать фото
+                showDialog(ConstantManager.LOAD_PROFILE_PHOTO);
+                break;
         }
     }
 
@@ -181,7 +207,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case ConstantManager.REQUEST_CAMERA_PICTURE:
+                if (mPhotoFile != null && resultCode == RESULT_OK) {
+                    mSelectedImage = Uri.fromFile(mPhotoFile);
+                    insertProfileImage(mSelectedImage);
+                }
+                break;
+            case ConstantManager.REQUEST_GALLERY_PICTURE:
+                if (data != null && resultCode == RESULT_OK) {
+                    mSelectedImage = data.getData();
+                    insertProfileImage(mSelectedImage);
+                }
+                break;
+        }
     }
 
     private void showSnackBar(String message) {
@@ -226,6 +265,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void changeEditorMode(int mode) {
         if (mode == 1) {
+            mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
             mFab.setImageResource(R.drawable.ic_check_black_24dp);
             for (EditText userValue : mUserInfoViews) {
                 userValue.setFocusable(true);
@@ -235,6 +275,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 lockToolbar();
             }
         } else {
+            mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(R.color.white));
             mFab.setImageResource(R.drawable.ic_mode_edit_black_24dp);
             for (EditText userValue : mUserInfoViews) {
                 userValue.setFocusable(false);
@@ -263,11 +304,26 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void loadPhotoFromGallery() {
-
+        Intent takeGalleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        takeGalleryIntent.setType("image/*");
+        startActivityForResult(Intent.createChooser(takeGalleryIntent, "выберите фото"),
+                ConstantManager.REQUEST_GALLERY_PICTURE);
     }
 
     private void loadPhotoFromCamera() {
+        Intent takeCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
+        try {
+            mPhotoFile = createImageFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (mPhotoFile != null) {
+            takeCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mPhotoFile));
+            startActivityForResult(takeCaptureIntent, ConstantManager.REQUEST_CAMERA_PICTURE);
+        } else {
+            showSnackBar("Внешняя память не доступна");
+        }
     }
 
     private void hideProfilePlaceholder() {
@@ -287,6 +343,64 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private void unlockToolbar() {
         mAppBarParams.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL |
                 AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED);
-        mCollapsingToolbar.setLayoutParams(mAppBarParams) ;
+        mCollapsingToolbar.setLayoutParams(mAppBarParams);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case ConstantManager.LOAD_PROFILE_PHOTO:
+                String[] selectItems = {getString(R.string.user_profile_dialog_gallery),
+                        getString(R.string.user_profile_diallog_camera),
+                        getString(R.string.user_profile_dialog_cancel)};
+
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.user_profile_dialog_title);
+                builder.setItems(selectItems, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int choiceItem) {
+                        switch (choiceItem) {
+                            case 0:
+                                // TODO: 7/5/2016 load from gallery
+                                loadPhotoFromGallery();
+                                showSnackBar("load from gallery");
+                                break;
+                            case 1:
+                                // TODO: 7/5/2016 load from camera
+                                loadPhotoFromCamera();
+                                showSnackBar("load from camera");
+                                break;
+                            case 2:
+                                // TODO: 7/5/2016 cancel
+                                dialogInterface.cancel();
+                                showSnackBar("cancel");
+                                break;
+                        }
+                    }
+                });
+                return builder.create();
+            default:
+                return null;
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File imageFile = null;
+        if (ExStorageState.isWritable()) {
+            File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            imageFile = File.createTempFile(imageFileName, ".jpg", storageDir);
+        }
+        return imageFile;
+    }
+
+    private void insertProfileImage(Uri selectedImage) {
+        Picasso.with(this)
+                .load(selectedImage)
+                .error(R.drawable.ic_warning_black_24dp)
+                .into(mProfilePhoto);
+
+        mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
     }
 }
