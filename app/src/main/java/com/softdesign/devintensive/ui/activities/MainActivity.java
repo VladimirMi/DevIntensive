@@ -1,20 +1,27 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.Manifest;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -101,6 +108,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         setupToolbar();
         setupDrawer();
 
+        // TODO: 7/5/2016 placeeholder + transform + crop(512*256)
         Picasso.with(this)
                 .load(mDataManager.getPreferencesManager().loadUserPhoto())
                 .into(mProfilePhoto);
@@ -223,6 +231,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == ConstantManager.CAMERA_PERMISSION_REQUEST_CODE && grantResults.length == 2) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // TODO: 7/5/2016 обработать разрешение
+            }
+            if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                // TODO: 7/5/2016 обработать разрешение
+            }
+        }
+    }
+
     private void showSnackBar(String message) {
         Snackbar.make(mCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
@@ -311,18 +331,38 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void loadPhotoFromCamera() {
-        Intent takeCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                        PackageManager.PERMISSION_GRANTED) {
 
-        try {
-            mPhotoFile = createImageFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (mPhotoFile != null) {
-            takeCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mPhotoFile));
-            startActivityForResult(takeCaptureIntent, ConstantManager.REQUEST_CAMERA_PICTURE);
+
+            Intent takeCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+            try {
+                mPhotoFile = createImageFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (mPhotoFile != null) {
+                takeCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mPhotoFile));
+                startActivityForResult(takeCaptureIntent, ConstantManager.REQUEST_CAMERA_PICTURE);
+            } else {
+                showSnackBar("Внешняя память не доступна");
+            }
         } else {
-            showSnackBar("Внешняя память не доступна");
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, ConstantManager.CAMERA_PERMISSION_REQUEST_CODE);
+
+            Snackbar.make(mCoordinatorLayout, "Для корректной работы приложения необходимо дать требуемые разрешения", Snackbar.LENGTH_LONG)
+                    .setAction("Разрешить", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            openApplicationSettings();
+                        }
+                    }).show();
         }
     }
 
@@ -363,17 +403,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             case 0:
                                 // TODO: 7/5/2016 load from gallery
                                 loadPhotoFromGallery();
-                                showSnackBar("load from gallery");
+//                                showSnackBar("load from gallery");
                                 break;
                             case 1:
                                 // TODO: 7/5/2016 load from camera
                                 loadPhotoFromCamera();
-                                showSnackBar("load from camera");
+//                                showSnackBar("load from camera");
                                 break;
                             case 2:
                                 // TODO: 7/5/2016 cancel
                                 dialogInterface.cancel();
-                                showSnackBar("cancel");
+//                                showSnackBar("cancel");
                                 break;
                         }
                     }
@@ -392,15 +432,30 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             imageFile = File.createTempFile(imageFileName, ".jpg", storageDir);
         }
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.MediaColumns.DATA, imageFile.getAbsolutePath());
+
+        this.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
         return imageFile;
     }
 
     private void insertProfileImage(Uri selectedImage) {
+        // TODO: 7/5/2016 placeeholder + transform + crop(512*256)
         Picasso.with(this)
                 .load(selectedImage)
                 .error(R.drawable.ic_warning_black_24dp)
                 .into(mProfilePhoto);
 
         mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
+    }
+
+    private void openApplicationSettings() {
+        Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:" + getPackageName()));
+        startActivityForResult(appSettingsIntent, ConstantManager.SETTINGS_PERMISSION_REQUEST_CODE);
     }
 }
