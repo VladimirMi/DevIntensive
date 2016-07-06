@@ -41,7 +41,7 @@
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/call_img"
+                android:id="@+id/make_call_img"
                 style="@style/icon.right"
                 android:src="@drawable/ic_phone_in_talk_black_24dp"/>
         </LinearLayout>
@@ -67,7 +67,7 @@
                     <EditText
                         android:id="@+id/email_et"
                         style="@style/user_info_item_text"
-                        android:hint="@string/mail_hint"
+                        android:hint="@string/email_hint"
                         android:inputType="textEmailAddress"
                         android:text="@string/email"/>
 
@@ -76,6 +76,7 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/send_email_img"
                 style="@style/icon.right"
                 android:src="@drawable/ic_send_black_24dp"/>
         </LinearLayout>
@@ -110,6 +111,7 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/vk_img"
                 style="@style/icon.right"
                 android:src="@drawable/ic_visibility_black_24dp"/>
         </LinearLayout>
@@ -143,6 +145,7 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/github_img"
                 style="@style/icon.right"
                 android:src="@drawable/ic_visibility_black_24dp"/>
         </LinearLayout>

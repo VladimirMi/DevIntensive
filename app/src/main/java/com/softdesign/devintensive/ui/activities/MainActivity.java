@@ -50,11 +50,13 @@ import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
+import butterknife.BindViews;
 import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = ConstantManager.TAG_PREFIX + "Main Activity";
-    private ImageView mCallImg;
+    @BindViews({R.id.make_call_img, R.id.send_email_img, R.id.vk_img, R.id.github_img})
+    View[] mActionIcons;
     private CoordinatorLayout mCoordinatorLayout;
     private Toolbar mToolbar;
     private DrawerLayout mNavigationDrawer;
@@ -72,6 +74,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private AppBarLayout.LayoutParams mAppBarParams = null;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +84,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
 
         mDataManager = DataManager.getInstance();
-        mCallImg = (ImageView) findViewById(R.id.call_img);
+
 
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_container);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -101,9 +104,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mUserInfoViews.add(mUserAboutMe);
 
 
-        mCallImg.setOnClickListener(this);
         mFab.setOnClickListener(this);
         mProfilePlaceholder.setOnClickListener(this);
+
+        for (View actionIcon : mActionIcons) {
+            actionIcon.setOnClickListener(this);
+        }
 
         setupToolbar();
         setupDrawer();
@@ -172,8 +178,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.call_img:
-                showProgress();
+            case R.id.make_call_img:
+                makeActionView(Uri.parse("tel://" + mUserPhone.getText()));
+                break;
+            case R.id.send_email_img:
+                sendEmail();
+                break;
+            case R.id.vk_img:
+                makeActionView(Uri.parse("https://" + mUserVk.getText()));
+                break;
+            case R.id.github_img:
+                makeActionView(Uri.parse("https://" + mUserGit.getText()));
                 break;
             case R.id.fab:
                 if (mCurrentEditMode == 0) {
@@ -205,6 +220,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             super.onBackPressed();
         }
     }
+
 
     /**
      * Полученте рузультата из другой Activity (фото из галлереи или камеры)
@@ -267,6 +283,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 showSnackBar(item.getTitle().toString());
                 item.setChecked(true);
                 mNavigationDrawer.closeDrawer(GravityCompat.START);
+                int itemId = item.getItemId();
+                switch (itemId) {
+                    case R.id.login_menu:
+                        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                        startActivity(loginIntent);
+                        return true;
+                }
                 return false;
             }
         });
@@ -335,7 +358,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
                         PackageManager.PERMISSION_GRANTED) {
-
 
             Intent takeCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
@@ -444,7 +466,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void insertProfileImage(Uri selectedImage) {
-        // TODO: 7/5/2016 placeeholder + transform + crop(512*256)
+        // TODO: 7/5/2016 placeholder + transform + crop(512*256)
         Picasso.with(this)
                 .load(selectedImage)
                 .error(R.drawable.ic_warning_black_24dp)
@@ -457,5 +479,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.parse("package:" + getPackageName()));
         startActivityForResult(appSettingsIntent, ConstantManager.SETTINGS_PERMISSION_REQUEST_CODE);
+    }
+
+
+    private void sendEmail() {
+        String address = mUserMail.getText().toString();
+
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                "mailto", address, null));
+        startActivity(Intent.createChooser(emailIntent, "Send email"));
+    }
+
+    private void makeActionView(Uri uri) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(Intent.createChooser(intent, "Make action view"));
     }
 }
