@@ -58,17 +58,17 @@ import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener, View.OnFocusChangeListener {
+
     private static final String TAG = ConstantManager.TAG_PREFIX + "Main Activity";
-    private CoordinatorLayout mCoordinatorLayout;
-    private Toolbar mToolbar;
-    private DrawerLayout mNavigationDrawer;
-    private FloatingActionButton mFab;
-    @BindView(R.id.profile_placeholder) RelativeLayout mProfilePlaceholder;
-    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
+    @BindView(R.id.main_coordinator_container) CoordinatorLayout mCoordinatorLayout;
     @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
+    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
+    @BindView(R.id.fab) FloatingActionButton mFab;
+    @BindView(R.id.profile_placeholder) RelativeLayout mProfilePlaceholder;
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
-    private int mCurrentEditMode;
+    @BindView(R.id.navigation_drawer) DrawerLayout mNavigationDrawer;
 
     @BindViews({R.id.phone_et, R.id.email_et, R.id.vk_et, R.id.github_et, R.id.about_me_et})
     EditText[] mUserInfoViews;
@@ -79,10 +79,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @BindViews({R.id.make_call_img, R.id.send_email_img, R.id.vk_img, R.id.github_img})
     ImageView[] mActionIcons;
 
+    private int mCurrentEditMode;
     private DataManager mDataManager;
     private File mPhotoFile = null;
-    private Uri mSelectedImage = null;
-
     private AppBarLayout.LayoutParams mAppBarParams = null;
 
 
@@ -93,16 +92,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         Log.d(TAG, "onCreate");
         ButterKnife.bind(this);
 
-
         mDataManager = DataManager.getInstance();
 
-        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_container);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mNavigationDrawer = (DrawerLayout) findViewById(R.id.navigation_drawer);
-        mFab = (FloatingActionButton) findViewById(R.id.fab);
-
-
-        assert mFab != null;
         mFab.setOnClickListener(this);
         mProfilePlaceholder.setOnClickListener(this);
 
@@ -111,41 +102,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
 
         for (EditText userInfoView : mUserInfoViews) {
-            userInfoView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    switch (v.getId()) {
-                        case R.id.phone_et:
-                            break;
-                        case R.id.email_et:
-                            break;
-                        case R.id.vk_et:
-                            String value = mUserInfoViews[2].getText().toString();
-                            int startIndex = value.indexOf("vk");
-                            if (startIndex > 0) {
-                                mUserInfoViews[2].setText(value.substring(startIndex));
-                            }
-                            break;
-                        case R.id.github_et:
-                            value = mUserInfoViews[3].getText().toString();
-                            startIndex = value.indexOf("github");
-                            if (startIndex > 0) {
-                                mUserInfoViews[3].setText(value.substring(startIndex));
-                            }
-                            break;
-                    }
-                }
-            });
+            userInfoView.setOnFocusChangeListener(this);
             userInfoView.addTextChangedListener(new MyTextWatcher(userInfoView));
         }
-
 
         setupToolbar();
         setupDrawer();
 
-        // TODO: 7/5/2016 placeeholder + transform + crop(512*256)
+        // TODO: 7/5/2016 placeholder + transform + crop(512*256)
         Picasso.with(this)
                 .load(mDataManager.getPreferencesManager().loadUserPhoto())
+                .placeholder(R.drawable.user_photo)
                 .into(mProfilePhoto);
 
 
@@ -235,11 +202,36 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        switch (v.getId()) {
+            case R.id.phone_et:
+                break;
+            case R.id.email_et:
+                break;
+            case R.id.vk_et:
+                String value = mUserInfoViews[2].getText().toString();
+                int startIndex = value.indexOf("vk");
+                if (startIndex > 0) {
+                    mUserInfoViews[2].setText(value.substring(startIndex));
+                }
+                break;
+            case R.id.github_et:
+                value = mUserInfoViews[3].getText().toString();
+                startIndex = value.indexOf("github");
+                if (startIndex > 0) {
+                    mUserInfoViews[3].setText(value.substring(startIndex));
+                }
+                break;
+        }
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(ConstantManager.EDIT_MODE_KEY, mCurrentEditMode);
         saveUserInfoValue();
     }
+
 
     @Override
     public void onBackPressed() {
@@ -250,27 +242,28 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
-
     /**
-     * Полученте рузультата из другой Activity (фото из галлереи или камеры)
+     * Получение рузультата из другой Activity (фото из галлереи или камеры)
      *
-     * @param requestCode
-     * @param resultCode
-     * @param data
+     * @param requestCode The integer request code originally supplied to startActivityForResult(),
+     *                    allowing you to identify who this result came from.
+     * @param resultCode The integer result code returned by the child activity through its setResult().
+     * @param data An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case ConstantManager.REQUEST_CAMERA_PICTURE:
+                Uri selectedImage;
                 if (mPhotoFile != null && resultCode == RESULT_OK) {
-                    mSelectedImage = Uri.fromFile(mPhotoFile);
-                    insertProfileImage(mSelectedImage);
+                    selectedImage = Uri.fromFile(mPhotoFile);
+                    insertProfileImage(selectedImage);
                 }
                 break;
             case ConstantManager.REQUEST_GALLERY_PICTURE:
                 if (data != null && resultCode == RESULT_OK) {
-                    mSelectedImage = data.getData();
-                    insertProfileImage(mSelectedImage);
+                    selectedImage = data.getData();
+                    insertProfileImage(selectedImage);
                 }
                 break;
         }
@@ -285,6 +278,44 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 // TODO: 7/5/2016 обработать разрешение
             }
+        }
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case ConstantManager.LOAD_PROFILE_PHOTO:
+                String[] selectItems = {getString(R.string.user_profile_dialog_gallery),
+                        getString(R.string.user_profile_diallog_camera),
+                        getString(R.string.user_profile_dialog_cancel)};
+
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.user_profile_dialog_title);
+                builder.setItems(selectItems, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int choiceItem) {
+                        switch (choiceItem) {
+                            case 0:
+                                // TODO: 7/5/2016 load from gallery
+                                loadPhotoFromGallery();
+//                                showSnackBar("load from gallery");
+                                break;
+                            case 1:
+                                // TODO: 7/5/2016 load from camera
+                                loadPhotoFromCamera();
+//                                showSnackBar("load from camera");
+                                break;
+                            case 2:
+                                // TODO: 7/5/2016 cancel
+                                dialogInterface.cancel();
+//                                showSnackBar("cancel");
+                                break;
+                        }
+                    }
+                });
+                return builder.create();
+            default:
+                return null;
         }
     }
 
@@ -359,7 +390,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 hideProfilePlaceholder();
                 unlockToolbar();
             }
-            mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(R.color.white));
+            mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(android.R.color.white));
             mFab.setImageResource(R.drawable.ic_mode_edit_black_24dp);
         }
 
@@ -442,53 +473,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mCollapsingToolbar.setLayoutParams(mAppBarParams);
     }
 
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        switch (id) {
-            case ConstantManager.LOAD_PROFILE_PHOTO:
-                String[] selectItems = {getString(R.string.user_profile_dialog_gallery),
-                        getString(R.string.user_profile_diallog_camera),
-                        getString(R.string.user_profile_dialog_cancel)};
-
-                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.user_profile_dialog_title);
-                builder.setItems(selectItems, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int choiceItem) {
-                        switch (choiceItem) {
-                            case 0:
-                                // TODO: 7/5/2016 load from gallery
-                                loadPhotoFromGallery();
-//                                showSnackBar("load from gallery");
-                                break;
-                            case 1:
-                                // TODO: 7/5/2016 load from camera
-                                loadPhotoFromCamera();
-//                                showSnackBar("load from camera");
-                                break;
-                            case 2:
-                                // TODO: 7/5/2016 cancel
-                                dialogInterface.cancel();
-//                                showSnackBar("cancel");
-                                break;
-                        }
-                    }
-                });
-                return builder.create();
-            default:
-                return null;
-        }
-    }
-
     private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", getResources().getConfiguration().locale).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File imageFile = null;
+        File imageFile;
         if (ExStorageState.isWritable()) {
             File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             imageFile = File.createTempFile(imageFileName, ".jpg", storageDir);
+        } else {
+            return null;
         }
-
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
@@ -503,7 +497,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         // TODO: 7/5/2016 placeholder + transform + crop(512*256)
         Picasso.with(this)
                 .load(selectedImage)
-                .error(R.drawable.ic_warning_black_24dp)
+                .placeholder(R.drawable.user_photo)
                 .into(mProfilePhoto);
 
         mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
@@ -514,7 +508,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 Uri.parse("package:" + getPackageName()));
         startActivityForResult(appSettingsIntent, ConstantManager.SETTINGS_PERMISSION_REQUEST_CODE);
     }
-
 
     private void sendEmail(Uri uri) {
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO, uri);
@@ -537,7 +530,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             mActionIcons[0].setImageResource(R.drawable.ic_call_black_24dp);
             return true;
         } else {
-            mUserInfoInputLayouts[0].setHint(getString(R.string.err_msg_email));
+            mUserInfoInputLayouts[0].setHint(getString(R.string.err_msg_phone));
             mActionIcons[0].setClickable(false);
             mActionIcons[0].setImageResource(R.drawable.ic_error_grey_24dp);
             requestFocus(mUserInfoViews[0]);
@@ -575,7 +568,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             mActionIcons[2].setImageResource(R.drawable.ic_vk_social_network_logo);
             return true;
         } else {
-            mUserInfoInputLayouts[2].setHint(getString(R.string.err_msg_email));
+            mUserInfoInputLayouts[2].setHint(getString(R.string.err_msg_vk));
             mActionIcons[2].setClickable(false);
             mActionIcons[2].setImageResource(R.drawable.ic_error_grey_24dp);
             requestFocus(mUserInfoViews[2]);
@@ -594,14 +587,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             mActionIcons[3].setImageResource(R.drawable.ic_github_logo);
             return true;
         } else {
-            mUserInfoInputLayouts[3].setHint(getString(R.string.err_msg_email));
+            mUserInfoInputLayouts[3].setHint(getString(R.string.err_msg_git));
             mActionIcons[3].setClickable(false);
             mActionIcons[3].setImageResource(R.drawable.ic_error_grey_24dp);
             requestFocus(mUserInfoViews[3]);
             return false;
         }
     }
-
 
     private void requestFocus(EditText editText) {
         Log.d(TAG, "requestFocus: " + editText.getText() + " " + editText.requestFocus());
@@ -641,6 +633,4 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             }
         }
     }
-
-
 }

@@ -27,10 +27,11 @@
     <dimen name="size_small_24">24dp</dimen>
 
 
-    <dimen name="line_size">2dp</dimen>
+    <dimen name="line_size_2">2dp</dimen>
     <dimen name="profile_image_size">256dp</dimen>
     <dimen name="fab_right_space">8dp</dimen>
     <dimen name="placeholder_photo_size_90">90dp</dimen>
-
-
+    <dimen name="drawer_header_size">172dp</dimen>
+    <dimen name="drawer_header_avatar_size">172dp</dimen>
+    <dimen name="login_card_size">240dp</dimen>
 </resources>

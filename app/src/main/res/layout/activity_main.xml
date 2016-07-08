@@ -29,47 +29,40 @@
                 android:layout_height="wrap_content"
                 android:fitsSystemWindows="true"
                 app:contentScrim="@color/color_primary"
-                app:expandedTitleTextAppearance="@android:style/TextAppearance.Large"
                 app:expandedTitleGravity="bottom|center_horizontal"
+                app:expandedTitleTextAppearance="@android:style/TextAppearance.Large"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/profile_image_size"
                     android:fitsSystemWindows="true">
+
                     <ImageView
                         android:id="@+id/profile_photo"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         android:src="@drawable/user_photo"/>
+
                     <RelativeLayout
+                        android:id="@+id/profile_placeholder"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@color/grey_background"
-                        android:visibility="gone"
-                        android:id="@+id/profile_placeholder">
+                        android:visibility="gone">
+
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/user_profile.placeholder.image"
-                            android:textColor="@color/white"
-                            android:fontFamily="sans-serif-medium"
-                            android:layout_centerHorizontal="true"
+                            style="@style/placeholder_text"
                             android:layout_above="@+id/placeholder_photo"
-                            android:layout_marginBottom="@dimen/spacing_small_8"/>
+                            android:text="@string/user_profile.placeholder.image"/>
+
                         <ImageView
+                            style="@style/placeholder_image"
                             android:id="@+id/placeholder_photo"
-                            android:layout_width="@dimen/placeholder_photo_size_90"
-                            android:layout_height="@dimen/placeholder_photo_size_90"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/ic_add_a_photo_48px"
-                            android:layout_centerHorizontal="true"
-                            android:layout_alignParentBottom="true"
-                            android:layout_marginBottom="@dimen/spacing_large_56"/>
+                            android:src="@drawable/ic_add_a_photo_48px"/>
                     </RelativeLayout>
                 </FrameLayout>
-
 
 
                 <android.support.v7.widget.Toolbar
@@ -78,7 +71,7 @@
                     android:layout_height="?attr/actionBarSize"
                     app:layout_collapseMode="pin"
                     app:theme="@style/AppTheme.PopupOverlay"
-                    app:titleTextColor="@color/white"/>
+                    app:titleTextColor="@android:color/white"/>
 
             </android.support.design.widget.CollapsingToolbarLayout>
 

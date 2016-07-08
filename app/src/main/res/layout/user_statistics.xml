@@ -17,16 +17,16 @@
         android:orientation="vertical">
 
         <TextView
-            style="@style/user_ratings.value"
+            style="@style/user_statistic.value"
             android:text="@string/rating_value"/>
 
         <TextView
-            style="@style/user_ratings.hint"
+            style="@style/user_statistic.hint"
             android:text="@string/rating_title"/>
     </LinearLayout>
 
     <View
-        android:layout_width="@dimen/line_size"
+        android:layout_width="@dimen/line_size_2"
         android:layout_height="@dimen/size_medium_56"
         android:background="@color/grey_light"/>
 
@@ -37,16 +37,16 @@
         android:orientation="vertical">
 
         <TextView
-            style="@style/user_ratings.value"
+            style="@style/user_statistic.value"
             android:text="@string/code_value"/>
 
         <TextView
-            style="@style/user_ratings.hint"
+            style="@style/user_statistic.hint"
             android:text="@string/code_title"/>
     </LinearLayout>
 
     <View
-        android:layout_width="@dimen/line_size"
+        android:layout_width="@dimen/line_size_2"
         android:layout_height="@dimen/size_medium_56"
         android:background="@color/grey_light"/>
 
@@ -57,11 +57,11 @@
         android:orientation="vertical">
 
         <TextView
-            style="@style/user_ratings.value"
+            style="@style/user_statistic.value"
             android:text="@string/projects_value"/>
 
         <TextView
-            style="@style/user_ratings.hint"
+            style="@style/user_statistic.hint"
             android:text="@string/projects_title"/>
     </LinearLayout>
 

@@ -47,7 +47,11 @@
                 android:src="@drawable/ic_phone_in_talk_black_24dp"/>
         </LinearLayout>
 
-        <include layout="@layout/dividing_line"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_size_2"
+            android:layout_marginLeft="@dimen/spacing_larger_72"
+            android:background="@color/grey_light"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -83,7 +87,11 @@
                 android:src="@drawable/ic_send_black_24dp"/>
         </LinearLayout>
 
-        <include layout="@layout/dividing_line"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_size_2"
+            android:layout_marginLeft="@dimen/spacing_larger_72"
+            android:background="@color/grey_light"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -119,7 +127,11 @@
                 android:src="@drawable/ic_visibility_black_24dp"/>
         </LinearLayout>
 
-        <include layout="@layout/dividing_line"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_size_2"
+            android:layout_marginLeft="@dimen/spacing_larger_72"
+            android:background="@color/grey_light"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -154,7 +166,11 @@
                 android:src="@drawable/ic_visibility_black_24dp"/>
         </LinearLayout>
 
-        <include layout="@layout/dividing_line"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_size_2"
+            android:layout_marginLeft="@dimen/spacing_larger_72"
+            android:background="@color/grey_light"/>
 
         <LinearLayout
             android:layout_width="match_parent"
