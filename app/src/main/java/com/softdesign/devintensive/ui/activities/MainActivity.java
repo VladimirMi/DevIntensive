@@ -20,6 +20,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
@@ -28,9 +29,13 @@ import android.support.v7.app.ActionBar;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -55,8 +60,6 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = ConstantManager.TAG_PREFIX + "Main Activity";
-    @BindViews({R.id.make_call_img, R.id.send_email_img, R.id.vk_img, R.id.github_img})
-    View[] mActionIcons;
     private CoordinatorLayout mCoordinatorLayout;
     private Toolbar mToolbar;
     private DrawerLayout mNavigationDrawer;
@@ -65,9 +68,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
     @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
-    private EditText mUserPhone, mUserMail, mUserGit, mUserVk, mUserAboutMe;
-    private List<EditText> mUserInfoViews;
     private int mCurrentEditMode;
+
+    @BindViews({R.id.phone_et, R.id.email_et, R.id.vk_et, R.id.github_et, R.id.about_me_et})
+    EditText[] mUserInfoViews;
+
+    @BindViews({R.id.phone_til, R.id.email_til, R.id.vk_til, R.id.github_til, R.id.about_me_til})
+    TextInputLayout[] mUserInfoInputLayouts;
+
+    @BindViews({R.id.make_call_img, R.id.send_email_img, R.id.vk_img, R.id.github_img})
+    ImageView[] mActionIcons;
+
     private DataManager mDataManager;
     private File mPhotoFile = null;
     private Uri mSelectedImage = null;
@@ -85,31 +96,49 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         mDataManager = DataManager.getInstance();
 
-
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_container);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mNavigationDrawer = (DrawerLayout) findViewById(R.id.navigation_drawer);
         mFab = (FloatingActionButton) findViewById(R.id.fab);
-        mUserPhone = (EditText) findViewById(R.id.phone_et);
-        mUserMail = (EditText) findViewById(R.id.email_et);
-        mUserGit = (EditText) findViewById(R.id.github_et);
-        mUserVk = (EditText) findViewById(R.id.vk_et);
-        mUserAboutMe = (EditText) findViewById(R.id.about_me_et);
-
-        mUserInfoViews = new ArrayList<>();
-        mUserInfoViews.add(mUserPhone);
-        mUserInfoViews.add(mUserMail);
-        mUserInfoViews.add(mUserGit);
-        mUserInfoViews.add(mUserVk);
-        mUserInfoViews.add(mUserAboutMe);
 
 
+        assert mFab != null;
         mFab.setOnClickListener(this);
         mProfilePlaceholder.setOnClickListener(this);
 
         for (View actionIcon : mActionIcons) {
             actionIcon.setOnClickListener(this);
         }
+
+        for (EditText userInfoView : mUserInfoViews) {
+            userInfoView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    switch (v.getId()) {
+                        case R.id.phone_et:
+                            break;
+                        case R.id.email_et:
+                            break;
+                        case R.id.vk_et:
+                            String value = mUserInfoViews[2].getText().toString();
+                            int startIndex = value.indexOf("vk");
+                            if (startIndex > 0) {
+                                mUserInfoViews[2].setText(value.substring(startIndex));
+                            }
+                            break;
+                        case R.id.github_et:
+                            value = mUserInfoViews[3].getText().toString();
+                            startIndex = value.indexOf("github");
+                            if (startIndex > 0) {
+                                mUserInfoViews[3].setText(value.substring(startIndex));
+                            }
+                            break;
+                    }
+                }
+            });
+            userInfoView.addTextChangedListener(new MyTextWatcher(userInfoView));
+        }
+
 
         setupToolbar();
         setupDrawer();
@@ -179,16 +208,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.make_call_img:
-                makeActionView(Uri.parse("tel://" + mUserPhone.getText()));
+                makeActionView(Uri.parse("tel:" + mUserInfoViews[0].getText()));
                 break;
             case R.id.send_email_img:
-                sendEmail();
+                sendEmail(Uri.parse("mailto:" + mUserInfoViews[1].getText()));
                 break;
             case R.id.vk_img:
-                makeActionView(Uri.parse("https://" + mUserVk.getText()));
+                makeActionView(Uri.parse("https:" + mUserInfoViews[2].getText()));
                 break;
             case R.id.github_img:
-                makeActionView(Uri.parse("https://" + mUserGit.getText()));
+                makeActionView(Uri.parse("https:" + mUserInfoViews[3].getText()));
                 break;
             case R.id.fab:
                 if (mCurrentEditMode == 0) {
@@ -308,18 +337,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void changeEditorMode(int mode) {
         if (mode == 1) {
-            mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
-            mFab.setImageResource(R.drawable.ic_check_black_24dp);
             for (EditText userValue : mUserInfoViews) {
                 userValue.setFocusable(true);
                 userValue.setEnabled(true);
                 userValue.setFocusableInTouchMode(true);
                 showProfilePlaceholder();
                 lockToolbar();
+                requestFocus(mUserInfoViews[0]);
             }
+            mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
+            mFab.setImageResource(R.drawable.ic_check_black_24dp);
         } else {
-            mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(R.color.white));
-            mFab.setImageResource(R.drawable.ic_mode_edit_black_24dp);
+            if (!validatePhone()) return;
+            if (!validateEmail()) return;
+            if (!validateVk()) return;
+            if (!validateGit()) return;
             for (EditText userValue : mUserInfoViews) {
                 userValue.setFocusable(false);
                 userValue.setEnabled(false);
@@ -327,6 +359,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 hideProfilePlaceholder();
                 unlockToolbar();
             }
+            mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(R.color.white));
+            mFab.setImageResource(R.drawable.ic_mode_edit_black_24dp);
         }
 
     }
@@ -334,7 +368,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private void loadUserInfoValue() {
         List<String> userData = mDataManager.getPreferencesManager().loadUserProfileData();
         for (int i = 0; i < userData.size(); i++) {
-            mUserInfoViews.get(i).setText(userData.get(i));
+            mUserInfoViews[i].setText(userData.get(i));
         }
     }
 
@@ -482,11 +516,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
 
-    private void sendEmail() {
-        String address = mUserMail.getText().toString();
-
-        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                "mailto", address, null));
+    private void sendEmail(Uri uri) {
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, uri);
         startActivity(Intent.createChooser(emailIntent, "Send email"));
     }
 
@@ -494,4 +525,122 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         startActivity(Intent.createChooser(intent, "Make action view"));
     }
+
+    public boolean validatePhone() {
+        String phone = mUserInfoViews[0].getText().toString().trim();
+        Boolean isValidPhone = !TextUtils.isEmpty(phone) &&
+                ConstantManager.PHONE.matcher(phone).matches();
+
+        if (isValidPhone) {
+            mUserInfoInputLayouts[0].setHint(getString(R.string.phone_hint));
+            mActionIcons[0].setClickable(true);
+            mActionIcons[0].setImageResource(R.drawable.ic_call_black_24dp);
+            return true;
+        } else {
+            mUserInfoInputLayouts[0].setHint(getString(R.string.err_msg_email));
+            mActionIcons[0].setClickable(false);
+            mActionIcons[0].setImageResource(R.drawable.ic_error_grey_24dp);
+            requestFocus(mUserInfoViews[0]);
+            return false;
+        }
+    }
+
+    private boolean validateEmail() {
+        String email = mUserInfoViews[1].getText().toString().trim();
+        Boolean isValidEmail = !TextUtils.isEmpty(email) &&
+                ConstantManager.EMAIL_ADDRESS.matcher(email).matches();
+
+        if (isValidEmail) {
+            mUserInfoInputLayouts[1].setHint(getString(R.string.email_hint));
+            mActionIcons[1].setClickable(true);
+            mActionIcons[1].setImageResource(R.drawable.ic_send_black_24dp);
+            return true;
+        } else {
+            mUserInfoInputLayouts[1].setHint(getString(R.string.err_msg_email));
+            mActionIcons[1].setClickable(false);
+            mActionIcons[1].setImageResource(R.drawable.ic_error_grey_24dp);
+            requestFocus(mUserInfoViews[1]);
+            return false;
+        }
+    }
+
+    private boolean validateVk() {
+        String vk = mUserInfoViews[2].getText().toString().trim();
+        Boolean isValidVk = !TextUtils.isEmpty(vk) &&
+                ConstantManager.VK_URL.matcher(vk).matches();
+
+        if (isValidVk) {
+            mUserInfoInputLayouts[2].setHint(getString(R.string.vk_hint));
+            mActionIcons[2].setClickable(true);
+            mActionIcons[2].setImageResource(R.drawable.ic_vk_social_network_logo);
+            return true;
+        } else {
+            mUserInfoInputLayouts[2].setHint(getString(R.string.err_msg_email));
+            mActionIcons[2].setClickable(false);
+            mActionIcons[2].setImageResource(R.drawable.ic_error_grey_24dp);
+            requestFocus(mUserInfoViews[2]);
+            return false;
+        }
+    }
+
+    private boolean validateGit() {
+        String git = mUserInfoViews[3].getText().toString().trim();
+        Boolean isValidGit = !TextUtils.isEmpty(git) &&
+                ConstantManager.GIT_URL.matcher(git).matches();
+
+        if (isValidGit) {
+            mUserInfoInputLayouts[3].setHint(getString(R.string.github_hint));
+            mActionIcons[3].setClickable(true);
+            mActionIcons[3].setImageResource(R.drawable.ic_github_logo);
+            return true;
+        } else {
+            mUserInfoInputLayouts[3].setHint(getString(R.string.err_msg_email));
+            mActionIcons[3].setClickable(false);
+            mActionIcons[3].setImageResource(R.drawable.ic_error_grey_24dp);
+            requestFocus(mUserInfoViews[3]);
+            return false;
+        }
+    }
+
+
+    private void requestFocus(EditText editText) {
+        Log.d(TAG, "requestFocus: " + editText.getText() + " " + editText.requestFocus());
+        if (editText.requestFocus()) {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
+    }
+
+    private class MyTextWatcher implements TextWatcher {
+
+        private final EditText mEditText;
+
+        public MyTextWatcher(EditText text) {
+            mEditText = text;
+        }
+
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        public void afterTextChanged(Editable editable) {
+            switch (mEditText.getId()) {
+                case R.id.phone_et:
+                    validatePhone();
+                    break;
+                case R.id.email_et:
+                    validateEmail();
+                    break;
+                case R.id.vk_et:
+                    validateVk();
+                    break;
+                case R.id.github_et:
+                    validateGit();
+                    break;
+            }
+        }
+    }
+
+
 }

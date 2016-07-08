@@ -26,6 +26,7 @@
             <LinearLayout style="@style/user_info_item">
 
                 <android.support.design.widget.TextInputLayout
+                    android:id="@+id/phone_til"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
@@ -56,11 +57,12 @@
 
             <ImageView
                 style="@style/icon.left"
-                android:src="@drawable/ic_mail_black_24dp"/>
+                android:src="@drawable/ic_mail_grey_24dp"/>
 
             <LinearLayout style="@style/user_info_item">
 
                 <android.support.design.widget.TextInputLayout
+                    android:id="@+id/email_til"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
@@ -96,6 +98,7 @@
             <LinearLayout style="@style/user_info_item">
 
                 <android.support.design.widget.TextInputLayout
+                    android:id="@+id/vk_til"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
@@ -131,6 +134,7 @@
             <LinearLayout style="@style/user_info_item">
 
                 <android.support.design.widget.TextInputLayout
+                    android:id="@+id/github_til"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
@@ -168,6 +172,7 @@
                 android:layout_marginRight="@dimen/spacing_medium_32">
 
                 <android.support.design.widget.TextInputLayout
+                    android:id="@+id/about_me_til"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 

@@ -43,4 +43,6 @@
     <string name="user_profile_dialog_cancel">Отмена</string>
     <string name="user_profile_dialog_title">Изменить фотографию пользователя</string>
 
+    <string name="err_msg_email">Enter valid email address</string>
+
 </resources>
