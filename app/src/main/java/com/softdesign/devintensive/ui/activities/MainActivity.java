@@ -247,8 +247,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
      *
      * @param requestCode The integer request code originally supplied to startActivityForResult(),
      *                    allowing you to identify who this result came from.
-     * @param resultCode The integer result code returned by the child activity through its setResult().
-     * @param data An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
+     * @param resultCode  The integer result code returned by the child activity through its setResult().
+     * @param data        An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -372,12 +372,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 userValue.setFocusable(true);
                 userValue.setEnabled(true);
                 userValue.setFocusableInTouchMode(true);
-                showProfilePlaceholder();
-                lockToolbar();
-                requestFocus(mUserInfoViews[0]);
+
             }
+            showProfilePlaceholder();
+            lockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
             mFab.setImageResource(R.drawable.ic_check_black_24dp);
+            requestFocus(mUserInfoViews[0]);
+            mUserInfoViews[0].setSelection(mUserInfoViews[0].length());
         } else {
             if (!validatePhone()) return;
             if (!validateEmail()) return;
@@ -387,9 +389,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 userValue.setFocusable(false);
                 userValue.setEnabled(false);
                 userValue.setFocusableInTouchMode(false);
-                hideProfilePlaceholder();
-                unlockToolbar();
             }
+            hideProfilePlaceholder();
+            unlockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(android.R.color.white));
             mFab.setImageResource(R.drawable.ic_mode_edit_black_24dp);
         }
@@ -412,10 +414,24 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     private void loadPhotoFromGallery() {
-        Intent takeGalleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        takeGalleryIntent.setType("image/*");
-        startActivityForResult(Intent.createChooser(takeGalleryIntent, "выберите фото"),
-                ConstantManager.REQUEST_GALLERY_PICTURE);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED) {
+            Intent takeGalleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            takeGalleryIntent.setType("image/*");
+            startActivityForResult(Intent.createChooser(takeGalleryIntent, "выберите фото"),
+                    ConstantManager.REQUEST_GALLERY_PICTURE);
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    ConstantManager.GALLERY_PERMISSION_REQUEST_CODE);
+            Snackbar.make(mCoordinatorLayout, "Для корректной работы приложения необходимо дать требуемые разрешения", Snackbar.LENGTH_LONG)
+                    .setAction("Разрешить", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            openApplicationSettings();
+                        }
+                    }).show();
+        }
     }
 
     private void loadPhotoFromCamera() {
@@ -596,7 +612,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     private void requestFocus(EditText editText) {
-        Log.d(TAG, "requestFocus: " + editText.getText() + " " + editText.requestFocus());
         if (editText.requestFocus()) {
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }

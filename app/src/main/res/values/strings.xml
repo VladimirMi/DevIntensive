@@ -46,9 +46,9 @@
     <string name="enter">Войти</string>
     <string name="password_hint">Пароль</string>
     <string name="password_reminder">Забыли пароль?</string>
-    <string name="err_msg_email">Введите правильный email адрес</string>
-    <string name="err_msg_phone">Введите правильный номер телефона</string>
-    <string name="err_msg_vk">Введите правильный адрес профиля VK</string>
-    <string name="err_msg_git">Введите правильный адрес репозитория</string>
+    <string name="err_msg_email">Неправильный email адрес</string>
+    <string name="err_msg_phone">Неправильный номер телефона</string>
+    <string name="err_msg_vk">Неправильный адрес профиля VK</string>
+    <string name="err_msg_git">Неправильный адрес репозитория</string>
 
 </resources>

@@ -32,6 +32,6 @@
     <dimen name="fab_right_space">8dp</dimen>
     <dimen name="placeholder_photo_size_90">90dp</dimen>
     <dimen name="drawer_header_size">172dp</dimen>
-    <dimen name="drawer_header_avatar_size">172dp</dimen>
+    <dimen name="drawer_header_avatar_size">60dp</dimen>
     <dimen name="login_card_size">240dp</dimen>
 </resources>
