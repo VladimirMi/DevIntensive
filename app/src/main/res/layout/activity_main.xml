@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fitsSystemWindows="true"
-                app:contentScrim="@color/color_primary"
+                app:contentScrim="@color/grey"
                 app:expandedTitleGravity="bottom|center_horizontal"
                 app:expandedTitleTextAppearance="@android:style/TextAppearance.Large"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed">
@@ -86,7 +86,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/fab_right_space"
-            android:src="@drawable/ic_mode_edit_black_24dp"
+            android:src="@drawable/ic_mode_edit_24dp"
             app:layout_anchor="@id/appbar_layout"
             app:layout_anchorGravity="bottom|right"/>
     </android.support.design.widget.CoordinatorLayout>

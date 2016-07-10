@@ -5,9 +5,8 @@ import android.util.Patterns;
 import java.util.regex.Pattern;
 
 public interface ConstantManager {
-    String TAG_PREFIX = "DEV ";
+    // Keys
     String EDIT_MODE_KEY = "EDIT_MODE_KEY";
-
     String USER_PHONE_KEY = "USER_KEY_1";
     String USER_MAIL_KEY = "USER_KEY_2";
     String USER_VK_KEY = "USER_KEY_3";
@@ -15,23 +14,40 @@ public interface ConstantManager {
     String USER_ABOUT_KEY = "USER_KEY_5";
     String USER_PHOTO_KEY = "USER_PHOTO_KEY";
 
-    int LOAD_PROFILE_PHOTO = 1;
-    int REQUEST_CAMERA_PICTURE = 101;
-    int REQUEST_GALLERY_PICTURE = 102;
-    int SETTINGS_PERMISSION_REQUEST_CODE = 103;
-    int CAMERA_PERMISSION_REQUEST_CODE = 104;
-    int GALLERY_PERMISSION_REQUEST_CODE = 105;
+    // Misc constants
+    String TAG_PREFIX = "DEV ";
+    String TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
+    String EXTENSION_JPEG = ".jpg";
+    String PHOTO_FILE_PREFIX = "JPEG_";
 
+    // Dialog ids
+    int LOAD_PROFILE_PHOTO = 1;
+
+    // Intent request codes
+    int REQUEST_CAMERA_PICTURE = 50;
+    int REQUEST_GALLERY_PICTURE = 51;
+
+    // Permission request codes
+    int SETTINGS_PERMISSION_REQUEST_CODE = 100;
+    int CAMERA_PERMISSION_REQUEST_CODE = 101;
+    int GALLERY_PERMISSION_REQUEST_CODE = 102;
+
+    // URI schemes
+    String TELEPHONE_SCHEME = "tel:";
+    String MAIL_SCHEME = "mailto:";
+    String HTTPS_SCHEME = "https:";
+    String PACKAGE_SCHEME = "package:";
+
+    // Mime types
+    String MIME_TYPE_IMAGE = "image/*";
+    String MIME_TYPE_JPEG = "image/jpeg";
+
+    // Validation patterns
     Pattern EMAIL_ADDRESS = Pattern.compile(
             "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{3,256}" +
-                    "\\@" +
-                    "[a-zA-Z0-9][a-zA-Z0-9\\-]{1,64}" +
-                    "(" +
-                    "\\." +
-                    "[a-zA-Z0-9][a-zA-Z0-9\\-]{1,25}" +
-                    ")+"
+                    "\\@[a-zA-Z0-9]{2,64}" +
+                    "\\.[a-zA-Z0-9]{2,25}"
     );
-
 
     Pattern PHONE = Pattern.compile(
             "\\+?+[0-9]{1,3}[\\- \\.]?[0-9]{0,3}[\\- \\.]?"
@@ -44,6 +60,7 @@ public interface ConstantManager {
                     + "(\\/(?:(?:[" + Patterns.GOOD_IRI_CHAR + "\\;\\/\\?\\:\\@\\&\\=\\#\\~"
                     + "\\-\\.\\+\\!\\*\\'\\(\\)\\,\\_]){3,}|(?:\\%[a-fA-F0-9]{3,}))*)+"
                     + "(?:\\b|$))");
+
     Pattern GIT_URL = Pattern.compile(
             "((?:(http|https|Http|Https|rtsp|Rtsp):\\/\\/|)"
                     + "(?:github\\.com)"

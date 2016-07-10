@@ -21,7 +21,7 @@
 
             <ImageView
                 style="@style/icon.left"
-                android:src="@drawable/ic_call_black_24dp"/>
+                android:src="@drawable/ic_call_24dp"/>
 
             <LinearLayout style="@style/user_info_item">
 
@@ -44,7 +44,7 @@
             <ImageView
                 android:id="@+id/make_call_img"
                 style="@style/icon.right"
-                android:src="@drawable/ic_phone_in_talk_black_24dp"/>
+                android:src="@drawable/ic_phone_in_talk24dp"/>
         </LinearLayout>
 
         <View
@@ -61,7 +61,7 @@
 
             <ImageView
                 style="@style/icon.left"
-                android:src="@drawable/ic_mail_grey_24dp"/>
+                android:src="@drawable/ic_mail_24dp"/>
 
             <LinearLayout style="@style/user_info_item">
 
@@ -84,7 +84,7 @@
             <ImageView
                 android:id="@+id/send_email_img"
                 style="@style/icon.right"
-                android:src="@drawable/ic_send_black_24dp"/>
+                android:src="@drawable/ic_send_24dp"/>
         </LinearLayout>
 
         <View
@@ -124,7 +124,7 @@
             <ImageView
                 android:id="@+id/vk_img"
                 style="@style/icon.right"
-                android:src="@drawable/ic_visibility_black_24dp"/>
+                android:src="@drawable/ic_visibility_24dp"/>
         </LinearLayout>
 
         <View
@@ -163,7 +163,7 @@
             <ImageView
                 android:id="@+id/github_img"
                 style="@style/icon.right"
-                android:src="@drawable/ic_visibility_black_24dp"/>
+                android:src="@drawable/ic_visibility_24dp"/>
         </LinearLayout>
 
         <View
@@ -180,7 +180,7 @@
 
             <ImageView
                 style="@style/icon.left"
-                android:src="@drawable/ic_account_circle_black_24dp"/>
+                android:src="@drawable/ic_account_circle_24dp"/>
 
             <LinearLayout
                 style="@style/user_info_item"

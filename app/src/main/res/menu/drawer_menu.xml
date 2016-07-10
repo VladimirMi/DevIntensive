@@ -4,11 +4,11 @@
         <item android:title="Мой профиль"
             android:checkable="true"
             android:id="@+id/user_profile_menu"
-            android:icon="@drawable/ic_account_circle_black_24dp"/>
+            android:icon="@drawable/ic_account_circle_24dp"/>
 
         <item android:title="Команда"
               android:id="@+id/team_menu"
-              android:icon="@drawable/ic_people_black_24dp"/>
+              android:icon="@drawable/ic_people_24dp"/>
 
         <item android:title="Вход"
             android:id="@+id/login_menu"

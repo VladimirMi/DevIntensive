@@ -109,7 +109,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         setupToolbar();
         setupDrawer();
 
-        // TODO: 7/5/2016 placeholder + transform + crop(512*256)
         Picasso.with(this)
                 .load(mDataManager.getPreferencesManager().loadUserPhoto())
                 .placeholder(R.drawable.user_photo)
@@ -175,16 +174,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.make_call_img:
-                makeActionView(Uri.parse("tel:" + mUserInfoViews[0].getText()));
+                makeActionView(Uri.parse(ConstantManager.TELEPHONE_SCHEME + mUserInfoViews[0].getText()));
                 break;
             case R.id.send_email_img:
-                sendEmail(Uri.parse("mailto:" + mUserInfoViews[1].getText()));
+                sendEmail(Uri.parse(ConstantManager.MAIL_SCHEME + mUserInfoViews[1].getText()));
                 break;
             case R.id.vk_img:
-                makeActionView(Uri.parse("https:" + mUserInfoViews[2].getText()));
+                makeActionView(Uri.parse(ConstantManager.HTTPS_SCHEME + mUserInfoViews[2].getText()));
                 break;
             case R.id.github_img:
-                makeActionView(Uri.parse("https:" + mUserInfoViews[3].getText()));
+                makeActionView(Uri.parse(ConstantManager.HTTPS_SCHEME + mUserInfoViews[3].getText()));
                 break;
             case R.id.fab:
                 if (mCurrentEditMode == 0) {
@@ -195,7 +194,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 changeEditorMode(mCurrentEditMode);
                 break;
             case R.id.profile_placeholder:
-                // TODO: 7/5/2016 сделать выбор откуда загружать фото
                 showDialog(ConstantManager.LOAD_PROFILE_PHOTO);
                 break;
         }
@@ -208,6 +206,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 break;
             case R.id.email_et:
                 break;
+            // отсекает лишние символы перед "vk"
             case R.id.vk_et:
                 String value = mUserInfoViews[2].getText().toString();
                 int startIndex = value.indexOf("vk");
@@ -215,6 +214,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                     mUserInfoViews[2].setText(value.substring(startIndex));
                 }
                 break;
+            // отсекает лишние символы перед "github"
             case R.id.github_et:
                 value = mUserInfoViews[3].getText().toString();
                 startIndex = value.indexOf("github");
@@ -271,13 +271,25 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == ConstantManager.CAMERA_PERMISSION_REQUEST_CODE && grantResults.length == 2) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // TODO: 7/5/2016 обработать разрешение
-            }
-            if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                // TODO: 7/5/2016 обработать разрешение
-            }
+        switch (requestCode) {
+            case ConstantManager.GALLERY_PERMISSION_REQUEST_CODE:
+                for (int grantResult : grantResults) {
+                    if (grantResult == PackageManager.PERMISSION_DENIED) {
+                        showPermissionSnackbar();
+                        return;
+                    }
+                }
+                loadPhotoFromGallery();
+                break;
+            case ConstantManager.CAMERA_PERMISSION_REQUEST_CODE:
+                for (int grantResult : grantResults) {
+                    if (grantResult == PackageManager.PERMISSION_DENIED) {
+                        showPermissionSnackbar();
+                        return;
+                    }
+                }
+                loadPhotoFromCamera();
+                break;
         }
     }
 
@@ -296,19 +308,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                     public void onClick(DialogInterface dialogInterface, int choiceItem) {
                         switch (choiceItem) {
                             case 0:
-                                // TODO: 7/5/2016 load from gallery
                                 loadPhotoFromGallery();
-//                                showSnackBar("load from gallery");
                                 break;
                             case 1:
-                                // TODO: 7/5/2016 load from camera
                                 loadPhotoFromCamera();
-//                                showSnackBar("load from camera");
                                 break;
                             case 2:
-                                // TODO: 7/5/2016 cancel
                                 dialogInterface.cancel();
-//                                showSnackBar("cancel");
                                 break;
                         }
                     }
@@ -329,7 +335,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
         mAppBarParams = (AppBarLayout.LayoutParams) mCollapsingToolbar.getLayoutParams();
         if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
@@ -377,9 +383,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             showProfilePlaceholder();
             lockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
-            mFab.setImageResource(R.drawable.ic_check_black_24dp);
+            mFab.setImageResource(R.drawable.ic_check_24dp);
             requestFocus(mUserInfoViews[0]);
-            mUserInfoViews[0].setSelection(mUserInfoViews[0].length());
         } else {
             if (!validatePhone()) return;
             if (!validateEmail()) return;
@@ -393,7 +398,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             hideProfilePlaceholder();
             unlockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(android.R.color.white));
-            mFab.setImageResource(R.drawable.ic_mode_edit_black_24dp);
+            mFab.setImageResource(R.drawable.ic_mode_edit_24dp);
         }
 
     }
@@ -416,21 +421,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private void loadPhotoFromGallery() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
                 PackageManager.PERMISSION_GRANTED) {
+
             Intent takeGalleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            takeGalleryIntent.setType("image/*");
-            startActivityForResult(Intent.createChooser(takeGalleryIntent, "выберите фото"),
+            takeGalleryIntent.setType(ConstantManager.MIME_TYPE_IMAGE);
+            startActivityForResult(Intent.createChooser(takeGalleryIntent, getString(R.string.chooser_gallery)),
                     ConstantManager.REQUEST_GALLERY_PICTURE);
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     ConstantManager.GALLERY_PERMISSION_REQUEST_CODE);
-            Snackbar.make(mCoordinatorLayout, "Для корректной работы приложения необходимо дать требуемые разрешения", Snackbar.LENGTH_LONG)
-                    .setAction("Разрешить", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            openApplicationSettings();
-                        }
-                    }).show();
         }
     }
 
@@ -449,23 +448,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             }
             if (mPhotoFile != null) {
                 takeCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mPhotoFile));
-                startActivityForResult(takeCaptureIntent, ConstantManager.REQUEST_CAMERA_PICTURE);
+                startActivityForResult(Intent.createChooser(takeCaptureIntent, getString(R.string.chooser_camera)),
+                        ConstantManager.REQUEST_CAMERA_PICTURE);
             } else {
-                showSnackBar("Внешняя память не доступна");
+                showSnackBar(getString(R.string.err_msg_ext_storage));
             }
         } else {
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.CAMERA,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
             }, ConstantManager.CAMERA_PERMISSION_REQUEST_CODE);
-
-            Snackbar.make(mCoordinatorLayout, "Для корректной работы приложения необходимо дать требуемые разрешения", Snackbar.LENGTH_LONG)
-                    .setAction("Разрешить", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            openApplicationSettings();
-                        }
-                    }).show();
         }
     }
 
@@ -489,19 +481,36 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         mCollapsingToolbar.setLayoutParams(mAppBarParams);
     }
 
+    private void showPermissionSnackbar() {
+        Snackbar.make(mCoordinatorLayout, getString(R.string.permission_snackbar_text), Snackbar.LENGTH_LONG)
+                .setAction(getString(R.string.permission_snackbar_title), new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        openApplicationSettings();
+                    }
+                }).show();
+    }
+
+    private void openApplicationSettings() {
+        Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse(ConstantManager.PACKAGE_SCHEME + getPackageName()));
+        startActivityForResult(appSettingsIntent, ConstantManager.SETTINGS_PERMISSION_REQUEST_CODE);
+    }
+
     private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", getResources().getConfiguration().locale).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String timeStamp = new SimpleDateFormat(ConstantManager.TIMESTAMP_FORMAT,
+                getResources().getConfiguration().locale).format(new Date());
+        String imageFileName = ConstantManager.PHOTO_FILE_PREFIX + timeStamp;
         File imageFile;
         if (ExStorageState.isWritable()) {
             File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            imageFile = File.createTempFile(imageFileName, ".jpg", storageDir);
+            imageFile = File.createTempFile(imageFileName, ConstantManager.EXTENSION_JPEG, storageDir);
         } else {
             return null;
         }
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.Images.Media.MIME_TYPE, ConstantManager.MIME_TYPE_JPEG);
         values.put(MediaStore.MediaColumns.DATA, imageFile.getAbsolutePath());
 
         this.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
@@ -509,8 +518,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         return imageFile;
     }
 
+    /**
+     * Установка фотографии профайла
+     * @param selectedImage URI выбранного изображения
+     */
     private void insertProfileImage(Uri selectedImage) {
-        // TODO: 7/5/2016 placeholder + transform + crop(512*256)
         Picasso.with(this)
                 .load(selectedImage)
                 .placeholder(R.drawable.user_photo)
@@ -519,20 +531,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
     }
 
-    private void openApplicationSettings() {
-        Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.parse("package:" + getPackageName()));
-        startActivityForResult(appSettingsIntent, ConstantManager.SETTINGS_PERMISSION_REQUEST_CODE);
-    }
-
+    /**
+     * Создание и запуск SENDTO интента
+     * @param uri цель SENDTO
+     */
     private void sendEmail(Uri uri) {
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO, uri);
-        startActivity(Intent.createChooser(emailIntent, "Send email"));
+        startActivity(Intent.createChooser(emailIntent, getString(R.string.chooser_email)));
     }
 
+    /**
+     * Создание и запуск ACTION_VIEW интента
+     * @param uri цель ACTION_VIEW
+     */
     private void makeActionView(Uri uri) {
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        startActivity(Intent.createChooser(intent, "Make action view"));
+        startActivity(intent);
     }
 
     public boolean validatePhone() {
@@ -543,12 +557,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         if (isValidPhone) {
             mUserInfoInputLayouts[0].setHint(getString(R.string.phone_hint));
             mActionIcons[0].setClickable(true);
-            mActionIcons[0].setImageResource(R.drawable.ic_call_black_24dp);
+            mActionIcons[0].setImageResource(R.drawable.ic_call_24dp);
             return true;
         } else {
             mUserInfoInputLayouts[0].setHint(getString(R.string.err_msg_phone));
             mActionIcons[0].setClickable(false);
-            mActionIcons[0].setImageResource(R.drawable.ic_error_grey_24dp);
+            mActionIcons[0].setImageResource(R.drawable.ic_error_24dp);
             requestFocus(mUserInfoViews[0]);
             return false;
         }
@@ -562,12 +576,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         if (isValidEmail) {
             mUserInfoInputLayouts[1].setHint(getString(R.string.email_hint));
             mActionIcons[1].setClickable(true);
-            mActionIcons[1].setImageResource(R.drawable.ic_send_black_24dp);
+            mActionIcons[1].setImageResource(R.drawable.ic_send_24dp);
             return true;
         } else {
             mUserInfoInputLayouts[1].setHint(getString(R.string.err_msg_email));
             mActionIcons[1].setClickable(false);
-            mActionIcons[1].setImageResource(R.drawable.ic_error_grey_24dp);
+            mActionIcons[1].setImageResource(R.drawable.ic_error_24dp);
             requestFocus(mUserInfoViews[1]);
             return false;
         }
@@ -586,7 +600,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         } else {
             mUserInfoInputLayouts[2].setHint(getString(R.string.err_msg_vk));
             mActionIcons[2].setClickable(false);
-            mActionIcons[2].setImageResource(R.drawable.ic_error_grey_24dp);
+            mActionIcons[2].setImageResource(R.drawable.ic_error_24dp);
             requestFocus(mUserInfoViews[2]);
             return false;
         }
@@ -605,15 +619,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         } else {
             mUserInfoInputLayouts[3].setHint(getString(R.string.err_msg_git));
             mActionIcons[3].setClickable(false);
-            mActionIcons[3].setImageResource(R.drawable.ic_error_grey_24dp);
+            mActionIcons[3].setImageResource(R.drawable.ic_error_24dp);
             requestFocus(mUserInfoViews[3]);
             return false;
         }
     }
 
+    /**
+     *  Запрос фокуса у EditText и если возможно установка его и перемещение курсора
+     *  в конец строки
+     * @param editText EditText у которого запрашивается фокус
+     */
     private void requestFocus(EditText editText) {
         if (editText.requestFocus()) {
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            editText.setSelection(editText.length());
         }
     }
 

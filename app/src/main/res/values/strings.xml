@@ -50,5 +50,11 @@
     <string name="err_msg_phone">Неправильный номер телефона</string>
     <string name="err_msg_vk">Неправильный адрес профиля VK</string>
     <string name="err_msg_git">Неправильный адрес репозитория</string>
+    <string name="err_msg_ext_storage">Внешняя память не доступна</string>
+    <string name="chooser_gallery">Выбрать фото</string>
+    <string name="chooser_camera">Сделать фото</string>
+    <string name="chooser_email">Отправить email</string>
+    <string name="permission_snackbar_text">Для корректной работы необходимо дать требуемые разрешения</string>
+    <string name="permission_snackbar_title">Разрешить</string>
 
 </resources>
