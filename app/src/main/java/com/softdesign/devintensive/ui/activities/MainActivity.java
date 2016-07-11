@@ -39,9 +39,11 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
+import com.softdesign.devintensive.utils.CircleTransformation;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.ExStorageState;
 import com.softdesign.devintensive.utils.RoundedAvatarDrawable;
@@ -79,7 +81,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     @BindViews({R.id.make_call_img, R.id.send_email_img, R.id.vk_img, R.id.github_img})
     ImageView[] mActionIcons;
 
-    private int mCurrentEditMode;
+    @BindViews({R.id.rating_txt, R.id.code_lines_txt, R.id.projects_txt})
+    TextView[] mUserStatisticViews;
+
+    private boolean mEditMode;
     private DataManager mDataManager;
     private File mPhotoFile = null;
     private AppBarLayout.LayoutParams mAppBarParams = null;
@@ -111,19 +116,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
         Picasso.with(this)
                 .load(mDataManager.getPreferencesManager().loadUserPhoto())
-                .placeholder(R.drawable.user_photo)
+                .placeholder(R.drawable.ic_add_a_photo_48px)
                 .into(mProfilePhoto);
 
 
         if (savedInstanceState != null) {
             // recreating activity
-            mCurrentEditMode = savedInstanceState.getInt(ConstantManager.EDIT_MODE_KEY, 0);
-            loadUserInfoValue();
+            mEditMode = savedInstanceState.getBoolean(ConstantManager.EDIT_MODE_KEY, false);
         } else {
             // first starting of the activity
-            saveUserInfoValue();
         }
-        changeEditorMode(mCurrentEditMode);
+        loadUserInfo();
+        loadUserStatistic();
+        setEditorMode();
     }
 
     @Override
@@ -186,12 +191,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 makeActionView(Uri.parse(ConstantManager.HTTPS_SCHEME + mUserInfoViews[3].getText()));
                 break;
             case R.id.fab:
-                if (mCurrentEditMode == 0) {
-                    mCurrentEditMode = 1;
-                } else {
-                    mCurrentEditMode = 0;
+                boolean validate = validatePhone()&&validateEmail()&&validateVk()&&validateGit();
+                if (validate) {
+                    mEditMode = !mEditMode;
+                    setEditorMode();
                 }
-                changeEditorMode(mCurrentEditMode);
                 break;
             case R.id.profile_placeholder:
                 showDialog(ConstantManager.LOAD_PROFILE_PHOTO);
@@ -228,8 +232,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(ConstantManager.EDIT_MODE_KEY, mCurrentEditMode);
-        saveUserInfoValue();
+        outState.putBoolean(ConstantManager.EDIT_MODE_KEY, mEditMode);
+        saveUserInfo();
     }
 
 
@@ -361,61 +365,63 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         });
         // установка круглого аватара
         ImageView userAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.user_avatar);
-        Bitmap avatar = BitmapFactory.decodeResource(getResources(), R.drawable.user_avatar);
-        RoundedAvatarDrawable roundedAvatar = new RoundedAvatarDrawable(avatar);
-        userAvatar.setImageDrawable(roundedAvatar);
-
+//        Bitmap avatar = BitmapFactory.decodeResource(getResources(), R.drawable.user_avatar);
+//        RoundedAvatarDrawable roundedAvatar = new RoundedAvatarDrawable(avatar);
+//        userAvatar.setImageDrawable(roundedAvatar);
+        Picasso.with(this)
+                .load(mDataManager.getPreferencesManager().loadUserAvatar())
+                .placeholder(R.drawable.ic_add_a_photo_48px)
+                .transform(new CircleTransformation())
+                .into(userAvatar);
     }
 
     /**
      * переключает режим редактирования
-     *
-     * @param mode если 1 - режим редактирования, если 0 - режим просмотра
      */
-    private void changeEditorMode(int mode) {
-        if (mode == 1) {
+    private void setEditorMode() {
+        if (mEditMode) {
             for (EditText userValue : mUserInfoViews) {
+                userValue.setFocusableInTouchMode(true);
                 userValue.setFocusable(true);
                 userValue.setEnabled(true);
-                userValue.setFocusableInTouchMode(true);
-
             }
             showProfilePlaceholder();
-            lockToolbar();
+//            lockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
             mFab.setImageResource(R.drawable.ic_check_24dp);
             requestFocus(mUserInfoViews[0]);
         } else {
-            if (!validatePhone()) return;
-            if (!validateEmail()) return;
-            if (!validateVk()) return;
-            if (!validateGit()) return;
             for (EditText userValue : mUserInfoViews) {
-                userValue.setFocusable(false);
                 userValue.setEnabled(false);
-                userValue.setFocusableInTouchMode(false);
             }
             hideProfilePlaceholder();
-            unlockToolbar();
+//            unlockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(android.R.color.white));
             mFab.setImageResource(R.drawable.ic_mode_edit_24dp);
         }
 
     }
 
-    private void loadUserInfoValue() {
-        List<String> userData = mDataManager.getPreferencesManager().loadUserProfileData();
-        for (int i = 0; i < userData.size(); i++) {
-            mUserInfoViews[i].setText(userData.get(i));
+    private void loadUserInfo() {
+        List<String> userInfo = mDataManager.getPreferencesManager().loadUserInfo();
+        for (int i = 0; i < userInfo.size(); i++) {
+            mUserInfoViews[i].setText(userInfo.get(i));
         }
     }
 
-    private void saveUserInfoValue() {
+    private void saveUserInfo() {
         List<String> userData = new ArrayList<>();
         for (EditText userInfoView : mUserInfoViews) {
             userData.add(userInfoView.getText().toString());
         }
-        mDataManager.getPreferencesManager().saveUserProfileData(userData);
+        mDataManager.getPreferencesManager().saveUserInfo(userData);
+    }
+
+    private void loadUserStatistic() {
+        List<String> userStatistic = mDataManager.getPreferencesManager().loadUserStatistic();
+        for (int i = 0; i < userStatistic.size(); i++) {
+            mUserStatisticViews[i].setText(userStatistic.get(i));
+        }
     }
 
     private void loadPhotoFromGallery() {
@@ -462,7 +468,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     private void hideProfilePlaceholder() {
-        mProfilePlaceholder.setVisibility(View.GONE);
+        mProfilePlaceholder.setVisibility(View.INVISIBLE);
     }
 
     private void showProfilePlaceholder() {
@@ -525,7 +531,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private void insertProfileImage(Uri selectedImage) {
         Picasso.with(this)
                 .load(selectedImage)
-                .placeholder(R.drawable.user_photo)
+                .placeholder(R.drawable.ic_add_a_photo_48px)
                 .into(mProfilePhoto);
 
         mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);

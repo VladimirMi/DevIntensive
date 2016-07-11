@@ -10,16 +10,15 @@ import android.widget.LinearLayout;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.utils.ConstantManager;
 
-
 public class UserStatisticBehavior extends CoordinatorLayout.Behavior<LinearLayout> {
     private static final String TAG = ConstantManager.TAG_PREFIX + "UserStatisticBehavior";
     private boolean changeTopPadding = true;
     private boolean changeBottomPadding = false;
-    private int initialPadding;
+    private int mInitialPadding;
 
     public UserStatisticBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initialPadding = (int) context.getResources().getDimension(R.dimen.spacing_medium_28);
+        mInitialPadding = context.getResources().getDimensionPixelSize(R.dimen.spacing_medium_28);
     }
 
     @Override
@@ -88,7 +87,7 @@ public class UserStatisticBehavior extends CoordinatorLayout.Behavior<LinearLayo
      */
     private void setPaddingTop(LinearLayout linearLayout, int padding) {
         if (padding < 0) padding = 0;
-        if (padding > initialPadding) padding = initialPadding;
+        if (padding > mInitialPadding) padding = mInitialPadding;
         linearLayout.setPadding(0, padding,
                 0, linearLayout.getPaddingBottom());
         if (padding == 0) {
@@ -104,10 +103,10 @@ public class UserStatisticBehavior extends CoordinatorLayout.Behavior<LinearLayo
      */
     private void setPaddingBottom(LinearLayout linearLayout, int padding) {
         if (padding < 0) padding = 0;
-        if (padding > initialPadding) padding = initialPadding;
+        if (padding > mInitialPadding) padding = mInitialPadding;
         linearLayout.setPadding(0, linearLayout.getPaddingTop(),
                 0, padding);
-        if (padding == initialPadding) {
+        if (padding == mInitialPadding) {
             changeTopPadding = true;
             changeBottomPadding = false;
         }

@@ -5,14 +5,20 @@ import android.util.Patterns;
 import java.util.regex.Pattern;
 
 public interface ConstantManager {
-    // Keys
-    String EDIT_MODE_KEY = "EDIT_MODE_KEY";
-    String USER_PHONE_KEY = "USER_KEY_1";
-    String USER_MAIL_KEY = "USER_KEY_2";
-    String USER_VK_KEY = "USER_KEY_3";
-    String USER_GIT_KEY = "USER_KEY_4";
-    String USER_ABOUT_KEY = "USER_KEY_5";
+    // Preferences Keys
+    String USER_PHONE_KEY = "USER_PHONE_KEY";
+    String USER_MAIL_KEY = "USER_MAIL_KEY";
+    String USER_VK_KEY = "USER_VK_KEY";
+    String USER_GIT_KEY = "USER_GIT_KEY";
+    String USER_ABOUT_KEY = "USER_ABOUT_KEY";
     String USER_PHOTO_KEY = "USER_PHOTO_KEY";
+    String USER_AVATAR_KEY = "USER_AVATAR_KEY";
+    String USER_RATING_KEY = "USER_RATING_KEY";
+    String USER_CODE_LINES_KEY = "USER_CODE_LINES_KEY";
+    String USER_PROJECTS_KEY = "USER_PROJECTS_KEY";
+    String EDIT_MODE_KEY = "EDIT_MODE_KEY";
+    String AUTH_TOKEN_KEY = "AUTH_TOKEN_KEY";
+    String USER_ID_KEY = "USER_ID_KEY";
 
     // Misc constants
     String TAG_PREFIX = "DEV ";
@@ -60,7 +66,6 @@ public interface ConstantManager {
                     + "(\\/(?:(?:[" + Patterns.GOOD_IRI_CHAR + "\\;\\/\\?\\:\\@\\&\\=\\#\\~"
                     + "\\-\\.\\+\\!\\*\\'\\(\\)\\,\\_]){3,}|(?:\\%[a-fA-F0-9]{3,}))*)+"
                     + "(?:\\b|$))");
-
     Pattern GIT_URL = Pattern.compile(
             "((?:(http|https|Http|Https|rtsp|Rtsp):\\/\\/|)"
                     + "(?:github\\.com)"
