@@ -23,6 +23,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -73,9 +75,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         mPreferencesManager.saveAuthToken(userModel.getData().getToken());
         mPreferencesManager.saveUserId(userModel.getData().getUser().getId());
         saveUserValues(userModel);
-
-        Intent mainActivityIntent = new Intent(this, MainActivity.class);
-        startActivity(mainActivityIntent);
+        startMainActivity();
     }
 
     private void signIn() {
@@ -83,6 +83,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             UserLoginReq request = new UserLoginReq(mLogin.getText().toString(), mPassword.getText().toString());
             Call<UserModelRes> call = mDataManager.loginUser(request);
 
+            showProgress();
             call.enqueue(new Callback<UserModelRes>() {
                 @Override
                 public void onResponse(Call<UserModelRes> call, Response<UserModelRes> response) {
@@ -93,11 +94,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     } else {
                         showSnackBar("SNAFU");
                     }
+                    hideProgress();
                 }
-
                 @Override
                 public void onFailure(Call<UserModelRes> call, Throwable t) {
                     showSnackBar("SNAFU");
+                    hideProgress();
                 }
             });
         } else {
@@ -124,5 +126,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         mPreferencesManager.saveUserPhoto(Uri.parse(user.getPublicInfo().getPhoto()));
         mPreferencesManager.saveUserAvatar(Uri.parse(user.getPublicInfo().getAvatar()));
+    }
+
+    private void startMainActivity() {
+        Intent mainActivityIntent = new Intent(this, MainActivity.class);
+        mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(mainActivityIntent);
     }
 }

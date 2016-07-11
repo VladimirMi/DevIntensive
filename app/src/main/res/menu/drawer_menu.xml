@@ -10,8 +10,8 @@
               android:id="@+id/team_menu"
               android:icon="@drawable/ic_people_24dp"/>
 
-        <item android:title="Вход"
+        <item android:title="Выход"
             android:id="@+id/login_menu"
-            android:icon="@drawable/login"/>
+            android:icon="@drawable/logout"/>
     </group>
 </menu>
