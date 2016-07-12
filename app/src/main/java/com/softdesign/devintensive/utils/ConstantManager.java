@@ -19,12 +19,11 @@ public interface ConstantManager {
     String EDIT_MODE_KEY = "EDIT_MODE_KEY";
     String AUTH_TOKEN_KEY = "AUTH_TOKEN_KEY";
     String USER_ID_KEY = "USER_ID_KEY";
+    String USER_NAME_KEY = "USER_NAME_KEY";
 
     // Misc constants
     String TAG_PREFIX = "DEV ";
-    String TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
     String EXTENSION_JPEG = ".jpg";
-    String PHOTO_FILE_PREFIX = "JPEG_";
 
     // Dialog ids
     int LOAD_PROFILE_PHOTO = 1;
@@ -48,28 +47,6 @@ public interface ConstantManager {
     String MIME_TYPE_IMAGE = "image/*";
     String MIME_TYPE_JPEG = "image/jpeg";
 
-    // Validation patterns
-    Pattern EMAIL_ADDRESS = Pattern.compile(
-            "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{3,256}" +
-                    "\\@[a-zA-Z0-9]{2,64}" +
-                    "\\.[a-zA-Z0-9]{2,25}"
-    );
-
-    Pattern PHONE = Pattern.compile(
-            "\\+?+[0-9]{1,3}[\\- \\.]?[0-9]{0,3}[\\- \\.]?"
-                    + "\\(?[0-9]{3,5}\\)?[\\- \\.]?"
-                    + "([0-9]{3}[\\- \\.]?[0-9]{2,3})[\\- \\.]?[0-9]{2,3}");
-
-    Pattern VK_URL = Pattern.compile(
-            "((?:(http|https|Http|Https|rtsp|Rtsp):\\/\\/|)"
-                    + "(?:vk\\.com|new\\.vk\\.com)"
-                    + "(\\/(?:(?:[" + Patterns.GOOD_IRI_CHAR + "\\;\\/\\?\\:\\@\\&\\=\\#\\~"
-                    + "\\-\\.\\+\\!\\*\\'\\(\\)\\,\\_]){3,}|(?:\\%[a-fA-F0-9]{3,}))*)+"
-                    + "(?:\\b|$))");
-    Pattern GIT_URL = Pattern.compile(
-            "((?:(http|https|Http|Https|rtsp|Rtsp):\\/\\/|)"
-                    + "(?:github\\.com)"
-                    + "(\\/(?:(?:[" + Patterns.GOOD_IRI_CHAR + "\\;\\/\\?\\:\\@\\&\\=\\#\\~"
-                    + "\\-\\.\\+\\!\\*\\'\\(\\)\\,\\_]){3,}|(?:\\%[a-fA-F0-9]{3,}))*)?"
-                    + "(?:\\b|$))");
+    // Content types
+    String CONTENT_TYPE_MULTIPART = "multipart/form-data";
 }

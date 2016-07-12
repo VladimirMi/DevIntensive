@@ -18,8 +18,7 @@
 
         <TextView
             android:id="@+id/rating_txt"
-            style="@style/user_statistic.value"
-            android:text="@string/rating_value"/>
+            style="@style/user_statistic.value"/>
 
         <TextView
             style="@style/user_statistic.hint"
@@ -39,8 +38,7 @@
 
         <TextView
             android:id="@+id/code_lines_txt"
-            style="@style/user_statistic.value"
-            android:text="@string/code_value"/>
+            style="@style/user_statistic.value"/>
 
         <TextView
             style="@style/user_statistic.hint"
@@ -60,8 +58,7 @@
 
         <TextView
             android:id="@+id/projects_txt"
-            style="@style/user_statistic.value"
-            android:text="@string/projects_value"/>
+            style="@style/user_statistic.value"/>
 
         <TextView
             style="@style/user_statistic.hint"

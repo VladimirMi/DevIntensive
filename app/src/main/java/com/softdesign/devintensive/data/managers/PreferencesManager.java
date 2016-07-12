@@ -3,6 +3,7 @@ package com.softdesign.devintensive.data.managers;
 import android.content.SharedPreferences;
 import android.net.Uri;
 
+import com.softdesign.devintensive.data.network.res.UserModelRes;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.DevintensiveApplication;
 
@@ -42,7 +43,7 @@ public class PreferencesManager {
     public List<String> loadUserInfo() {
         List<String> userFields = new ArrayList<>();
         for (String userFieldKey : USER_INFO) {
-            userFields.add(mSharedPreferences.getString(userFieldKey, "null"));
+            userFields.add(mSharedPreferences.getString(userFieldKey, ""));
         }
         return userFields;
     }
@@ -55,7 +56,7 @@ public class PreferencesManager {
 
     public Uri loadUserPhoto() {
         return Uri.parse(mSharedPreferences.getString(ConstantManager.USER_PHOTO_KEY,
-                "android.resource://com.softdesign.devintensive/drawable/ic_add_a_photo_48px"));
+                ""));
     }
 
     public void saveAuthToken(String authToken) {
@@ -90,7 +91,7 @@ public class PreferencesManager {
     public List<String> loadUserStatistic() {
         List<String> userStatistic = new ArrayList<>();
         for (String userFieldKey : USER_STATISTIC) {
-            userStatistic.add(mSharedPreferences.getString(userFieldKey, "null"));
+            userStatistic.add(mSharedPreferences.getString(userFieldKey, ""));
         }
         return userStatistic;
     }
@@ -102,13 +103,43 @@ public class PreferencesManager {
     }
 
     public Uri loadUserAvatar() {
-        return Uri.parse(mSharedPreferences.getString(ConstantManager.USER_AVATAR_KEY,
-                "android.resource://com.softdesign.devintensive/drawable/ic_add_a_photo_48px"));
+        return Uri.parse(mSharedPreferences.getString(ConstantManager.USER_AVATAR_KEY, ""));
     }
 
     public void clearAllData() {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.clear();
         editor.apply();
+    }
+
+    public void saveUserName(String firstName, String secondName) {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(ConstantManager.USER_NAME_KEY, secondName + " " + firstName);
+        editor.apply();
+    }
+
+    public String loadUserName() {
+        return mSharedPreferences.getString(ConstantManager.USER_NAME_KEY, "");
+    }
+
+    public void saveUserValues(UserModelRes.Data userModel) {
+        List<String> userStatistic = new ArrayList<>();
+        userStatistic.add(String.valueOf(userModel.getProfileValues().getRating()));
+        userStatistic.add(String.valueOf(userModel.getProfileValues().getLinesCode()));
+        userStatistic.add(String.valueOf(userModel.getProfileValues().getProjects()));
+
+        List<String> userInfo = new ArrayList<>();
+        userInfo.add(userModel.getContacts().getPhone());
+        userInfo.add(userModel.getContacts().getEmail());
+        userInfo.add(userModel.getContacts().getVk());
+        // TODO: 7/10/2016 разобраться с множественными репозиториями
+        userInfo.add(userModel.getRepositories().getRepo().get(0).getGit());
+        userInfo.add(userModel.getPublicInfo().getBio());
+
+        saveUserStatistic(userStatistic);
+        saveUserInfo(userInfo);
+        saveUserPhoto(Uri.parse(userModel.getPublicInfo().getPhoto()));
+        saveUserAvatar(Uri.parse(userModel.getPublicInfo().getAvatar()));
+        saveUserName(userModel.getFirstName(), userModel.getSecondName());
     }
 }

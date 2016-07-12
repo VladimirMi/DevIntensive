@@ -20,24 +20,6 @@ public class UserModelRes {
 
     public class Data {
 
-        @SerializedName("user")
-        @Expose
-        private User user;
-        @SerializedName("token")
-        @Expose
-        private String token;
-
-        public String getToken() {
-            return token;
-        }
-
-        public User getUser() {
-            return user;
-        }
-    }
-
-    public class User {
-
         @SerializedName("_id")
         @Expose
         private String id;

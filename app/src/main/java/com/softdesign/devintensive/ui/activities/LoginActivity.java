@@ -3,7 +3,6 @@ package com.softdesign.devintensive.ui.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -15,7 +14,9 @@ import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.managers.PreferencesManager;
 import com.softdesign.devintensive.data.network.req.UserLoginReq;
+import com.softdesign.devintensive.data.network.res.LoginModelRes;
 import com.softdesign.devintensive.data.network.res.UserModelRes;
+import com.softdesign.devintensive.utils.AppConfig;
 import com.softdesign.devintensive.utils.NetworkStatusChecker;
 
 import java.util.ArrayList;
@@ -23,8 +24,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -66,71 +65,49 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private void remindPassword() {
-        Intent remindIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://devintensive.softdesign-apps.ru/forgotpass"));
+        Intent remindIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(AppConfig.FORGOT_PASS_URL));
         startActivity(remindIntent);
     }
 
-    private void loginSuccess(UserModelRes userModel) {
-        showSnackBar("Вход");
-        mPreferencesManager.saveAuthToken(userModel.getData().getToken());
-        mPreferencesManager.saveUserId(userModel.getData().getUser().getId());
-        saveUserValues(userModel);
+    private void loginSuccess(LoginModelRes loginModel) {
+        mPreferencesManager.saveAuthToken(loginModel.getData().getToken());
+        mPreferencesManager.saveUserId(loginModel.getData().getUser().getId());
+        mPreferencesManager.saveUserValues(loginModel.getData().getUser());
         startMainActivity();
     }
 
     private void signIn() {
         if (NetworkStatusChecker.isNetworkAvaliable(this)) {
             UserLoginReq request = new UserLoginReq(mLogin.getText().toString(), mPassword.getText().toString());
-            Call<UserModelRes> call = mDataManager.loginUser(request);
+            Call<LoginModelRes> call = mDataManager.loginUser(request);
 
             showProgress();
-            call.enqueue(new Callback<UserModelRes>() {
+            call.enqueue(new Callback<LoginModelRes>() {
                 @Override
-                public void onResponse(Call<UserModelRes> call, Response<UserModelRes> response) {
+                public void onResponse(Call<LoginModelRes> call, Response<LoginModelRes> response) {
                     if (response.isSuccessful()) {
                         loginSuccess(response.body());
                     } else if (response.code() == 404) {
-                        showSnackBar("Неверный логин или пароль");
+                        showSnackBar(getString(R.string.err_msg_login));
                     } else {
-                        showSnackBar("SNAFU");
+                        showSnackBar(getString(R.string.err_msg_unknown));
                     }
                     hideProgress();
                 }
                 @Override
-                public void onFailure(Call<UserModelRes> call, Throwable t) {
-                    showSnackBar("SNAFU");
+                public void onFailure(Call<LoginModelRes> call, Throwable t) {
+                    showSnackBar(getString(R.string.err_msg_unknown));
                     hideProgress();
                 }
             });
         } else {
-            showSnackBar("Интернет не доступен");
+            showSnackBar(getString(R.string.err_msg_internet));
         }
     }
 
-    private void saveUserValues(UserModelRes userModel) {
-        UserModelRes.User user = userModel.getData().getUser();
-        List<String> userStatistic = new ArrayList<>();
-        userStatistic.add(String.valueOf(user.getProfileValues().getRating()));
-        userStatistic.add(String.valueOf(user.getProfileValues().getLinesCode()));
-        userStatistic.add(String.valueOf(user.getProfileValues().getProjects()));
-        mPreferencesManager.saveUserStatistic(userStatistic);
-
-        List<String> userInfo = new ArrayList<>();
-        userInfo.add(user.getContacts().getPhone());
-        userInfo.add(user.getContacts().getEmail());
-        userInfo.add(user.getContacts().getVk());
-        // TODO: 7/10/2016 разобраться с множественными репозиториями
-        userInfo.add(user.getRepositories().getRepo().get(0).getGit());
-        userInfo.add(user.getPublicInfo().getBio());
-        mPreferencesManager.saveUserInfo(userInfo);
-
-        mPreferencesManager.saveUserPhoto(Uri.parse(user.getPublicInfo().getPhoto()));
-        mPreferencesManager.saveUserAvatar(Uri.parse(user.getPublicInfo().getAvatar()));
-    }
 
     private void startMainActivity() {
         Intent mainActivityIntent = new Intent(this, MainActivity.class);
-        mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(mainActivityIntent);
     }
 }
