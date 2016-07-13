@@ -36,17 +36,20 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.managers.PreferencesManager;
+import com.softdesign.devintensive.data.network.res.UploadImageRes;
 import com.softdesign.devintensive.data.network.res.UserModelRes;
 import com.softdesign.devintensive.utils.AppConfig;
 import com.softdesign.devintensive.utils.CircleTransformation;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.ExStorageState;
+import com.softdesign.devintensive.utils.MyTextWatcher;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -59,6 +62,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -119,7 +123,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
         for (EditText userInfoView : mUserInfoViews) {
             userInfoView.setOnFocusChangeListener(this);
-            userInfoView.addTextChangedListener(new MyTextWatcher(userInfoView));
+            userInfoView.addTextChangedListener(new MyTextWatcher(userInfoView, this));
         }
 
         if (savedInstanceState != null) {
@@ -202,17 +206,27 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 break;
             case R.id.fab:
                 if (mEditMode) {
-                    boolean validate = validatePhone() && validateEmail() && validateVk() && validateGit();
-                    if (validate) {
-                        if (mPhotoFile != null) {
-                            Uri editorPhotoUri = Uri.fromFile(mPhotoFile);
-                            if (!mOriginPhotoUri.equals(editorPhotoUri)) {
-                                uploadPhoto();
-                            }
-                        }
-                        mEditMode = !mEditMode;
-                        setupEditMode();
+                    if (!MyTextWatcher.isValidPhone(mUserInfoViews[0].getText().toString())) {
+                        requestFocus(mUserInfoViews[0]);
+                        return;
+                    } else if (!MyTextWatcher.isValidEmail(mUserInfoViews[1].getText().toString())) {
+                        requestFocus(mUserInfoViews[1]);
+                        return;
+                    } else if (!MyTextWatcher.isValidVk(mUserInfoViews[2].getText().toString())) {
+                        requestFocus(mUserInfoViews[2]);
+                        return;
+                    } else if (!MyTextWatcher.isValidGit(mUserInfoViews[3].getText().toString())) {
+                        requestFocus(mUserInfoViews[3]);
+                        return;
                     }
+                    if (mPhotoFile != null) {
+                        Uri editorPhotoUri = Uri.fromFile(mPhotoFile);
+                        if (!mOriginPhotoUri.equals(editorPhotoUri)) {
+                            uploadPhoto();
+                        }
+                    }
+                    mEditMode = !mEditMode;
+                    setupEditMode();
                 } else {
                     mOriginPhotoUri = mPreferencesManager.loadUserPhoto();
                     mEditMode = !mEditMode;
@@ -597,126 +611,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         startActivity(intent);
     }
 
-    public boolean validatePhone() {
-        String phone = mUserInfoViews[0].getText().toString().trim();
-        Boolean isValidPhone = !TextUtils.isEmpty(phone) &&
-                AppConfig.PHONE_VALIDATE.matcher(phone).matches();
-
-        if (isValidPhone) {
-            mUserInfoInputLayouts[0].setHint(getString(R.string.phone_hint));
-            mActionIcons[0].setClickable(true);
-            mActionIcons[0].setImageResource(R.drawable.ic_call_24dp);
-            return true;
-        } else {
-            mUserInfoInputLayouts[0].setHint(getString(R.string.err_msg_phone));
-            mActionIcons[0].setClickable(false);
-            mActionIcons[0].setImageResource(R.drawable.ic_error_24dp);
-            requestFocus(mUserInfoViews[0]);
-            return false;
-        }
-    }
-
-    private boolean validateEmail() {
-        String email = mUserInfoViews[1].getText().toString().trim();
-        Boolean isValidEmail = !TextUtils.isEmpty(email) &&
-                AppConfig.EMAIL_ADDRESS_VALIDATE.matcher(email).matches();
-
-        if (isValidEmail) {
-            mUserInfoInputLayouts[1].setHint(getString(R.string.email_hint));
-            mActionIcons[1].setClickable(true);
-            mActionIcons[1].setImageResource(R.drawable.ic_send_24dp);
-            return true;
-        } else {
-            mUserInfoInputLayouts[1].setHint(getString(R.string.err_msg_email));
-            mActionIcons[1].setClickable(false);
-            mActionIcons[1].setImageResource(R.drawable.ic_error_24dp);
-            requestFocus(mUserInfoViews[1]);
-            return false;
-        }
-    }
-
-    private boolean validateVk() {
-        String vk = mUserInfoViews[2].getText().toString().trim();
-        Boolean isValidVk = !TextUtils.isEmpty(vk) &&
-                AppConfig.VK_URL_VALIDATE.matcher(vk).matches();
-
-        if (isValidVk) {
-            mUserInfoInputLayouts[2].setHint(getString(R.string.vk_hint));
-            mActionIcons[2].setClickable(true);
-            mActionIcons[2].setImageResource(R.drawable.ic_vk_social_network_logo);
-            return true;
-        } else {
-            mUserInfoInputLayouts[2].setHint(getString(R.string.err_msg_vk));
-            mActionIcons[2].setClickable(false);
-            mActionIcons[2].setImageResource(R.drawable.ic_error_24dp);
-            requestFocus(mUserInfoViews[2]);
-            return false;
-        }
-    }
-
-    private boolean validateGit() {
-        String git = mUserInfoViews[3].getText().toString().trim();
-        Boolean isValidGit = !TextUtils.isEmpty(git) &&
-                AppConfig.GIT_URL_VALIDATE.matcher(git).matches();
-
-        if (isValidGit) {
-            mUserInfoInputLayouts[3].setHint(getString(R.string.github_hint));
-            mActionIcons[3].setClickable(true);
-            mActionIcons[3].setImageResource(R.drawable.ic_github_logo);
-            return true;
-        } else {
-            mUserInfoInputLayouts[3].setHint(getString(R.string.err_msg_git));
-            mActionIcons[3].setClickable(false);
-            mActionIcons[3].setImageResource(R.drawable.ic_error_24dp);
-            requestFocus(mUserInfoViews[3]);
-            return false;
-        }
-    }
-
     /**
      * Запрос фокуса у EditText и если возможно установка его и перемещение курсора
      * в конец строки
      *
      * @param editText EditText у которого запрашивается фокус
      */
-    private void requestFocus(EditText editText) {
+    public void requestFocus(EditText editText) {
         if (editText.requestFocus()) {
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
             editText.setSelection(editText.length());
         }
-    }
-
-    private class MyTextWatcher implements TextWatcher {
-
-        private final EditText mEditText;
-
-        public MyTextWatcher(EditText text) {
-            mEditText = text;
-        }
-
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        public void afterTextChanged(Editable editable) {
-            switch (mEditText.getId()) {
-                case R.id.phone_et:
-                    validatePhone();
-                    break;
-                case R.id.email_et:
-                    validateEmail();
-                    break;
-                case R.id.vk_et:
-                    validateVk();
-                    break;
-                case R.id.github_et:
-                    validateGit();
-                    break;
-            }
-        }
-
     }
 
     private void uploadPhoto() {
@@ -725,12 +630,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         MultipartBody.Part body = MultipartBody.Part.createFormData(
                 AppConfig.PHOTO_FORM_KEY, mPhotoFile.getName(), requestFile);
 
-        Call<ResponseBody> call = mDataManager.uploadPhoto(mPreferencesManager.getUserId(), body);
-        call.enqueue(new Callback<ResponseBody>() {
+        Call<UploadImageRes> call = mDataManager.uploadPhoto(mPreferencesManager.getUserId(), body);
+        call.enqueue(new Callback<UploadImageRes>() {
             @Override
             public void onResponse(Call call, Response response) {
                 Log.d(TAG, "uploadPhoto onResponse");
             }
+
             @Override
             public void onFailure(Call call, Throwable t) {
                 Log.d(TAG, "uploadPhoto onFailure");
@@ -751,6 +657,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 loadDrawerContent();
                 Log.d(TAG, "updateClientInfo onResponse");
             }
+
             @Override
             public void onFailure(Call<UserModelRes> call, Throwable t) {
                 Log.d(TAG, "updateClientInfo onFailure");
