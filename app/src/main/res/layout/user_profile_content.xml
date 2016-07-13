@@ -34,8 +34,7 @@
                         android:id="@+id/phone_et"
                         style="@style/user_info_item_text"
                         android:hint="@string/phone_hint"
-                        android:inputType="phone"
-                        android:text="@string/phone"/>
+                        android:inputType="phone"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -74,8 +73,7 @@
                         android:id="@+id/email_et"
                         style="@style/user_info_item_text"
                         android:hint="@string/email_hint"
-                        android:inputType="textEmailAddress"
-                        android:text="@string/email"/>
+                        android:inputType="textEmailAddress"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -114,8 +112,7 @@
                         android:id="@+id/vk_et"
                         style="@style/user_info_item_text"
                         android:hint="@string/vk_hint"
-                        android:inputType="textUri"
-                        android:text="@string/vk"/>
+                        android:inputType="textUri"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -153,8 +150,7 @@
                     <EditText
                         android:id="@+id/github_et"
                         style="@style/user_info_item_text"
-                        android:hint="@string/github_hint"
-                        android:text="@string/github"/>
+                        android:hint="@string/github_hint"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -196,8 +192,7 @@
                         android:id="@+id/about_me_et"
                         style="@style/user_info_item_text"
                         android:hint="@string/about_me_hint"
-                        android:inputType="textMultiLine"
-                        android:text="@string/about_me"/>
+                        android:inputType="textMultiLine"/>
 
                 </android.support.design.widget.TextInputLayout>
 

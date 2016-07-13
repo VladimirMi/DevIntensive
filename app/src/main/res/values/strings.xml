@@ -1,41 +1,13 @@
 <resources>
-    <string name="app_name">Михалев Владимир</string>
+    <string name="app_name">DevintensiveApp</string>
     <string name="phone_hint">Мобильный</string>
     <string name="email_hint">E-mail</string>
     <string name="vk_hint">Профиль в VK</string>
     <string name="github_hint">Репозиторий</string>
     <string name="about_me_hint">О себе</string>
-    <string name="about_me">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Integer id risus ante. Aenean tortor turpis, tincidunt eu odio et,
-        sagittis lacinia dolor. Aenean pellentesque felis metus,
-        sed egestas libero auctor.
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Integer id risus ante. Aenean tortor turpis, tincidunt eu odio et,
-        sagittis lacinia dolor. Aenean pellentesque felis metus,
-        sed egestas libero auctor.
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Integer id risus ante. Aenean tortor turpis, tincidunt eu odio et,
-        sagittis lacinia dolor. Aenean pellentesque felis metus,
-        sed egestas libero auctor.
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Integer id risus ante. Aenean tortor turpis, tincidunt eu odio et,
-        sagittis lacinia dolor. Aenean pellentesque felis metus,
-        sed egestas libero auctor.
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Integer id risus ante. Aenean tortor turpis, tincidunt eu odio et,
-        sagittis lacinia dolor. Aenean pellentesque felis metus,
-        sed egestas libero auctor.
-    </string>
-    <string name="github">github.com/VladimirMi/DevIntensive</string>
-    <string name="vk">new.vk.com/profile</string>
-    <string name="email">vladimirmsm@email.ru</string>
-    <string name="phone">+7(987)123-45-67</string>
-    <string name="rating_value">73</string>
+    <string name="email">vladimirmsm@yandex.ru</string>
     <string name="rating_title">Рейтинг</string>
-    <string name="code_value">9999</string>
     <string name="code_title">Написано строк кода</string>
-    <string name="projects_value">73</string>
     <string name="projects_title">Проектов</string>
     <string name="user_profile.placeholder.image">Изменить фотографию профиля</string>
     <string name="user_profile_dialog_gallery">Загрузить из галереи</string>
@@ -43,7 +15,8 @@
     <string name="user_profile_dialog_cancel">Отмена</string>
     <string name="user_profile_dialog_title">Изменить фотографию пользователя</string>
 
-    <string name="enter">Войти</string>
+    <string name="log_in">Войти</string>
+    <string name="log_out">Выйти</string>
     <string name="password_hint">Пароль</string>
     <string name="password_reminder">Забыли пароль?</string>
     <string name="err_msg_email">Неправильный email адрес</string>
@@ -51,10 +24,15 @@
     <string name="err_msg_vk">Неправильный адрес профиля VK</string>
     <string name="err_msg_git">Неправильный адрес репозитория</string>
     <string name="err_msg_ext_storage">Внешняя память не доступна</string>
+    <string name="err_msg_login">Неверный логин или пароль</string>
+    <string name="err_msg_unknown">Неизвестная ошибка</string>
+    <string name="err_msg_internet">Интернет не доступен</string>
     <string name="chooser_gallery">Выбрать фото</string>
     <string name="chooser_camera">Сделать фото</string>
     <string name="chooser_email">Отправить email</string>
     <string name="permission_snackbar_text">Для корректной работы необходимо дать требуемые разрешения</string>
     <string name="permission_snackbar_title">Разрешить</string>
+    <string name="team">Команда</string>
+    <string name="my_profile">Мой профиль</string>
 
 </resources>

@@ -17,8 +17,8 @@
         android:orientation="vertical">
 
         <TextView
-            style="@style/user_statistic.value"
-            android:text="@string/rating_value"/>
+            android:id="@+id/rating_txt"
+            style="@style/user_statistic.value"/>
 
         <TextView
             style="@style/user_statistic.hint"
@@ -37,8 +37,8 @@
         android:orientation="vertical">
 
         <TextView
-            style="@style/user_statistic.value"
-            android:text="@string/code_value"/>
+            android:id="@+id/code_lines_txt"
+            style="@style/user_statistic.value"/>
 
         <TextView
             style="@style/user_statistic.hint"
@@ -57,8 +57,8 @@
         android:orientation="vertical">
 
         <TextView
-            style="@style/user_statistic.value"
-            android:text="@string/projects_value"/>
+            android:id="@+id/projects_txt"
+            style="@style/user_statistic.value"/>
 
         <TextView
             style="@style/user_statistic.hint"
