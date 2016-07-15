@@ -24,6 +24,8 @@ public interface ConstantManager {
     String PARCELABLE_KEY = "PARCELABLE_KEY";
     String USERS_LIST_KEY = "USERS_LIST_KEY";
 
+    String LOAD_FRAG_TAG = "LOAD_FRAG_TAG";
+
     // Misc constants
     String TAG_PREFIX = "DEV ";
     String EXTENSION_JPEG = ".jpg";

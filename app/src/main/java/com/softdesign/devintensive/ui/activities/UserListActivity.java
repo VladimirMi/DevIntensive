@@ -1,24 +1,22 @@
 package com.softdesign.devintensive.ui.activities;
 
 import android.content.Intent;
-import android.os.Parcelable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.google.gson.Gson;
@@ -28,18 +26,18 @@ import com.softdesign.devintensive.data.managers.PreferencesManager;
 import com.softdesign.devintensive.data.network.res.UserListRes;
 import com.softdesign.devintensive.data.storage.models.UserDTO;
 import com.softdesign.devintensive.ui.adapters.UsersAdapter;
+import com.softdesign.devintensive.ui.fragments.LoadUsersTaskFragment;
 import com.softdesign.devintensive.utils.ConstantManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UserListActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
+public class UserListActivity extends AppCompatActivity
+        implements SearchView.OnQueryTextListener, LoadUsersTaskFragment.TaskCallbacks {
 
     private static final String TAG = ConstantManager.TAG_PREFIX + "UserListActivity";
     @BindView(R.id.main_coordinator_container) CoordinatorLayout mCoordinatorLayout;
@@ -69,12 +67,17 @@ public class UserListActivity extends AppCompatActivity implements SearchView.On
         setupToolbar();
         setupDrawer();
 
-        if (savedInstanceState == null) {
-            loadUsers();
+        FragmentManager fm = getSupportFragmentManager();
+        LoadUsersTaskFragment loadUsersTask = (LoadUsersTaskFragment) fm.findFragmentByTag(ConstantManager.LOAD_FRAG_TAG);
+
+        // If the Fragment is non-null, then it is currently being
+        // retained across a configuration change.
+        if (loadUsersTask == null) {
+            loadUsersTask = new LoadUsersTaskFragment();
+            fm.beginTransaction().add(loadUsersTask, ConstantManager.LOAD_FRAG_TAG).commit();
+            loadUsersTask.startLoad();
         } else {
-            mResponse = new Gson().fromJson(savedInstanceState.getString(ConstantManager.USERS_LIST_KEY),
-                    UserListRes.class);
-            mUsers = mResponse.getData();
+            mUsers = loadUsersTask.getResponse().body().getData();
             setupRecycler();
         }
     }
@@ -115,25 +118,6 @@ public class UserListActivity extends AppCompatActivity implements SearchView.On
     }
 
     private void loadUsers() {
-        Call<UserListRes> call = mDataManager.getUserList();
-
-        call.enqueue(new Callback<UserListRes>() {
-            @Override
-            public void onResponse(Call<UserListRes> call, Response<UserListRes> response) {
-                try {
-                    mResponse = response.body();
-                    mUsers = response.body().getData();
-                    setupRecycler();
-                } catch (NullPointerException e) {
-                    Log.e(TAG, e.toString());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UserListRes> call, Throwable t) {
-                // TODO: 7/14/2016 обработать ошибки
-            }
-        });
     }
 
     private void setupToolbar() {
@@ -195,23 +179,23 @@ public class UserListActivity extends AppCompatActivity implements SearchView.On
 
     @Override
     public boolean onQueryTextChange(String query) {
-        final List<UserListRes.UserData> filteredModelList = filter(mUsers, query);
-        mUsersAdapter.animateTo(filteredModelList);
+        mUsersAdapter.filter(query);
         mRecyclerView.scrollToPosition(0);
         return true;
     }
 
-    private List<UserListRes.UserData> filter(List<UserListRes.UserData> users, String query) {
-        query = query.toLowerCase();
-
-        final List<UserListRes.UserData> filteredModelList = new ArrayList<>();
-        for (UserListRes.UserData user : users) {
-            final String name = user.getFullName().toLowerCase();
-            if (name.contains(query)) {
-                filteredModelList.add(user);
-            }
+    @Override
+    public void onResponse(Call<UserListRes> call, Response<UserListRes> response) {
+        try {
+            mUsers = response.body().getData();
+            setupRecycler();
+        } catch (NullPointerException e) {
+            Log.e(TAG, e.toString());
         }
+    }
 
-        return filteredModelList;
+    @Override
+    public void onFailure(Call<UserListRes> call, Throwable t) {
+        // TODO: 7/15/2016 обработать ошибки
     }
 }
