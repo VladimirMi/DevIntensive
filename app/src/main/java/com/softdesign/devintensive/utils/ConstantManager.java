@@ -21,6 +21,9 @@ public interface ConstantManager {
     String USER_ID_KEY = "USER_ID_KEY";
     String USER_NAME_KEY = "USER_NAME_KEY";
 
+    String PARCELABLE_KEY = "PARCELABLE_KEY";
+    String USERS_LIST_KEY = "USERS_LIST_KEY";
+
     // Misc constants
     String TAG_PREFIX = "DEV ";
     String EXTENSION_JPEG = ".jpg";

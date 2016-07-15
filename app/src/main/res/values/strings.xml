@@ -32,7 +32,8 @@
     <string name="chooser_email">Отправить email</string>
     <string name="permission_snackbar_text">Для корректной работы необходимо дать требуемые разрешения</string>
     <string name="permission_snackbar_title">Разрешить</string>
-    <string name="team">Команда</string>
-    <string name="my_profile">Мой профиль</string>
-
+    <string name="team_menu">Команда</string>
+    <string name="profile_menu">Мой профиль</string>
+    <string name="users_menu">Все пользаватели</string>
+    <string name="action_search">Поиск</string>
 </resources>

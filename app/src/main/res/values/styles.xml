@@ -70,6 +70,18 @@
         <item name="android:textSize">@dimen/font_small_14</item>
     </style>
 
+    <style name="user_statistic.card" parent="user_statistic">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="user_statistic.card.value" parent="user_statistic.card">
+        <item name="android:textSize">@dimen/font_large_20</item>
+    </style>
+
+    <style name="user_statistic.card.hint" parent="user_statistic.card">
+        <item name="android:textSize">@dimen/font_small_14</item>
+    </style>
+
     <style name="custom_dialog">
         <item name="android:fullDark">@android:color/transparent</item>
     </style>
@@ -144,15 +156,13 @@
 
 
     <style name="AppTheme.Button.Red" parent="Base.Widget.AppCompat.Button.Colored">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
         <item name="android:color">@color/color_accent</item>
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:gravity">center</item>
-        <item name="android:layout_marginTop">@dimen/spacing_medium_28</item>
-        <item name="android:layout_marginRight">@dimen/spacing_medium_28</item>
-        <item name="android:layout_marginBottom">@dimen/spacing_normal_16</item>
-        <item name="android:layout_marginLeft">@dimen/spacing_medium_28</item>
     </style>
 
+    <style name="ToolBarStyle" parent="Theme.AppCompat">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:actionMenuTextColor">@android:color/white</item>
+    </style>
 </resources>

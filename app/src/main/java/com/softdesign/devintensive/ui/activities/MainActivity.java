@@ -109,7 +109,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         setContentView(R.layout.activity_main);
         Log.d(TAG, "onCreate");
         ButterKnife.bind(this);
-        Picasso.with(this).setIndicatorsEnabled(true);
 
         mDataManager = DataManager.getInstance();
         mPreferencesManager = mDataManager.getPreferencesManager();
@@ -358,7 +357,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
-                showSnackBar(item.getTitle().toString());
                 item.setChecked(true);
                 mNavigationDrawer.closeDrawer(GravityCompat.START);
                 int itemId = item.getItemId();
@@ -369,6 +367,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                         Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
                         startActivity(loginIntent);
                         finish();
+                        return true;
+                    case R.id.users_menu:
+                        Intent usersIntent = new Intent(MainActivity.this, UserListActivity.class);
+                        startActivity(usersIntent);
                         return true;
                 }
                 return false;

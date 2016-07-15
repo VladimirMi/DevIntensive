@@ -3,6 +3,7 @@ package com.softdesign.devintensive.data.network;
 import com.softdesign.devintensive.data.network.req.UserLoginReq;
 import com.softdesign.devintensive.data.network.res.LoginModelRes;
 import com.softdesign.devintensive.data.network.res.UploadImageRes;
+import com.softdesign.devintensive.data.network.res.UserListRes;
 import com.softdesign.devintensive.data.network.res.UserModelRes;
 
 
@@ -25,5 +26,8 @@ public interface RestService {
 
     @GET("user/{userId}")
     Call<UserModelRes> getUser(@Path("userId") String userId);
+
+    @GET("user/list?orderBy=rating")
+    Call<UserListRes> getUserList();
 }
 
