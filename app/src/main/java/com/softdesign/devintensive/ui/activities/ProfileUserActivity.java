@@ -1,18 +1,21 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.storage.models.UserDTO;
-import com.softdesign.devintensive.ui.adapters.RepositoriesAdapter;
+import com.softdesign.devintensive.ui.views.GitItemView;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.squareup.picasso.Picasso;
 
@@ -30,7 +33,9 @@ public class ProfileUserActivity extends AppCompatActivity {
     @BindView(R.id.rating_txt) TextView mRating;
     @BindView(R.id.code_lines_txt) TextView mCodeLines;
     @BindView(R.id.projects_txt) TextView mProjects;
-    @BindView(R.id.repositories_list) ListView mRepoListView;
+    @BindView(R.id.repositories_list) LinearLayout mRepoListView;
+
+    private UserDTO mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +43,13 @@ public class ProfileUserActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile_user);
         ButterKnife.bind(this);
 
+        mUser = getIntent().getParcelableExtra(ConstantManager.PARCELABLE_KEY);
+
         setupToolbar();
+        initRepositoriesView();
         initProfileData();
     }
+
 
     private void setupToolbar() {
         setSupportActionBar(mToolbar);
@@ -51,22 +60,33 @@ public class ProfileUserActivity extends AppCompatActivity {
         }
     }
 
+    private void initRepositoriesView() {
+        final List<String> repositories = mUser.getRepositories();
+
+        for (String repository : repositories) {
+            GitItemView gitItem = new GitItemView(this, repository);
+            gitItem.getGitImageView().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent viewIntent = new Intent(Intent.ACTION_VIEW,
+                            Uri.parse(ConstantManager.HTTPS_SCHEME + v.getContentDescription()));
+                    startActivity(viewIntent);
+                }
+            });
+            mRepoListView.addView(gitItem);
+        }
+    }
+
+
     private void initProfileData() {
-        UserDTO userDTO = getIntent().getParcelableExtra(ConstantManager.PARCELABLE_KEY);
-
-        final List<String> repositories = userDTO.getRepositories();
-        RepositoriesAdapter adapter = new RepositoriesAdapter(this, repositories);
-
-        mRepoListView.setAdapter(adapter);
-
-        mRating.setText(userDTO.getRating());
-        mCodeLines.setText(userDTO.getCodeLines());
-        mProjects.setText(userDTO.getProjects());
-        mUserBio.setText(userDTO.getBio());
-        mCollapsingToolbar.setTitle(userDTO.getFullName());
+        mRating.setText(mUser.getRating());
+        mCodeLines.setText(mUser.getCodeLines());
+        mProjects.setText(mUser.getProjects());
+        mUserBio.setText(mUser.getBio());
+        mCollapsingToolbar.setTitle(mUser.getFullName());
 
         Picasso.with(this)
-                .load(userDTO.getPhoto())
+                .load(mUser.getPhoto())
                 .placeholder(R.drawable.user_bg)
                 .error(R.drawable.user_bg)
                 .into(mProfileImage);

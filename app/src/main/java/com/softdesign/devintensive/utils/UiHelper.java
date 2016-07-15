@@ -2,6 +2,10 @@ package com.softdesign.devintensive.utils;
 
 import android.content.Context;
 import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import com.softdesign.devintensive.data.managers.DataManager;
 
