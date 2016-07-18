@@ -6,11 +6,12 @@ import com.softdesign.devintensive.data.network.RestService;
 import com.softdesign.devintensive.data.network.ServiceGenerator;
 import com.softdesign.devintensive.data.network.req.UserLoginReq;
 import com.softdesign.devintensive.data.network.res.LoginModelRes;
+import com.softdesign.devintensive.data.network.res.UploadImageRes;
+import com.softdesign.devintensive.data.network.res.UserListRes;
 import com.softdesign.devintensive.data.network.res.UserModelRes;
 import com.softdesign.devintensive.utils.DevintensiveApplication;
 
 import okhttp3.MultipartBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 
 public class DataManager {
@@ -46,7 +47,7 @@ public class DataManager {
         return mRestService.loginUser(userLoginReq);
     }
 
-    public Call<ResponseBody> uploadPhoto(String userId, MultipartBody.Part userPhotoReq) {
+    public Call<UploadImageRes> uploadPhoto(String userId, MultipartBody.Part userPhotoReq) {
         return mRestService.uploadPhoto(userId, userPhotoReq);
     }
 
@@ -54,6 +55,9 @@ public class DataManager {
         return mRestService.getUser(userId);
     }
 
+    public Call<UserListRes> getUserList() {
+        return mRestService.getUserList();
+    }
     // endregion
 
     // region =========== Database ============

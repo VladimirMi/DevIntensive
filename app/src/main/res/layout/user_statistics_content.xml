@@ -5,10 +5,9 @@
               android:layout_height="wrap_content"
               android:background="@color/grey"
               android:orientation="horizontal"
-              android:minHeight="@dimen/size_medium_56"
               android:paddingBottom="@dimen/spacing_medium_28"
               android:paddingTop="@dimen/spacing_medium_28"
-              app:layout_behavior=".ui.view.behaviors.UserStatisticBehavior">
+              app:layout_behavior=".ui.behaviors.UserStatisticBehavior">
 
     <LinearLayout
         android:layout_width="0dp"

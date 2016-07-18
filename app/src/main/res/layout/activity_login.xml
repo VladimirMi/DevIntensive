@@ -17,8 +17,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="@dimen/line_size_2"
-            app:cardElevation="@dimen/spacing_small_8">
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -95,6 +95,13 @@
                     <Button
                         android:id="@+id/sign_in_btn"
                         style="@style/AppTheme.Button.Red"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/spacing_normal_16"
+                        android:layout_marginLeft="@dimen/spacing_medium_28"
+                        android:layout_marginRight="@dimen/spacing_medium_28"
+                        android:layout_marginTop="@dimen/spacing_medium_28"
+                        android:gravity="center"
                         android:text="@string/log_in"/>
 
                     <TextView

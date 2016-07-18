@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
-        <item android:title="@string/my_profile"
+        <item android:title="@string/profile_menu"
             android:checkable="true"
             android:id="@+id/user_profile_menu"
             android:icon="@drawable/ic_account_circle_24dp"/>
 
-        <item android:title="@string/team"
+        <item android:title="@string/team_menu"
               android:id="@+id/team_menu"
               android:icon="@drawable/ic_people_24dp"/>
+
+        <item android:title="@string/users_menu"
+            android:id="@+id/users_menu"
+            android:icon="@drawable/ic_people_outline_black_24dp"/>
 
         <item android:title="@string/log_out"
             android:id="@+id/login_menu"

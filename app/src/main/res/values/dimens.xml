@@ -35,4 +35,7 @@
     <dimen name="drawer_header_size">172dp</dimen>
     <dimen name="drawer_header_avatar_size">60dp</dimen>
     <dimen name="login_card_size">240dp</dimen>
+    <dimen name="card_corner_radius">2dp</dimen>
+    <dimen name="user_statistic_height">112dp</dimen>
+    <dimen name="card_elevation">8dp</dimen>
 </resources>

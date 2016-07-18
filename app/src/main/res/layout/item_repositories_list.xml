@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="@dimen/size_large_72"
+              android:orientation="horizontal">
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/github_hint"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@color/grey"
+            android:textSize="12sp"/>
+
+        <TextView
+            android:id="@+id/github_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/font_small_14"
+            android:layout_centerVertical="true"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey_light"
+            android:layout_alignParentBottom="true"/>
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/github_img"
+        style="@style/icon.right"
+        android:src="@drawable/ic_visibility_24dp"/>
+
+</LinearLayout>

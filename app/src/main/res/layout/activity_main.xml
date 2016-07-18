@@ -57,8 +57,8 @@
                             android:text="@string/user_profile.placeholder.image"/>
 
                         <ImageView
-                            style="@style/placeholder_image"
                             android:id="@+id/placeholder_photo"
+                            style="@style/placeholder_image"
                             android:src="@drawable/ic_add_a_photo_48px"/>
                     </RelativeLayout>
                 </FrameLayout>
@@ -66,17 +66,17 @@
 
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar"
+                    style="@style/ToolBarStyle"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     app:layout_collapseMode="pin"
-                    app:theme="@style/AppTheme.PopupOverlay"
-                    app:titleTextColor="@android:color/white"/>
+                    app:popupTheme="@style/AppTheme.PopupOverlay"/>
 
             </android.support.design.widget.CollapsingToolbarLayout>
 
         </android.support.design.widget.AppBarLayout>
 
-        <include layout="@layout/user_statistics"/>
+        <include layout="@layout/user_statistics_content"/>
 
         <include layout="@layout/user_profile_content"/>
 
