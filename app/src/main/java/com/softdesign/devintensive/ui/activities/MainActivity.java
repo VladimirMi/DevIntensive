@@ -199,6 +199,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     protected void onRestart() {
         super.onRestart();
         Log.d(TAG, "onRestart");
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        navigationView.getMenu().getItem(0).setChecked(true);
     }
 
     @Override
@@ -347,7 +349,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        mCollapsingToolbar.setTitle(mPreferencesManager.loadUserName());
+        actionBar.setTitle(mPreferencesManager.loadUserName());
     }
 
     private void setupDrawer() {

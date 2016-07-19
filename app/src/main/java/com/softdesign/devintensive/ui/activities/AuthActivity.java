@@ -59,10 +59,8 @@ public class AuthActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        ButterKnife.bind(this);
 
-        isLoggedIn = !mPreferencesManager.getAuthToken().equals(ConstantManager.INVALID_TOKEN);
+        isLoggedIn = !mPreferencesManager.getAuthToken().isEmpty();
         isUsersListExists = mPreferencesManager.isUsersListExists();
 
         if (isLoggedIn) {
@@ -75,6 +73,8 @@ public class AuthActivity extends BaseActivity {
         }
 
         if (!isLoggedIn) {
+            setContentView(R.layout.activity_login);
+            ButterKnife.bind(this);
             if (!NetworkStatusChecker.isNetworkAvaliable(this)) {
                 showSnackBar(getString(R.string.err_msg_internet));
             }
@@ -170,7 +170,6 @@ public class AuthActivity extends BaseActivity {
 
                 } else if (response.code() == 401) {
 
-                    showSnackBar(getString(R.string.err_msg_token));
                     Log.e(TAG, "updateUserData onResponse: " + response.message());
                     mPreferencesManager.clearAllData();
                     mPreferencesManager.saveAuthToken(ConstantManager.INVALID_TOKEN);
@@ -178,7 +177,6 @@ public class AuthActivity extends BaseActivity {
 
                 } else {
 
-                    showSnackBar(getString(R.string.err_msg_unknown));
                     Log.e(TAG, "updateUserData onResponse: " + response.message());
                     EventBus.getDefault().post(new SavingUserDataEvent(false));
 
@@ -188,7 +186,6 @@ public class AuthActivity extends BaseActivity {
             @Override
             public void onFailure(Call<UserModelRes> call, Throwable t) {
 
-                showSnackBar(getString(R.string.err_msg_unknown));
                 Log.e(TAG, "updateUserData onFailure: " + t.getMessage());
                 EventBus.getDefault().post(new SavingUserDataEvent(false));
 
@@ -282,6 +279,9 @@ public class AuthActivity extends BaseActivity {
 
         if (isLoggedIn) {
             startMainActivity();
+        } else {
+            setContentView(R.layout.activity_login);
+            ButterKnife.bind(this);
         }
     }
 

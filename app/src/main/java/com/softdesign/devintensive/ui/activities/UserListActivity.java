@@ -64,25 +64,11 @@ public class UserListActivity extends BaseActivity
         mDataManager = DataManager.getInstance();
         mPreferencesManager = mDataManager.getPreferencesManager();
 
-        LinearLayoutManager gridLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(gridLayoutManager);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
 
         setupToolbar();
         setupDrawer();
-//
-//        FragmentManager fm = getSupportFragmentManager();
-//        LoadUsersTaskFragment loadUsersTask = (LoadUsersTaskFragment) fm.findFragmentByTag(ConstantManager.LOAD_FRAG_TAG);
-//
-//        // If the Fragment is non-null, then it is currently being
-//        // retained across a configuration change.
-//        if (loadUsersTask == null) {
-//            loadUsersTask = new LoadUsersTaskFragment();
-//            fm.beginTransaction().add(loadUsersTask, ConstantManager.LOAD_FRAG_TAG).commit();
-//            loadUsersTask.startLoad();
-//        } else {
-//            mUsers = loadUsersTask.getResponse().body().getData();
-//            setupRecycler();
-//        }
 
         ChronosOperation<List<User>> loadUsersListTask = new LoadUsersList();
         runOperation(loadUsersListTask);
@@ -123,8 +109,10 @@ public class UserListActivity extends BaseActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void getUsersListFromDb() {
-        mUsers = mDataManager.getUsersListFromDB();
+    protected void onRestart() {
+        super.onRestart();
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        navigationView.getMenu().getItem(2).setChecked(true);
     }
 
     private void setupToolbar() {
@@ -136,7 +124,7 @@ public class UserListActivity extends BaseActivity
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        mToolbar.setTitle(mPreferencesManager.loadUserName());
+        actionBar.setTitle(mPreferencesManager.loadUserName());
     }
 
     private void setupDrawer() {

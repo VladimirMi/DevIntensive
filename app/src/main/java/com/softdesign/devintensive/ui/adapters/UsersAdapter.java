@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -16,6 +17,7 @@ import com.softdesign.devintensive.data.network.res.UserListRes;
 import com.softdesign.devintensive.data.storage.models.User;
 import com.softdesign.devintensive.ui.views.AspectRatioImageView;
 import com.softdesign.devintensive.utils.ConstantManager;
+import com.softdesign.devintensive.utils.UiHelper;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -43,10 +45,11 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View converView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_list, parent, false);
         mContext = parent.getContext();
+        View converView = LayoutInflater.from(mContext).inflate(R.layout.item_user_list, parent, false);
         return new UserViewHolder(converView, mListener);
     }
+
 
     @Override
     public void onBindViewHolder(final UserViewHolder holder, int position) {
