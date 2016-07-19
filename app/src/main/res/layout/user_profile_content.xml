@@ -33,7 +33,6 @@
                         android:id="@+id/phone_et"
                         style="@style/user_info_item_text"
                         android:hint="@string/phone_hint"
-                        android:text="@string/empty_string"
                         android:inputType="phone"
                         android:tag="@string/phone_tag"/>
 
@@ -44,7 +43,7 @@
             <ImageView
                 android:id="@+id/make_call_img"
                 style="@style/icon.right"
-                android:src="@drawable/ic_phone_in_talk24dp"/>
+                android:src="@drawable/ic_phone_in_talk_24dp"/>
         </LinearLayout>
 
         <View
@@ -75,8 +74,7 @@
                         style="@style/user_info_item_text"
                         android:hint="@string/email_hint"
                         android:inputType="textEmailAddress"
-                        android:tag="@string/email_tag"
-                        android:text="@string/empty_string"/>
+                        android:tag="@string/email_tag"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -116,8 +114,7 @@
                         style="@style/user_info_item_text"
                         android:hint="@string/vk_hint"
                         android:inputType="textUri"
-                        android:tag="@string/vk_tag"
-                        android:text="@string/empty_string"/>
+                        android:tag="@string/vk_tag"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -186,8 +183,8 @@
                         android:id="@+id/bio_et"
                         style="@style/user_info_item_text"
                         android:hint="@string/about_me_hint"
-                        android:inputType="textMultiLine"
-                        android:text="@string/empty_string"/>
+                        android:tag="@string/bio_tag"
+                        android:inputType="textMultiLine"/>
 
                 </android.support.design.widget.TextInputLayout>
 

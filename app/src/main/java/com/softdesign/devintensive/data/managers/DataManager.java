@@ -14,7 +14,7 @@ import com.softdesign.devintensive.data.storage.models.DaoSession;
 import com.softdesign.devintensive.data.storage.models.Repository;
 import com.softdesign.devintensive.data.storage.models.RepositoryDao;
 import com.softdesign.devintensive.data.storage.models.User;
-import com.softdesign.devintensive.data.storage.models.UserProfile;
+import com.softdesign.devintensive.data.storage.models.UserDao;
 import com.softdesign.devintensive.utils.DevintensiveApplication;
 import com.squareup.picasso.Picasso;
 
@@ -85,23 +85,20 @@ public class DataManager {
 
     // region =========== Database ============
 
-    public UserProfile getUserProfileFromDB() {
-        UserProfile userProfile = null;
+    public List<User> getUsersListFromDB() {
+        List<User> userList = new ArrayList<>();
+
         try {
-            userProfile = mDaoSession.queryBuilder(UserProfile.class)
+            userList = mDaoSession.queryBuilder(User.class)
+                    .where(UserDao.Properties.CodeLines.gt(0))
+                    .orderDesc(UserDao.Properties.Rating)
                     .build()
-                    .unique();
+                    .list();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return userProfile;
-    }
-
-    public List<User> getUserListFromDB() {
-        List<User> temp = new ArrayList<>();
-
-        return temp;
+        return userList;
     }
 
     public List<Repository> getRepositoriesFromDB(String userId) {
@@ -109,6 +106,18 @@ public class DataManager {
         try {
             repositories = mDaoSession.queryBuilder(Repository.class)
                     .where(RepositoryDao.Properties.UserRemoteId.eq(userId))
+                    .build()
+                    .list();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return repositories;
+    }
+
+    public List<Repository> getAllRepositoriesFromDB() {
+        List<Repository> repositories = new ArrayList<>();
+        try {
+            repositories = mDaoSession.queryBuilder(Repository.class)
                     .build()
                     .list();
         } catch (Exception e) {

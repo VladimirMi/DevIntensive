@@ -67,17 +67,17 @@ public class ProfileUserActivity extends AppCompatActivity {
     }
 
     private void initRepositoriesView() {
-//        final List<String> repositories = mUser.getRepositories();
-//
-//        RepositoriesAdapter adapter = new RepositoriesAdapter(repositories, new RepositoriesAdapter.CustomClickListener() {
-//            @Override
-//            public void onItemClickListener(Uri uri) {
-//                Intent viewIntent = new Intent(Intent.ACTION_VIEW, uri);
-//                startActivity(viewIntent);
-//            }
-//        });
-//        mRepoListView.setAdapter(adapter);
-//        UiHelper.setRepoListViewHeight(mRepoListView);
+        final List<String> repositories = mUser.getRepositories();
+
+        RepositoriesAdapter adapter = new RepositoriesAdapter(repositories, new RepositoriesAdapter.CustomClickListener() {
+            @Override
+            public void onItemClickListener(Uri uri) {
+                Intent viewIntent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(viewIntent);
+            }
+        });
+        mRepoListView.setAdapter(adapter);
+        UiHelper.setListViewHeightBasedOnChildren(mRepoListView);
     }
 
 

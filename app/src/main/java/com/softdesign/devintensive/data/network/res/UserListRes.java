@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.softdesign.devintensive.data.storage.models.User;
 
 public class UserListRes {
 
@@ -12,7 +13,7 @@ public class UserListRes {
     private boolean success;
     @SerializedName("data")
     @Expose
-    private List<UserData> data = new ArrayList<UserData>();
+    private List<UserData> data = new ArrayList<>();
 
     public List<UserData> getData() {
         return data;

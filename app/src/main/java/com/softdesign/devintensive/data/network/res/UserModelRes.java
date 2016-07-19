@@ -150,7 +150,7 @@ public class UserModelRes {
         @SerializedName("projects")
         @Expose
         private int projects;
-        @SerializedName("codeLines")
+        @SerializedName("linesCode")
         @Expose
         private int codeLines;
         @SerializedName("rait")

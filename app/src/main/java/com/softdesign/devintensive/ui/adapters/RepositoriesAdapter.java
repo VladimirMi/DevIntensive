@@ -18,11 +18,11 @@ import java.util.List;
 
 public class RepositoriesAdapter extends BaseAdapter implements View.OnClickListener {
     private final CustomClickListener mListener;
-    private List<Repository> mRepoList;
+    private List<String> mRepoList;
     private List<EditText> mGitEtList = new ArrayList<>();
     private List<ImageView> mGitImgList = new ArrayList<>();
 
-    public RepositoriesAdapter(List<Repository> repositories, CustomClickListener listener) {
+    public RepositoriesAdapter(List<String> repositories, CustomClickListener listener) {
         mRepoList = repositories;
         mListener = listener;
     }
@@ -62,10 +62,10 @@ public class RepositoriesAdapter extends BaseAdapter implements View.OnClickList
         }
 
         EditText repoName = (EditText) itemView.findViewById(R.id.github_et);
-        repoName.setText(mRepoList.get(position).getRepositoryName());
+        repoName.setText(mRepoList.get(position));
 
         ImageView gitIcon = (ImageView) itemView.findViewById(R.id.github_img);
-        gitIcon.setContentDescription(mRepoList.get(position).getRepositoryName());
+        gitIcon.setContentDescription(mRepoList.get(position));
         gitIcon.setOnClickListener(this);
 
         mGitEtList.add(repoName);

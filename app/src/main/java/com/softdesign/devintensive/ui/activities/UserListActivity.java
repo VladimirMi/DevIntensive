@@ -4,12 +4,10 @@ import android.content.Intent;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,26 +16,31 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.google.gson.Gson;
+import com.redmadrobot.chronos.ChronosOperation;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.managers.PreferencesManager;
-import com.softdesign.devintensive.data.network.res.UserListRes;
+import com.softdesign.devintensive.data.storage.models.Repository;
+import com.softdesign.devintensive.data.storage.models.User;
 import com.softdesign.devintensive.data.storage.models.UserDTO;
+import com.softdesign.devintensive.data.tasks.LoadRepositories;
+import com.softdesign.devintensive.data.tasks.LoadUsersList;
 import com.softdesign.devintensive.ui.adapters.UsersAdapter;
-import com.softdesign.devintensive.ui.fragments.LoadUsersTaskFragment;
+import com.softdesign.devintensive.utils.CircleTransformation;
 import com.softdesign.devintensive.utils.ConstantManager;
+import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Response;
 
-public class UserListActivity extends AppCompatActivity
-        implements SearchView.OnQueryTextListener, LoadUsersTaskFragment.TaskCallbacks {
+public class UserListActivity extends BaseActivity
+        implements SearchView.OnQueryTextListener {
 
     private static final String TAG = ConstantManager.TAG_PREFIX + "UserListActivity";
     @BindView(R.id.main_coordinator_container) CoordinatorLayout mCoordinatorLayout;
@@ -49,8 +52,8 @@ public class UserListActivity extends AppCompatActivity
     private DataManager mDataManager;
     private PreferencesManager mPreferencesManager;
     private UsersAdapter mUsersAdapter;
-    private List<UserListRes.UserData> mUsers;
-    private UserListRes mResponse;
+    private List<User> mUsers;
+    private HashMap<String, List<Repository>> mRepositories;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,20 +69,25 @@ public class UserListActivity extends AppCompatActivity
 
         setupToolbar();
         setupDrawer();
+//
+//        FragmentManager fm = getSupportFragmentManager();
+//        LoadUsersTaskFragment loadUsersTask = (LoadUsersTaskFragment) fm.findFragmentByTag(ConstantManager.LOAD_FRAG_TAG);
+//
+//        // If the Fragment is non-null, then it is currently being
+//        // retained across a configuration change.
+//        if (loadUsersTask == null) {
+//            loadUsersTask = new LoadUsersTaskFragment();
+//            fm.beginTransaction().add(loadUsersTask, ConstantManager.LOAD_FRAG_TAG).commit();
+//            loadUsersTask.startLoad();
+//        } else {
+//            mUsers = loadUsersTask.getResponse().body().getData();
+//            setupRecycler();
+//        }
 
-        FragmentManager fm = getSupportFragmentManager();
-        LoadUsersTaskFragment loadUsersTask = (LoadUsersTaskFragment) fm.findFragmentByTag(ConstantManager.LOAD_FRAG_TAG);
-
-        // If the Fragment is non-null, then it is currently being
-        // retained across a configuration change.
-        if (loadUsersTask == null) {
-            loadUsersTask = new LoadUsersTaskFragment();
-            fm.beginTransaction().add(loadUsersTask, ConstantManager.LOAD_FRAG_TAG).commit();
-            loadUsersTask.startLoad();
-        } else {
-            mUsers = loadUsersTask.getResponse().body().getData();
-            setupRecycler();
-        }
+        ChronosOperation<List<User>> loadUsersListTask = new LoadUsersList();
+        runOperation(loadUsersListTask);
+        ChronosOperation<HashMap<String, List<Repository>>> loadRepositoriesTask = new LoadRepositories();
+        runOperation(loadRepositoriesTask);
     }
 
     @Override
@@ -102,8 +110,6 @@ public class UserListActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        outState.putString(ConstantManager.USERS_LIST_KEY, new Gson().toJson(mResponse));
     }
 
     @Override
@@ -117,7 +123,8 @@ public class UserListActivity extends AppCompatActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void loadUsers() {
+    private void getUsersListFromDb() {
+        mUsers = mDataManager.getUsersListFromDB();
     }
 
     private void setupToolbar() {
@@ -134,7 +141,9 @@ public class UserListActivity extends AppCompatActivity
 
     private void setupDrawer() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+
         assert navigationView != null;
+        navigationView.getMenu().getItem(2).setChecked(true);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
@@ -157,13 +166,28 @@ public class UserListActivity extends AppCompatActivity
                 return false;
             }
         });
+
+        // установка круглого аватара
+        ImageView userAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.user_avatar);
+        Picasso.with(this)
+                .load(mPreferencesManager.loadUserAvatar())
+                .placeholder(R.color.grey_light)
+                .transform(new CircleTransformation())
+                .into(userAvatar);
+
+        TextView userName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_txt);
+        TextView userEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_email_txt);
+        userName.setText(mPreferencesManager.loadUserName());
+        userEmail.setText(mPreferencesManager.loadUserInfo().get(1));
     }
 
     private void setupRecycler() {
         mUsersAdapter = new UsersAdapter(mUsers, new UsersAdapter.UserViewHolder.CustomClickListener() {
             @Override
             public void onUserItemClickListener(int position) {
-                UserDTO userDTO = new UserDTO(mUsers.get(position));
+
+                UserDTO userDTO = new UserDTO(mUsers.get(position), mRepositories.get(mUsers.get(position).getRemoteId()));
+
                 Intent profileIntent = new Intent(UserListActivity.this, ProfileUserActivity.class);
                 profileIntent.putExtra(ConstantManager.PARCELABLE_KEY, userDTO);
                 startActivity(profileIntent);
@@ -184,18 +208,37 @@ public class UserListActivity extends AppCompatActivity
         return true;
     }
 
-    @Override
-    public void onResponse(Call<UserListRes> call, Response<UserListRes> response) {
-        try {
-            mUsers = response.body().getData();
+    public void onOperationFinished(final LoadUsersList.Result result) {
+        if (result.isSuccessful()) {
+            mUsers = result.getOutput();
             setupRecycler();
-        } catch (NullPointerException e) {
-            Log.e(TAG, e.toString());
+        } else {
+            Log.e(TAG, "onSaveUserListFinished: " + result.getErrorMessage());
         }
     }
 
-    @Override
-    public void onFailure(Call<UserListRes> call, Throwable t) {
-        // TODO: 7/15/2016 обработать ошибки
+    public void onOperationFinished(final LoadRepositories.Result result) {
+        if (result.isSuccessful()) {
+            mRepositories = result.getOutput();
+            setupRecycler();
+        } else {
+
+            Log.e(TAG, "onSaveUserListFinished: " + result.getErrorMessage());
+        }
     }
+
+//    @Override
+//    public void onResponse(Call<UserListRes> call, Response<UserListRes> response) {
+//        try {
+//            mUsers = response.body().getData();
+//            setupRecycler();
+//        } catch (NullPointerException e) {
+//            Log.e(TAG, e.toString());
+//        }
+//    }
+//
+//    @Override
+//    public void onFailure(Call<UserListRes> call, Throwable t) {
+//        // TODO: 7/15/2016 обработать ошибки
+//    }
 }

@@ -13,13 +13,13 @@ import com.softdesign.devintensive.data.storage.models.UserDao;
 
 import java.util.List;
 
-public class SaveUserList extends ChronosOperation<Boolean> {
+public class SaveUsersList extends ChronosOperation<Boolean> {
     private final List<User> mUsers;
     private final List<Repository> mRepositories;
     private UserDao mUserDao;
     private RepositoryDao mRepositoryDao;
 
-    public SaveUserList(List<User> users, List<Repository> repositories) {
+    public SaveUsersList(List<User> users, List<Repository> repositories) {
         mUsers = users;
         mRepositories = repositories;
         mUserDao = DataManager.getInstance().getDaoSession().getUserDao();
@@ -46,7 +46,6 @@ public class SaveUserList extends ChronosOperation<Boolean> {
     }
 
     public final static class Result extends ChronosOperationResult<Boolean> {
-        public Result() {
-        }
+        public Result() {}
     }
 }

@@ -25,7 +25,8 @@
 
         <activity android:name=".ui.activities.MainActivity"/>
 
-        <activity android:name=".ui.activities.AuthActivity">
+        <activity android:name=".ui.activities.AuthActivity"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

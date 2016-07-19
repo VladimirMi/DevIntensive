@@ -40,6 +40,6 @@
     <string name="email_tag">email</string>
     <string name="vk_tag">vk</string>
     <string name="git_tag">git</string>
-    <string name="empty_string">   </string>
+    <string name="bio_tag">bio</string>
     <string name="err_msg_token">Invalid Token</string>
 </resources>

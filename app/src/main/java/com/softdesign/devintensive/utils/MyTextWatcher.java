@@ -54,7 +54,7 @@ public class MyTextWatcher implements TextWatcher {
         return setupValidate(isValid(phone),
                 DataManager.getInstance().getContext().getString(R.string.phone_hint),
                 mActivityReference.getString(R.string.err_msg_phone),
-                R.drawable.ic_call_24dp,
+                R.drawable.ic_phone_in_talk_24dp,
                 R.drawable.ic_error_24dp);
     }
 
@@ -70,7 +70,7 @@ public class MyTextWatcher implements TextWatcher {
         return setupValidate(isValid(vk),
                 mActivityReference.getString(R.string.vk_hint),
                 mActivityReference.getString(R.string.err_msg_vk),
-                R.drawable.ic_vk_social_network_logo,
+                R.drawable.ic_visibility_24dp,
                 R.drawable.ic_error_24dp);
     }
 
@@ -78,17 +78,17 @@ public class MyTextWatcher implements TextWatcher {
         return setupValidate(isValid(git),
                 mActivityReference.getString(R.string.github_hint),
                 mActivityReference.getString(R.string.err_msg_git),
-                R.drawable.ic_github_logo,
+                R.drawable.ic_visibility_24dp,
                 R.drawable.ic_error_24dp);
     }
 
     private boolean setupValidate(Boolean isValid, String hint, String errMsg, int actionIcon, int errIcon) {
         if (isValid) {
-            mEditText.setHint(hint);
+            mInputLayout.setHint(hint);
             mActionIcon.setImageResource(actionIcon);
             return true;
         } else {
-            mEditText.setHint(errMsg);
+            mInputLayout.setHint(errMsg);
             mActionIcon.setImageResource(errIcon);
             return false;
         }
@@ -96,7 +96,7 @@ public class MyTextWatcher implements TextWatcher {
 
     public static boolean isValid(EditText editText) {
         String tag = String.valueOf(editText.getTag());
-        String value = editText.getText().toString().trim();;
+        String value = editText.getText().toString().trim();
         Context context = DataManager.getInstance().getContext();
 
         if (value.isEmpty()) {

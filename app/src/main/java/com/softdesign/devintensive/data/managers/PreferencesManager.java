@@ -71,7 +71,7 @@ public class PreferencesManager {
     }
 
     public String getAuthToken() {
-        return mSharedPreferences.getString(ConstantManager.AUTH_TOKEN_KEY, "");
+        return mSharedPreferences.getString(ConstantManager.AUTH_TOKEN_KEY, ConstantManager.INVALID_TOKEN);
     }
 
     public void saveUserId(String userId) {

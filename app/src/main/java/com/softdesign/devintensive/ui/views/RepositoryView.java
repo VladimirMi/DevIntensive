@@ -13,8 +13,9 @@ import com.softdesign.devintensive.utils.ConstantManager;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class RepositoryView extends LinearLayout implements View.OnClickListener, View.OnFocusChangeListener {
+public class RepositoryView extends LinearLayout implements View.OnFocusChangeListener {
     private final CustomClickListener mListener;
     @BindView(R.id.github_et) EditText mGitEditText;
     @BindView(R.id.github_img) ImageView mGitImage;
@@ -24,14 +25,11 @@ public class RepositoryView extends LinearLayout implements View.OnClickListener
         inflate(getContext(), R.layout.item_repositories_list, this);
         ButterKnife.bind(this);
 
-        mGitEditText.setTag(ConstantManager.REPOSITORY_TAG);
         mListener = listener;
-
-        mGitImage.setOnClickListener(this);
         mGitEditText.setOnFocusChangeListener(this);
     }
 
-    @Override
+    @OnClick(R.id.github_img)
     public void onClick(View v) {
         if (mListener != null) {
             mListener.onIconClickListener(Uri.parse(ConstantManager.HTTPS_SCHEME + mGitEditText.getText()));

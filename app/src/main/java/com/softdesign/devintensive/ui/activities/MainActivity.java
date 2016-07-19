@@ -50,6 +50,7 @@ import com.softdesign.devintensive.utils.CircleTransformation;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.ExStorageState;
 import com.softdesign.devintensive.utils.MyTextWatcher;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -127,16 +128,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         mActionIcons.add(mEmailIcon);
         mActionIcons.add(mVkIcon);
 
+        for (View actionIcon : mActionIcons) {
+            actionIcon.setOnClickListener(this);
+        }
+
         initRepositoriesView();
 
         mUserInfoViews.add(mUserBio);
 
         mFab.setOnClickListener(this);
         mProfilePlaceholder.setOnClickListener(this);
-
-        for (View actionIcon : mActionIcons) {
-            actionIcon.setOnClickListener(this);
-        }
 
         for (int i = 0; i < mUserInfoViews.size() - 1; i++) {
             mUserInfoViews.get(i).addTextChangedListener(new MyTextWatcher(this,
@@ -154,7 +155,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         loadUserInfo();
         loadUserStatistic();
         loadUserPhoto();
-        loadDrawerContent();
     }
 
     @Override
@@ -262,6 +262,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        loadUserInfo();
+    }
+
+    @Override
     public void onBackPressed() {
         if (mNavigationDrawer.isDrawerOpen(GravityCompat.START)) {
             mNavigationDrawer.closeDrawer(GravityCompat.START);
@@ -346,17 +352,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
     private void setupDrawer() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+
         assert navigationView != null;
+        navigationView.getMenu().getItem(0).setChecked(true);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
-                item.setChecked(true);
                 mNavigationDrawer.closeDrawer(GravityCompat.START);
                 int itemId = item.getItemId();
                 switch (itemId) {
                     case R.id.login_menu:
-                        mPreferencesManager.saveUserId("");
-                        mPreferencesManager.saveAuthToken("");
+                        mPreferencesManager.clearAllData();
+                        mPreferencesManager.saveAuthToken(ConstantManager.INVALID_TOKEN);
                         Intent loginIntent = new Intent(MainActivity.this, AuthActivity.class);
                         startActivity(loginIntent);
                         finish();
@@ -369,6 +376,50 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 return false;
             }
         });
+
+        // установка круглого аватара
+        final ImageView userAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.user_avatar);
+        Picasso.with(this)
+                .load(mPreferencesManager.loadUserAvatar())
+                .fit()
+                .centerCrop()
+                .placeholder(R.drawable.user_bg)
+                .error(R.drawable.user_bg)
+                .transform(new CircleTransformation())
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(userAvatar, new com.squareup.picasso.Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "Load from cache");
+                    }
+
+                    @Override
+                    public void onError() {
+                        DataManager.getInstance().getPicasso()
+                                .load(mPreferencesManager.loadUserAvatar())
+                                .fit()
+                                .centerCrop()
+                                .placeholder(R.drawable.user_bg)
+                                .error(R.drawable.user_bg)
+                                .networkPolicy(NetworkPolicy.OFFLINE)
+                                .into(userAvatar, new com.squareup.picasso.Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "Load from net");
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.d(TAG, "Could not fetch the image");
+                                    }
+                                });
+                    }
+                });
+
+        TextView userName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_txt);
+        TextView userEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_email_txt);
+        userName.setText(mPreferencesManager.loadUserName());
+        userEmail.setText(mPreferencesManager.loadUserInfo().get(1));
     }
 
     /**
@@ -381,6 +432,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 userValue.setFocusable(true);
                 userValue.setEnabled(true);
             }
+            for (ImageView actionIcon : mActionIcons) {
+                actionIcon.setClickable(false);
+            }
             showProfilePlaceholder();
 //            lockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
@@ -390,6 +444,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             for (EditText userValue : mUserInfoViews) {
                 userValue.setFocusable(false);
                 userValue.setEnabled(false);
+            }
+            for (ImageView actionIcon : mActionIcons) {
+                actionIcon.setClickable(true);
             }
             hideProfilePlaceholder();
 //            unlockToolbar();
@@ -441,35 +498,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 .into(mProfilePhoto);
     }
 
-    private void loadDrawerContent() {
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
-
-        // установка круглого аватара
-        ImageView userAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.user_avatar);
-        Picasso.with(this)
-                .load(mPreferencesManager.loadUserAvatar())
-                .placeholder(R.color.grey_light)
-                .transform(new CircleTransformation())
-                .into(userAvatar);
-
-        TextView userName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_txt);
-        TextView userEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_email_txt);
-        userName.setText(mPreferencesManager.loadUserName());
-        userEmail.setText(mPreferencesManager.loadUserInfo().get(1));
-    }
 
     private void saveUserInfo() {
         List<String> userInfo = new ArrayList<>();
 
         StringBuilder repositories = new StringBuilder();
         for (EditText userInfoView : mUserInfoViews) {
-            if (userInfoView.getTag().equals(ConstantManager.REPOSITORY_TAG)) {
+            if (userInfoView.getTag().equals(getString(R.string.git_tag))) {
                 repositories.append(userInfoView.getText().toString() + " ");
             } else {
                 userInfo.add(userInfoView.getText().toString());
             }
         }
-        userInfo.add(4, repositories.toString());
+        userInfo.add(3, repositories.toString());
         mPreferencesManager.saveUserInfo(userInfo);
     }
 
@@ -606,11 +647,44 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
      *
      * @param selectedImage URI выбранного изображения
      */
-    private void insertProfileImage(Uri selectedImage) {
+    private void insertProfileImage(final Uri selectedImage) {
+
         Picasso.with(this)
                 .load(selectedImage)
-                .placeholder(R.color.grey_light)
-                .into(mProfilePhoto);
+                .fit()
+                .centerCrop()
+                .placeholder(R.drawable.user_bg)
+                .error(R.drawable.user_bg)
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(mProfilePhoto, new com.squareup.picasso.Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "Load from cache");
+                    }
+
+                    @Override
+                    public void onError() {
+                        DataManager.getInstance().getPicasso()
+                                .load(selectedImage)
+                                .fit()
+                                .centerCrop()
+                                .placeholder(R.drawable.user_bg)
+                                .error(R.drawable.user_bg)
+                                .networkPolicy(NetworkPolicy.OFFLINE)
+                                .into(mProfilePhoto, new com.squareup.picasso.Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "Load from net");
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.d(TAG, "Could not fetch the image");
+                                    }
+                                });
+                    }
+                });
+
         mPreferencesManager.saveUserPhoto(selectedImage);
     }
 

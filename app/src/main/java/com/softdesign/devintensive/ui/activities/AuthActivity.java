@@ -19,7 +19,7 @@ import com.softdesign.devintensive.data.network.res.UserListRes;
 import com.softdesign.devintensive.data.network.res.UserModelRes;
 import com.softdesign.devintensive.data.storage.models.Repository;
 import com.softdesign.devintensive.data.storage.models.User;
-import com.softdesign.devintensive.data.tasks.SaveUserList;
+import com.softdesign.devintensive.data.tasks.SaveUsersList;
 import com.softdesign.devintensive.data.tasks.events.SavingUserDataEvent;
 import com.softdesign.devintensive.data.tasks.events.SavingUsersListEvent;
 import com.softdesign.devintensive.utils.AppConfig;
@@ -41,7 +41,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AuthActivity extends BaseActivity{
+public class AuthActivity extends BaseActivity {
     private static final String TAG = ConstantManager.TAG_PREFIX + "AuthActivity";
     @BindView(R.id.sign_in_btn) Button mSignIn;
     @BindView(R.id.reminder_txt) TextView mReminderPassword;
@@ -59,6 +59,8 @@ public class AuthActivity extends BaseActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+        ButterKnife.bind(this);
 
         isLoggedIn = !mPreferencesManager.getAuthToken().equals(ConstantManager.INVALID_TOKEN);
         isUsersListExists = mPreferencesManager.isUsersListExists();
@@ -73,15 +75,23 @@ public class AuthActivity extends BaseActivity{
         }
 
         if (!isLoggedIn) {
-            setContentView(R.layout.activity_login);
-            ButterKnife.bind(this);
-
             if (!NetworkStatusChecker.isNetworkAvaliable(this)) {
                 showSnackBar(getString(R.string.err_msg_internet));
             }
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
 
     private void showSnackBar(String message) {
         Snackbar.make(mCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
@@ -95,14 +105,15 @@ public class AuthActivity extends BaseActivity{
 
         updateUsersList();
     }
+
     @OnClick(R.id.reminder_txt)
-    private void remindPassword() {
+    void remindPassword() {
         Intent remindIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(AppConfig.FORGOT_PASS_URL));
         startActivity(remindIntent);
     }
 
     @OnClick(R.id.sign_in_btn)
-    private void signIn() {
+    void signIn() {
         if (NetworkStatusChecker.isNetworkAvaliable(this)) {
 
             UserLoginReq request = new UserLoginReq(mLogin.getText().toString(), mPassword.getText().toString());
@@ -223,13 +234,12 @@ public class AuthActivity extends BaseActivity{
             repositories.addAll(Helper.getRepoListFromUserData(userData));
         }
 
-        ChronosOperation<Boolean> task = new SaveUserList(users, repositories);
+        ChronosOperation<Boolean> task = new SaveUsersList(users, repositories);
         runOperation(task);
     }
 
 
-
-    public void onOperationFinished(final SaveUserList.Result result) {
+    public void onOperationFinished(final SaveUsersList.Result result) {
         if (result.isSuccessful()) {
             EventBus.getDefault().post(new SavingUsersListEvent(true));
         } else {
@@ -239,7 +249,7 @@ public class AuthActivity extends BaseActivity{
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    private void onSaveUserData(SavingUserDataEvent event) {
+    public void onSaveUserData(SavingUserDataEvent event) {
 
         isUserDataSavingFinished = true;
         isUserDataSaved = event.savingStatus;
@@ -250,7 +260,7 @@ public class AuthActivity extends BaseActivity{
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    private void onSaveUsersList(SavingUsersListEvent event) {
+    public void onSaveUsersList(SavingUsersListEvent event) {
 
         isUsersListSavingFinished = true;
         isUsersListSaved = event.savingStatus;
