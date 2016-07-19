@@ -36,4 +36,10 @@
     <string name="profile_menu">Мой профиль</string>
     <string name="users_menu">Все пользаватели</string>
     <string name="action_search">Поиск</string>
+    <string name="phone_tag">phone</string>
+    <string name="email_tag">email</string>
+    <string name="vk_tag">vk</string>
+    <string name="git_tag">git</string>
+    <string name="empty_string">   </string>
+    <string name="err_msg_token">Invalid Token</string>
 </resources>

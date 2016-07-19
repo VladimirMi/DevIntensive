@@ -62,12 +62,8 @@ public class UserModelRes {
             return profileValues;
         }
 
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public String getSecondName() {
-            return secondName;
+        public String getFullName() {
+            return secondName + " " + firstName;
         }
 
         public Repositories getRepositories() {
@@ -112,6 +108,10 @@ public class UserModelRes {
         public String getGit() {
             return git;
         }
+
+        public String getId() {
+            return id;
+        }
     }
 
     public class Contacts {
@@ -150,9 +150,9 @@ public class UserModelRes {
         @SerializedName("projects")
         @Expose
         private int projects;
-        @SerializedName("linesCode")
+        @SerializedName("codeLines")
         @Expose
-        private int linesCode;
+        private int codeLines;
         @SerializedName("rait")
         @Expose
         private int rait;
@@ -164,8 +164,8 @@ public class UserModelRes {
             return projects;
         }
 
-        public int getLinesCode() {
-            return linesCode;
+        public int getCodeLines() {
+            return codeLines;
         }
 
         public int getRating() {

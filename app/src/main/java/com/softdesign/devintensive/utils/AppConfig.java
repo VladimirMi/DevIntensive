@@ -41,4 +41,6 @@ public interface AppConfig {
     // Misc configs
     String TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
     String PHOTO_FILE_PREFIX = "JPEG_";
+    long MAX_CONNECT_TIMEOUT = 15_000;
+    long MAX_READ_TIMEOUT = 15_000;
 }

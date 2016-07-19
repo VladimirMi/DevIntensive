@@ -40,10 +40,7 @@ public class LoadUsersTaskFragment extends Fragment {
         if (context instanceof TaskCallbacks) {
             mListener = (TaskCallbacks) context;
         } else {
-            // You can decide if you want to mandate that the Activity implements your callback interface
-            // in which case you should throw an exception if it doesn't:
-            throw new IllegalStateException("Parent activity must implement TaskCallbacks");
-            // or you could just swallow it and allow a state where nobody is listening
+            throw new IllegalStateException("Parent activity mut implement TaskCallbacks");
         }
     }
 
@@ -60,7 +57,7 @@ public class LoadUsersTaskFragment extends Fragment {
      * The Activity can call this when it wants to start the task
      */
     public void startLoad() {
-        mCall = DataManager.getInstance().getUserList();
+        mCall = DataManager.getInstance().getUserListFromNet();
 
         mCall.enqueue(new Callback<UserListRes>() {
             @Override

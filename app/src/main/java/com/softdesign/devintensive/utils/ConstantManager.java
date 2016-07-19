@@ -54,4 +54,12 @@ public interface ConstantManager {
 
     // Content types
     String CONTENT_TYPE_MULTIPART = "multipart/form-data";
+
+
+    int USER_LIST_LOADER = 150;
+    int REPOSITORY_LOADER = 151;
+    int USER_PROFILE_LOADER = 152;
+    String INVALID_TOKEN = "INVALID_TOKEN";
+    String USERS_LIST_EXISTS_KEY = "USERS_LIST_EXISTS_KEY";
+    String REPOSITORY_TAG = "REPOSITORY_TAG";
 }

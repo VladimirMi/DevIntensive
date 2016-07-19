@@ -42,8 +42,14 @@ public class PreferencesManager {
 
     public List<String> loadUserInfo() {
         List<String> userFields = new ArrayList<>();
-        for (String userFieldKey : USER_INFO) {
-            userFields.add(mSharedPreferences.getString(userFieldKey, ""));
+        for (int i = 0; i < USER_INFO.length; i++) {
+            if (USER_INFO[i].equals(ConstantManager.USER_GIT_KEY)) {
+                for (String s : mSharedPreferences.getString(USER_INFO[i], "").split(" ")) {
+                    userFields.add(s);
+                }
+            } else {
+                userFields.add(mSharedPreferences.getString(USER_INFO[i], ""));
+            }
         }
         return userFields;
     }
@@ -55,8 +61,7 @@ public class PreferencesManager {
     }
 
     public Uri loadUserPhoto() {
-        return Uri.parse(mSharedPreferences.getString(ConstantManager.USER_PHOTO_KEY,
-                ""));
+        return Uri.parse(mSharedPreferences.getString(ConstantManager.USER_PHOTO_KEY, ""));
     }
 
     public void saveAuthToken(String authToken) {
@@ -106,40 +111,63 @@ public class PreferencesManager {
         return Uri.parse(mSharedPreferences.getString(ConstantManager.USER_AVATAR_KEY, ""));
     }
 
-    public void clearAllData() {
+    public void saveUserName(String fullName) {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.clear();
-        editor.apply();
-    }
-
-    public void saveUserName(String firstName, String secondName) {
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(ConstantManager.USER_NAME_KEY, secondName + " " + firstName);
+        editor.putString(ConstantManager.USER_NAME_KEY, fullName);
         editor.apply();
     }
 
     public String loadUserName() {
-        return mSharedPreferences.getString(ConstantManager.USER_NAME_KEY, "");
+        return mSharedPreferences.getString(ConstantManager.USER_NAME_KEY, ConstantManager.INVALID_TOKEN);
     }
 
-    public void saveUserValues(UserModelRes.Data userModel) {
+    public void saveUserData(UserModelRes.Data userData) {
+        saveUserId(userData.getId());
+
         List<String> userStatistic = new ArrayList<>();
-        userStatistic.add(String.valueOf(userModel.getProfileValues().getRating()));
-        userStatistic.add(String.valueOf(userModel.getProfileValues().getLinesCode()));
-        userStatistic.add(String.valueOf(userModel.getProfileValues().getProjects()));
+        userStatistic.add(String.valueOf(userData.getProfileValues().getRating()));
+        userStatistic.add(String.valueOf(userData.getProfileValues().getCodeLines()));
+        userStatistic.add(String.valueOf(userData.getProfileValues().getProjects()));
+        saveUserStatistic(userStatistic);
 
         List<String> userInfo = new ArrayList<>();
-        userInfo.add(userModel.getContacts().getPhone());
-        userInfo.add(userModel.getContacts().getEmail());
-        userInfo.add(userModel.getContacts().getVk());
-        // TODO: 7/10/2016 разобраться с множественными репозиториями
-        userInfo.add(userModel.getRepositories().getRepo().get(0).getGit());
-        userInfo.add(userModel.getPublicInfo().getBio());
+        userInfo.add(userData.getContacts().getPhone());
+        userInfo.add(userData.getContacts().getEmail());
+        userInfo.add(userData.getContacts().getVk());
 
-        saveUserStatistic(userStatistic);
+        StringBuilder repositories = new StringBuilder();
+        for (UserModelRes.Repo repo : userData.getRepositories().getRepo()) {
+            repositories.append(repo.getGit() + " ");
+        }
+        userInfo.add(repositories.toString());
+
+        userInfo.add(userData.getPublicInfo().getBio());
         saveUserInfo(userInfo);
-        saveUserPhoto(Uri.parse(userModel.getPublicInfo().getPhoto()));
-        saveUserAvatar(Uri.parse(userModel.getPublicInfo().getAvatar()));
-        saveUserName(userModel.getFirstName(), userModel.getSecondName());
+
+        saveUserPhoto(Uri.parse(userData.getPublicInfo().getPhoto()));
+
+        saveUserAvatar(Uri.parse(userData.getPublicInfo().getAvatar()));
+
+        saveUserName(userData.getFullName());
+    }
+
+    public int getRepositoriesSize() {
+        return mSharedPreferences.getString(ConstantManager.USER_GIT_KEY, "").split(" ").length;
+    }
+
+    public void setUsersListExists(boolean isUsersListExists) {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean(ConstantManager.USERS_LIST_EXISTS_KEY, isUsersListExists);
+        editor.apply();
+    }
+
+    public boolean isUsersListExists() {
+        return mSharedPreferences.getBoolean(ConstantManager.USERS_LIST_EXISTS_KEY, false);
+    }
+
+    public void clearAllData() {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.clear();
+        editor.apply();
     }
 }

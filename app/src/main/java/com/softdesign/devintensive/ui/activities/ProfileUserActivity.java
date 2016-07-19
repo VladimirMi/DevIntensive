@@ -6,17 +6,23 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.storage.models.UserDTO;
-import com.softdesign.devintensive.ui.views.GitItemView;
+import com.softdesign.devintensive.ui.adapters.RepositoriesAdapter;
+import com.softdesign.devintensive.ui.views.RepositoryDeviderView;
+import com.softdesign.devintensive.ui.views.RepositoryView;
 import com.softdesign.devintensive.utils.ConstantManager;
+import com.softdesign.devintensive.utils.UiHelper;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -33,7 +39,7 @@ public class ProfileUserActivity extends AppCompatActivity {
     @BindView(R.id.rating_txt) TextView mRating;
     @BindView(R.id.code_lines_txt) TextView mCodeLines;
     @BindView(R.id.projects_txt) TextView mProjects;
-    @BindView(R.id.repositories_list) LinearLayout mRepoListView;
+    @BindView(R.id.repositories_list) ListView mRepoListView;
 
     private UserDTO mUser;
 
@@ -61,20 +67,17 @@ public class ProfileUserActivity extends AppCompatActivity {
     }
 
     private void initRepositoriesView() {
-        final List<String> repositories = mUser.getRepositories();
-
-        for (String repository : repositories) {
-            GitItemView gitItem = new GitItemView(this, repository);
-            gitItem.getGitImageView().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent viewIntent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse(ConstantManager.HTTPS_SCHEME + v.getContentDescription()));
-                    startActivity(viewIntent);
-                }
-            });
-            mRepoListView.addView(gitItem);
-        }
+//        final List<String> repositories = mUser.getRepositories();
+//
+//        RepositoriesAdapter adapter = new RepositoriesAdapter(repositories, new RepositoriesAdapter.CustomClickListener() {
+//            @Override
+//            public void onItemClickListener(Uri uri) {
+//                Intent viewIntent = new Intent(Intent.ACTION_VIEW, uri);
+//                startActivity(viewIntent);
+//            }
+//        });
+//        mRepoListView.setAdapter(adapter);
+//        UiHelper.setRepoListViewHeight(mRepoListView);
     }
 
 

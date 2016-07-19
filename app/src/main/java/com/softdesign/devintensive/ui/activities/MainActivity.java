@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -18,18 +19,13 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,11 +36,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.managers.PreferencesManager;
 import com.softdesign.devintensive.data.network.res.UploadImageRes;
-import com.softdesign.devintensive.data.network.res.UserModelRes;
+import com.softdesign.devintensive.ui.views.RepositoryDeviderView;
+import com.softdesign.devintensive.ui.views.RepositoryView;
 import com.softdesign.devintensive.utils.AppConfig;
 import com.softdesign.devintensive.utils.CircleTransformation;
 import com.softdesign.devintensive.utils.ConstantManager;
@@ -62,11 +62,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -83,14 +81,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
     @BindView(R.id.navigation_drawer) DrawerLayout mNavigationDrawer;
 
-    @BindViews({R.id.phone_et, R.id.email_et, R.id.vk_et, R.id.github_et, R.id.about_me_et})
-    EditText[] mUserInfoViews;
+    @BindView(R.id.repositories_list) LinearLayout mRepoListView;
 
-    @BindViews({R.id.phone_til, R.id.email_til, R.id.vk_til, R.id.github_til, R.id.about_me_til})
-    TextInputLayout[] mUserInfoInputLayouts;
+    @BindView(R.id.phone_et) EditText mUserPhone;
+    @BindView(R.id.email_et) EditText mUserEmail;
+    @BindView(R.id.vk_et) EditText mUserVk;
+    @BindView(R.id.bio_et) EditText mUserBio;
 
-    @BindViews({R.id.make_call_img, R.id.send_email_img, R.id.vk_img, R.id.github_img})
-    ImageView[] mActionIcons;
+    @BindView(R.id.make_call_img) ImageView mPhoneIcon;
+    @BindView(R.id.send_email_img) ImageView mEmailIcon;
+    @BindView(R.id.vk_img) ImageView mVkIcon;
+
+    List<EditText> mUserInfoViews;
+
+    List<ImageView> mActionIcons;
 
     @BindViews({R.id.rating_txt, R.id.code_lines_txt, R.id.projects_txt})
     TextView[] mUserStatisticViews;
@@ -113,6 +117,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         mDataManager = DataManager.getInstance();
         mPreferencesManager = mDataManager.getPreferencesManager();
 
+        mUserInfoViews = new ArrayList<>();
+        mUserInfoViews.add(mUserPhone);
+        mUserInfoViews.add(mUserEmail);
+        mUserInfoViews.add(mUserVk);
+
+        mActionIcons = new ArrayList<>();
+        mActionIcons.add(mPhoneIcon);
+        mActionIcons.add(mEmailIcon);
+        mActionIcons.add(mVkIcon);
+
+        initRepositoriesView();
+
+        mUserInfoViews.add(mUserBio);
+
         mFab.setOnClickListener(this);
         mProfilePlaceholder.setOnClickListener(this);
 
@@ -120,9 +138,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             actionIcon.setOnClickListener(this);
         }
 
-        for (EditText userInfoView : mUserInfoViews) {
-            userInfoView.setOnFocusChangeListener(this);
-            userInfoView.addTextChangedListener(new MyTextWatcher(userInfoView, this));
+        for (int i = 0; i < mUserInfoViews.size() - 1; i++) {
+            mUserInfoViews.get(i).addTextChangedListener(new MyTextWatcher(this,
+                    mUserInfoViews.get(i), mActionIcons.get(i)));
         }
 
         if (savedInstanceState != null) {
@@ -137,8 +155,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         loadUserStatistic();
         loadUserPhoto();
         loadDrawerContent();
-
-        updateClientInfo();
     }
 
     @Override
@@ -189,34 +205,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.make_call_img:
-                makeActionView(Uri.parse(ConstantManager.TELEPHONE_SCHEME + mUserInfoViews[0].getText()));
+                makeActionView(Uri.parse(ConstantManager.TELEPHONE_SCHEME + mUserPhone.getText()));
                 break;
             case R.id.send_email_img:
-                sendEmail(Uri.parse(ConstantManager.MAIL_SCHEME + mUserInfoViews[1].getText()));
+                sendEmail(Uri.parse(ConstantManager.MAIL_SCHEME + mUserEmail.getText()));
                 break;
             case R.id.vk_img:
-                makeActionView(Uri.parse(ConstantManager.HTTPS_SCHEME + mUserInfoViews[2].getText()));
-                break;
-            case R.id.github_img:
-                makeActionView(Uri.parse(ConstantManager.HTTPS_SCHEME + mUserInfoViews[3].getText()));
+                makeActionView(Uri.parse(ConstantManager.HTTPS_SCHEME + mUserVk.getText()));
                 break;
             case R.id.profile_placeholder:
                 showDialog(ConstantManager.LOAD_PROFILE_PHOTO);
                 break;
             case R.id.fab:
                 if (mEditMode) {
-                    if (!MyTextWatcher.isValidPhone(mUserInfoViews[0].getText().toString())) {
-                        requestFocus(mUserInfoViews[0]);
-                        return;
-                    } else if (!MyTextWatcher.isValidEmail(mUserInfoViews[1].getText().toString())) {
-                        requestFocus(mUserInfoViews[1]);
-                        return;
-                    } else if (!MyTextWatcher.isValidVk(mUserInfoViews[2].getText().toString())) {
-                        requestFocus(mUserInfoViews[2]);
-                        return;
-                    } else if (!MyTextWatcher.isValidGit(mUserInfoViews[3].getText().toString())) {
-                        requestFocus(mUserInfoViews[3]);
-                        return;
+                    for (EditText userInfoView : mUserInfoViews) {
+                        if (!MyTextWatcher.isValid(userInfoView)) {
+                            requestFocus(userInfoView);
+                        }
                     }
                     if (mPhotoFile != null) {
                         Uri editorPhotoUri = Uri.fromFile(mPhotoFile);
@@ -238,24 +243,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         switch (v.getId()) {
-            case R.id.phone_et:
-                break;
-            case R.id.email_et:
-                break;
             // отсекает лишние символы перед "vk"
             case R.id.vk_et:
-                String value = mUserInfoViews[2].getText().toString();
+                String value = mUserVk.getText().toString();
                 int startIndex = value.indexOf("vk");
                 if (startIndex > 0) {
-                    mUserInfoViews[2].setText(value.substring(startIndex));
-                }
-                break;
-            // отсекает лишние символы перед "github"
-            case R.id.github_et:
-                value = mUserInfoViews[3].getText().toString();
-                startIndex = value.indexOf("github");
-                if (startIndex > 0) {
-                    mUserInfoViews[3].setText(value.substring(startIndex));
+                    mUserVk.setText(value.substring(startIndex));
                 }
                 break;
         }
@@ -364,7 +357,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                     case R.id.login_menu:
                         mPreferencesManager.saveUserId("");
                         mPreferencesManager.saveAuthToken("");
-                        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                        Intent loginIntent = new Intent(MainActivity.this, AuthActivity.class);
                         startActivity(loginIntent);
                         finish();
                         return true;
@@ -392,7 +385,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 //            lockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
             mFab.setImageResource(R.drawable.ic_check_24dp);
-            requestFocus(mUserInfoViews[0]);
+            requestFocus(mUserInfoViews.get(0));
         } else {
             for (EditText userValue : mUserInfoViews) {
                 userValue.setFocusable(false);
@@ -406,10 +399,31 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
     }
 
+    private void initRepositoriesView() {
+
+        for (int i = 0; i < mPreferencesManager.getRepositoriesSize(); i++) {
+            RepositoryView repositoryView = new RepositoryView(this, new RepositoryView.CustomClickListener() {
+                @Override
+                public void onIconClickListener(Uri uri) {
+                    makeActionView(uri);
+                }
+            });
+            mRepoListView.addView(repositoryView);
+
+            if (i < mPreferencesManager.getRepositoriesSize() - 1) {
+                RepositoryDeviderView deviderView = new RepositoryDeviderView(this);
+                mRepoListView.addView(deviderView);
+            }
+            mUserInfoViews.add(repositoryView.getGitEditText());
+            mActionIcons.add(repositoryView.getGitImage());
+        }
+    }
+
+
     private void loadUserInfo() {
         List<String> userInfo = mPreferencesManager.loadUserInfo();
         for (int i = 0; i < userInfo.size(); i++) {
-            mUserInfoViews[i].setText(userInfo.get(i));
+            mUserInfoViews.get(i).setText(userInfo.get(i));
         }
     }
 
@@ -445,11 +459,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     private void saveUserInfo() {
-        List<String> userData = new ArrayList<>();
+        List<String> userInfo = new ArrayList<>();
+
+        StringBuilder repositories = new StringBuilder();
         for (EditText userInfoView : mUserInfoViews) {
-            userData.add(userInfoView.getText().toString());
+            if (userInfoView.getTag().equals(ConstantManager.REPOSITORY_TAG)) {
+                repositories.append(userInfoView.getText().toString() + " ");
+            } else {
+                userInfo.add(userInfoView.getText().toString());
+            }
         }
-        mPreferencesManager.saveUserInfo(userData);
+        userInfo.add(4, repositories.toString());
+        mPreferencesManager.saveUserInfo(userInfo);
     }
 
     private void loadPhotoFromGallery() {
@@ -642,27 +663,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             @Override
             public void onFailure(Call call, Throwable t) {
                 Log.d(TAG, "uploadPhoto onFailure");
-            }
-        });
-    }
-
-    private void updateClientInfo() {
-        Call<UserModelRes> call = mDataManager.getUser(mPreferencesManager.getUserId());
-
-        call.enqueue(new Callback<UserModelRes>() {
-            @Override
-            public void onResponse(Call<UserModelRes> call, Response<UserModelRes> response) {
-                mPreferencesManager.saveUserValues(response.body().getData());
-                loadUserInfo();
-                loadUserStatistic();
-                loadUserPhoto();
-                loadDrawerContent();
-                Log.d(TAG, "updateClientInfo onResponse");
-            }
-
-            @Override
-            public void onFailure(Call<UserModelRes> call, Throwable t) {
-                Log.d(TAG, "updateClientInfo onFailure");
             }
         });
     }

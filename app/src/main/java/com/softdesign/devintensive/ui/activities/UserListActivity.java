@@ -145,7 +145,7 @@ public class UserListActivity extends AppCompatActivity
                     case R.id.login_menu:
                         mPreferencesManager.saveUserId("");
                         mPreferencesManager.saveAuthToken("");
-                        Intent loginIntent = new Intent(UserListActivity.this, LoginActivity.class);
+                        Intent loginIntent = new Intent(UserListActivity.this, AuthActivity.class);
                         startActivity(loginIntent);
                         finish();
                         return true;
