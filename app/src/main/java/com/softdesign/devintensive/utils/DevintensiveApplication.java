@@ -28,6 +28,14 @@ public class DevintensiveApplication extends Application {
         Database db = helper.getWritableDb();
         sDaoSession = new DaoMaster(db).newSession();
 
+//        Database db = new EncryptedOpenHelper(context, "mydatabase") {
+//            @Override
+//            public void onUpgrade(Database db, int oldVersion, int newVersion) {
+//                // Use db.execSQL(...) to execute SQL for schema updates
+//            }
+//        }.getReadableDatabase("secret-password");
+//        DaoSession daoSession = new DaoMaster(db).newSession();
+
         Stetho.initializeWithDefaults(this);
     }
 

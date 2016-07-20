@@ -8,6 +8,7 @@ import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.DevintensiveApplication;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PreferencesManager {
@@ -42,13 +43,11 @@ public class PreferencesManager {
 
     public List<String> loadUserInfo() {
         List<String> userFields = new ArrayList<>();
-        for (int i = 0; i < USER_INFO.length; i++) {
-            if (USER_INFO[i].equals(ConstantManager.USER_GIT_KEY)) {
-                for (String s : mSharedPreferences.getString(USER_INFO[i], "").split(" ")) {
-                    userFields.add(s);
-                }
+        for (String aUSER_INFO : USER_INFO) {
+            if (aUSER_INFO.equals(ConstantManager.USER_GIT_KEY)) {
+                Collections.addAll(userFields, mSharedPreferences.getString(aUSER_INFO, "null").split(" "));
             } else {
-                userFields.add(mSharedPreferences.getString(USER_INFO[i], ""));
+                userFields.add(mSharedPreferences.getString(aUSER_INFO, "null"));
             }
         }
         return userFields;
@@ -60,8 +59,8 @@ public class PreferencesManager {
         editor.apply();
     }
 
-    public Uri loadUserPhoto() {
-        return Uri.parse(mSharedPreferences.getString(ConstantManager.USER_PHOTO_KEY, ""));
+    public String loadUserPhoto() {
+        return mSharedPreferences.getString(ConstantManager.USER_PHOTO_KEY, "null");
     }
 
     public void saveAuthToken(String authToken) {
@@ -71,7 +70,7 @@ public class PreferencesManager {
     }
 
     public String getAuthToken() {
-        return mSharedPreferences.getString(ConstantManager.AUTH_TOKEN_KEY, "");
+        return mSharedPreferences.getString(ConstantManager.AUTH_TOKEN_KEY, ConstantManager.INVALID_TOKEN);
     }
 
     public void saveUserId(String userId) {
@@ -81,7 +80,7 @@ public class PreferencesManager {
     }
 
     public String getUserId() {
-        return mSharedPreferences.getString(ConstantManager.USER_ID_KEY, "");
+        return mSharedPreferences.getString(ConstantManager.USER_ID_KEY, "null");
     }
 
     public void saveUserStatistic(List<String> userStatistic) {
@@ -96,7 +95,7 @@ public class PreferencesManager {
     public List<String> loadUserStatistic() {
         List<String> userStatistic = new ArrayList<>();
         for (String userFieldKey : USER_STATISTIC) {
-            userStatistic.add(mSharedPreferences.getString(userFieldKey, ""));
+            userStatistic.add(mSharedPreferences.getString(userFieldKey, "null"));
         }
         return userStatistic;
     }
@@ -107,8 +106,8 @@ public class PreferencesManager {
         editor.apply();
     }
 
-    public Uri loadUserAvatar() {
-        return Uri.parse(mSharedPreferences.getString(ConstantManager.USER_AVATAR_KEY, ""));
+    public String loadUserAvatar() {
+        return mSharedPreferences.getString(ConstantManager.USER_AVATAR_KEY, "null");
     }
 
     public void saveUserName(String fullName) {
@@ -118,7 +117,7 @@ public class PreferencesManager {
     }
 
     public String loadUserName() {
-        return mSharedPreferences.getString(ConstantManager.USER_NAME_KEY, "");
+        return mSharedPreferences.getString(ConstantManager.USER_NAME_KEY, "null");
     }
 
     public void saveUserData(UserModelRes.Data userData) {
@@ -137,7 +136,7 @@ public class PreferencesManager {
 
         StringBuilder repositories = new StringBuilder();
         for (UserModelRes.Repo repo : userData.getRepositories().getRepo()) {
-            repositories.append(repo.getGit() + " ");
+            repositories.append(repo.getGit()).append(" ");
         }
         userInfo.add(repositories.toString());
 
@@ -152,7 +151,7 @@ public class PreferencesManager {
     }
 
     public int getRepositoriesSize() {
-        return mSharedPreferences.getString(ConstantManager.USER_GIT_KEY, "").split(" ").length;
+        return mSharedPreferences.getString(ConstantManager.USER_GIT_KEY, "null").split(" ").length;
     }
 
     public void setUsersListExists(boolean isUsersListExists) {

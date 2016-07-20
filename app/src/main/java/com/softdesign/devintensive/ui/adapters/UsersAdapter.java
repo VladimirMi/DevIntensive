@@ -2,50 +2,46 @@ package com.softdesign.devintensive.ui.adapters;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
-import com.softdesign.devintensive.data.network.res.UserListRes;
 import com.softdesign.devintensive.data.storage.models.User;
+import com.softdesign.devintensive.ui.behaviors.CustomItemTouchHelperCallback;
 import com.softdesign.devintensive.ui.views.AspectRatioImageView;
+import com.softdesign.devintensive.utils.AppConfig;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.UiHelper;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import butterknife.BindDrawable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
+public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder>
+        implements CustomItemTouchHelperCallback.ItemTouchHelperAdapter{
 
     private static final String TAG = ConstantManager.TAG_PREFIX + "UsersAdapter";
     private UserViewHolder.CustomClickListener mListener;
     private Context mContext;
-    private List<User> mUsers;
+    private List<User> mUsers = new ArrayList<>();
     private List<User> mUsersCopy = new ArrayList<>();
-    public boolean isAnimate = true;
+
 
     public UsersAdapter(List<User> users, UserViewHolder.CustomClickListener clickListener) {
         mUsers = users;
-        mUsersCopy.addAll(users);
+        mUsersCopy = users;
         mListener = clickListener;
     }
 
@@ -68,41 +64,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             userPhoto = user.getPhoto();
         }
 
-        Picasso.with(mContext)
-                .load(userPhoto)
-                .fit()
-                .centerCrop()
-                .placeholder(holder.mDummy)
-                .error(holder.mDummy)
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .into(holder.mUserPhoto, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        Log.d(TAG, "Load from cache");
-                    }
-
-                    @Override
-                    public void onError() {
-                        DataManager.getInstance().getPicasso()
-                                .load(userPhoto)
-                                .fit()
-                                .centerCrop()
-                                .placeholder(holder.mDummy)
-                                .error(holder.mDummy)
-                                .into(holder.mUserPhoto, new Callback() {
-                                    @Override
-                                    public void onSuccess() {
-                                        Log.d(TAG, "Load from net");
-                                    }
-
-                                    @Override
-                                    public void onError() {
-                                        Log.d(TAG, "Could not fetch the image");
-                                    }
-                                });
-                    }
-                });
-
+        UiHelper.setUserPhoto(mContext, userPhoto, holder.mUserPhoto);
 
         holder.mFullName.setText(user.getFullName());
         holder.mRating.setText(String.valueOf(user.getRating()));
@@ -115,8 +77,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             holder.mBio.setVisibility(View.VISIBLE);
             holder.mBio.setText(user.getBio());
         }
-
-        setFadeAnimation(holder.itemView);
     }
 
     @Override
@@ -124,28 +84,45 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         return mUsers.size();
     }
 
-    public void filter(String query) {
+    public void filter(final String query) {
         if (query.isEmpty()) {
-            mUsers.clear();
-            mUsers.addAll(mUsersCopy);
+            mUsers = mUsersCopy;
+            notifyDataSetChanged();
         } else {
-            ArrayList<User> newUsers = new ArrayList<>();
-            query = query.toLowerCase();
-            for (User user : mUsersCopy) {
-                if (user.getFullName().toLowerCase().contains(query)) {
-                    newUsers.add(user);
+            mUsers = DataManager.getInstance().searchUsers(query.toUpperCase());
+            Handler handler= new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
                 }
-            }
-            mUsers.clear();
-            mUsers.addAll(newUsers);
+            }, AppConfig.SEARCH_DELAY);
         }
-        notifyDataSetChanged();
     }
 
-    private void setFadeAnimation(View view) {
-        AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
-        anim.setDuration(500);
-        view.startAnimation(anim);
+
+    @Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        User user1 = mUsers.get(fromPosition);
+        User user2 = mUsers.get(toPosition);
+        user1.setOrder(toPosition);
+        user2.setOrder(fromPosition);
+        user1.update();
+        user2.update();
+
+        Collections.swap(mUsers, fromPosition, toPosition);
+        notifyItemMoved(fromPosition, toPosition);
+
+        return true;
+    }
+
+    @Override
+    public void onItemDismiss(int position) {
+        User user = mUsers.get(position);
+        user.setDeleted(true);
+        user.update();
+        mUsers.remove(position);
+        notifyItemRemoved(position);
     }
 
 

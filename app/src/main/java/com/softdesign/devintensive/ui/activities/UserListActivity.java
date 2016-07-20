@@ -1,30 +1,24 @@
 package com.softdesign.devintensive.ui.activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AnticipateOvershootInterpolator;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.CycleInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -38,10 +32,9 @@ import com.softdesign.devintensive.data.storage.models.UserDTO;
 import com.softdesign.devintensive.data.tasks.LoadRepositories;
 import com.softdesign.devintensive.data.tasks.LoadUsersList;
 import com.softdesign.devintensive.ui.adapters.UsersAdapter;
-import com.softdesign.devintensive.utils.CircleTransformation;
+import com.softdesign.devintensive.ui.behaviors.CustomItemTouchHelperCallback;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.UiHelper;
-import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,8 +42,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class UserListActivity extends BaseActivity
-        implements SearchView.OnQueryTextListener {
+public class UserListActivity extends BaseActivity {
 
     private static final String TAG = ConstantManager.TAG_PREFIX + "UserListActivity";
     @BindView(R.id.main_coordinator_container) CoordinatorLayout mCoordinatorLayout;
@@ -58,13 +50,15 @@ public class UserListActivity extends BaseActivity
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.navigation_drawer) DrawerLayout mNavigationDrawer;
     @BindView(R.id.user_list) RecyclerView mRecyclerView;
+    @BindView(R.id.navigation_view) NavigationView mNavigationView;
 
     private DataManager mDataManager;
     private PreferencesManager mPreferencesManager;
     private UsersAdapter mUsersAdapter;
     private List<User> mUsers;
     private HashMap<String, List<Repository>> mRepositories;
-    private boolean pendingIntroAnimation;
+
+    private boolean isAnimate = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,8 +80,8 @@ public class UserListActivity extends BaseActivity
         ChronosOperation<HashMap<String, List<Repository>>> loadRepositoriesTask = new LoadRepositories();
         runOperation(loadRepositoriesTask);
 
-        if (savedInstanceState == null) {
-            pendingIntroAnimation = true;
+        if (savedInstanceState != null) {
+            isAnimate = false;
         }
     }
 
@@ -109,7 +103,7 @@ public class UserListActivity extends BaseActivity
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
     }
 
@@ -119,7 +113,19 @@ public class UserListActivity extends BaseActivity
 
         final MenuItem item = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-        searchView.setOnQueryTextListener(this);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mUsersAdapter.filter(newText);
+                mRecyclerView.scrollToPosition(0);
+                return true;
+            }
+        });
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -127,20 +133,18 @@ public class UserListActivity extends BaseActivity
     @Override
     protected void onRestart() {
         super.onRestart();
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
-        navigationView.getMenu().getItem(2).setChecked(true);
+        mNavigationView.getMenu().getItem(2).setChecked(true);
     }
 
     private void setupToolbar() {
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
 
-        AppBarLayout.LayoutParams appBarParams = (AppBarLayout.LayoutParams) mToolbar.getLayoutParams();
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(mPreferencesManager.loadUserName());
         }
-        actionBar.setTitle(mPreferencesManager.loadUserName());
     }
 
     private void setupDrawer() {
@@ -155,15 +159,16 @@ public class UserListActivity extends BaseActivity
                 int itemId = item.getItemId();
                 switch (itemId) {
                     case R.id.login_menu:
-                        mPreferencesManager.saveUserId("");
-                        mPreferencesManager.saveAuthToken("");
+                        mPreferencesManager.clearAllData();
+                        mPreferencesManager.saveAuthToken(ConstantManager.INVALID_TOKEN);
                         Intent loginIntent = new Intent(UserListActivity.this, AuthActivity.class);
                         startActivity(loginIntent);
                         finish();
                         return true;
                     case R.id.user_profile_menu:
-                        Intent usersIntent = new Intent(UserListActivity.this, MainActivity.class);
-                        startActivity(usersIntent);
+                        Intent userIntent = new Intent(UserListActivity.this, MainActivity.class);
+                        userIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(userIntent);
                         return true;
                 }
                 return false;
@@ -172,11 +177,7 @@ public class UserListActivity extends BaseActivity
 
         // установка круглого аватара
         ImageView userAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.user_avatar);
-        Picasso.with(this)
-                .load(mPreferencesManager.loadUserAvatar())
-                .placeholder(R.color.grey_light)
-                .transform(new CircleTransformation())
-                .into(userAvatar);
+        UiHelper.setUserAvatar(this, mPreferencesManager.loadUserAvatar(), userAvatar);
 
         TextView userName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_txt);
         TextView userEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_email_txt);
@@ -188,7 +189,6 @@ public class UserListActivity extends BaseActivity
         mUsersAdapter = new UsersAdapter(mUsers, new UsersAdapter.UserViewHolder.CustomClickListener() {
             @Override
             public void onUserItemClickListener(int position) {
-
                 UserDTO userDTO = new UserDTO(mUsers.get(position), mRepositories.get(mUsers.get(position).getRemoteId()));
 
                 Intent profileIntent = new Intent(UserListActivity.this, ProfileUserActivity.class);
@@ -196,32 +196,29 @@ public class UserListActivity extends BaseActivity
                 startActivity(profileIntent);
             }
         });
+        mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mUsersAdapter);
-        mRecyclerView.setTranslationY(UiHelper.getScreenHeight(this));
-        mRecyclerView.setAlpha(0f);
-        mRecyclerView.setScaleX(0.0f);
-        mRecyclerView.setScaleY(0.0f);
-        mRecyclerView.animate()
-                .translationY(0)
-                .scaleX(1.0f)
-                .scaleY(1.0f)
-                .setDuration(1000)
-                .alpha(1f)
-                .setInterpolator(new FastOutSlowInInterpolator())
-                .start();
+
+        if (isAnimate) {
+            mRecyclerView.setTranslationY(UiHelper.getScreenHeight(this));
+            mRecyclerView.setAlpha(0f);
+            mRecyclerView.setScaleX(0.0f);
+            mRecyclerView.setScaleY(0.0f);
+            mRecyclerView.animate()
+                    .translationY(0)
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .setDuration(1000)
+                    .alpha(1f)
+                    .setInterpolator(new FastOutSlowInInterpolator())
+                    .start();
+        }
+
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(mUsersAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(mRecyclerView);
     }
 
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String query) {
-        mUsersAdapter.filter(query);
-        mRecyclerView.scrollToPosition(0);
-        return true;
-    }
 
     public void onOperationFinished(final LoadUsersList.Result result) {
         if (result.isSuccessful()) {
@@ -235,7 +232,6 @@ public class UserListActivity extends BaseActivity
     public void onOperationFinished(final LoadRepositories.Result result) {
         if (result.isSuccessful()) {
             mRepositories = result.getOutput();
-            setupRecycler();
         } else {
 
             Log.e(TAG, "onSaveUserListFinished: " + result.getErrorMessage());

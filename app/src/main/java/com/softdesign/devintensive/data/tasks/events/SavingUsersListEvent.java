@@ -1,9 +1,9 @@
 package com.softdesign.devintensive.data.tasks.events;
 
 public class SavingUsersListEvent {
-    public final boolean savingStatus;
+    public final String status;
 
-    public SavingUsersListEvent(boolean savingStatus) {
-        this.savingStatus = savingStatus;
+    public SavingUsersListEvent(String status) {
+        this.status = status;
     }
 }

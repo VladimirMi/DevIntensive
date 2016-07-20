@@ -83,7 +83,7 @@ public class DataManager {
     }
     // endregion
 
-    // region =========== Database ============
+    // region =========== Database ===========
 
     public List<User> getUsersListFromDB() {
         List<User> userList = new ArrayList<>();
@@ -91,7 +91,8 @@ public class DataManager {
         try {
             userList = mDaoSession.queryBuilder(User.class)
                     .where(UserDao.Properties.CodeLines.gt(0))
-                    .orderDesc(UserDao.Properties.Rating)
+                    .where(UserDao.Properties.Deleted.eq(false))
+                    .orderAsc(UserDao.Properties.Order)
                     .build()
                     .list();
         } catch (Exception e) {
@@ -126,6 +127,24 @@ public class DataManager {
         return repositories;
     }
 
+    public List<User> searchUsers(String search) {
+        List<User> users = new ArrayList<>();
+        try {
+            users = mDaoSession.queryBuilder(User.class)
+                    .build()
+                    .list();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        List<User> result = new ArrayList<>();
+        for (User user : users) {
+            if (user.getSearchName().contains(search)) {
+                result.add(user);
+            }
+        }
+
+        return result;
+    }
 
     // endregion
 }

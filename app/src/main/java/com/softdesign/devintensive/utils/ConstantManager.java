@@ -1,9 +1,5 @@
 package com.softdesign.devintensive.utils;
 
-import android.util.Patterns;
-
-import java.util.regex.Pattern;
-
 public interface ConstantManager {
     // Preferences Keys
     String USER_PHONE_KEY = "USER_PHONE_KEY";
@@ -20,11 +16,7 @@ public interface ConstantManager {
     String AUTH_TOKEN_KEY = "AUTH_TOKEN_KEY";
     String USER_ID_KEY = "USER_ID_KEY";
     String USER_NAME_KEY = "USER_NAME_KEY";
-
-    String PARCELABLE_KEY = "PARCELABLE_KEY";
-    String USERS_LIST_KEY = "USERS_LIST_KEY";
-
-    String LOAD_FRAG_TAG = "LOAD_FRAG_TAG";
+    String USERS_LIST_EXISTS_KEY = "USERS_LIST_EXISTS_KEY";
 
     // Misc constants
     String TAG_PREFIX = "DEV ";
@@ -56,10 +48,10 @@ public interface ConstantManager {
     String CONTENT_TYPE_MULTIPART = "multipart/form-data";
 
 
-    int USER_LIST_LOADER = 150;
-    int REPOSITORY_LOADER = 151;
-    int USER_PROFILE_LOADER = 152;
     String INVALID_TOKEN = "INVALID_TOKEN";
-    String USERS_LIST_EXISTS_KEY = "USERS_LIST_EXISTS_KEY";
-    String REPOSITORY_TAG = "REPOSITORY_TAG";
+    String PARCELABLE_KEY = "PARCELABLE_KEY";
+
+    String USER_LIST_UPDATED = "USER_LIST_UPDATED";
+    String USER_LIST_CREATED = "USER_LIST_CREATED";
+    String USER_LIST_FAIL = "USER_LIST_FAIL";
 }

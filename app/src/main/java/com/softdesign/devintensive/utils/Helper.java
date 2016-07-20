@@ -1,10 +1,8 @@
 package com.softdesign.devintensive.utils;
 
-import com.softdesign.devintensive.data.network.req.UserLoginReq;
 import com.softdesign.devintensive.data.network.res.UserListRes;
 import com.softdesign.devintensive.data.network.res.UserModelRes;
 import com.softdesign.devintensive.data.storage.models.Repository;
-import com.softdesign.devintensive.data.storage.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,4 +28,6 @@ public class Helper {
         }
         return repositories;
     }
+
+
 }

@@ -50,22 +50,19 @@ public class AuthActivity extends BaseActivity {
     @BindView(R.id.main_coordinator_container) CoordinatorLayout mCoordinatorLayout;
 
     private boolean isLoggedIn;
-    private boolean isUsersListExists;
     private boolean isUserDataSavingFinished;
     private boolean isUsersListSavingFinished;
-    private boolean isUserDataSaved;
-    private boolean isUsersListSaved;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        isLoggedIn = !mPreferencesManager.getAuthToken().isEmpty();
-        isUsersListExists = mPreferencesManager.isUsersListExists();
+        isLoggedIn = !mPreferencesManager.getAuthToken().equals(ConstantManager.INVALID_TOKEN);
 
         if (isLoggedIn) {
             if (!NetworkStatusChecker.isNetworkAvaliable(this)) {
                 startMainActivity();
+                return;
             }
             showProgress();
             updateUserData();
@@ -152,7 +149,6 @@ public class AuthActivity extends BaseActivity {
                 }
             });
         } else {
-            hideProgress();
             showSnackBar(getString(R.string.err_msg_internet));
         }
     }
@@ -206,7 +202,7 @@ public class AuthActivity extends BaseActivity {
                 } else {
 
                     Log.e(TAG, "updateUsersList onResponse: " + response.message());
-                    EventBus.getDefault().post(new SavingUsersListEvent(false));
+                    EventBus.getDefault().post(new SavingUsersListEvent(ConstantManager.USER_LIST_FAIL));
 
                 }
             }
@@ -215,7 +211,7 @@ public class AuthActivity extends BaseActivity {
             public void onFailure(Call<UserListRes> call, Throwable t) {
 
                 Log.e(TAG, "updateUsersList onFailure: " + t.getMessage());
-                EventBus.getDefault().post(new SavingUsersListEvent(false));
+                EventBus.getDefault().post(new SavingUsersListEvent(ConstantManager.USER_LIST_FAIL));
 
             }
         });
@@ -226,21 +222,23 @@ public class AuthActivity extends BaseActivity {
         List<User> users = new ArrayList<>();
         List<Repository> repositories = new ArrayList<>();
 
+        int order = 0;
         for (UserListRes.UserData userData : userDataList) {
-            users.add(new User(userData));
+            users.add(new User(userData, order));
             repositories.addAll(Helper.getRepoListFromUserData(userData));
+            order++;
         }
 
-        ChronosOperation<Boolean> task = new SaveUsersList(users, repositories);
+        ChronosOperation<String> task = new SaveUsersList(users, repositories);
         runOperation(task);
     }
 
 
     public void onOperationFinished(final SaveUsersList.Result result) {
         if (result.isSuccessful()) {
-            EventBus.getDefault().post(new SavingUsersListEvent(true));
+            EventBus.getDefault().post(new SavingUsersListEvent(result.getOutput()));
         } else {
-            EventBus.getDefault().post(new SavingUsersListEvent(false));
+            EventBus.getDefault().post(new SavingUsersListEvent(ConstantManager.USER_LIST_FAIL));
             Log.e(TAG, "onSaveUserListFinished: " + result.getErrorMessage());
         }
     }
@@ -249,9 +247,8 @@ public class AuthActivity extends BaseActivity {
     public void onSaveUserData(SavingUserDataEvent event) {
 
         isUserDataSavingFinished = true;
-        isUserDataSaved = event.savingStatus;
 
-        if (isUserDataSavingFinished && isUsersListSavingFinished) {
+        if (isUsersListSavingFinished) {
             decideStartMainActivity();
         }
     }
@@ -260,9 +257,12 @@ public class AuthActivity extends BaseActivity {
     public void onSaveUsersList(SavingUsersListEvent event) {
 
         isUsersListSavingFinished = true;
-        isUsersListSaved = event.savingStatus;
 
-        if (isUserDataSavingFinished && isUsersListSavingFinished) {
+        if (event.status.equals(ConstantManager.USER_LIST_CREATED)) {
+            mPreferencesManager.setUsersListExists(true);
+        }
+
+        if (isUserDataSavingFinished) {
             decideStartMainActivity();
         }
 
@@ -270,11 +270,6 @@ public class AuthActivity extends BaseActivity {
 
     private void decideStartMainActivity() {
         isLoggedIn = !mPreferencesManager.getAuthToken().equals(ConstantManager.INVALID_TOKEN);
-
-        if (isUsersListSaved) {
-            isUsersListExists = true;
-        }
-        mPreferencesManager.setUsersListExists(isUsersListExists);
 
         if (isLoggedIn) {
             startMainActivity();
@@ -288,6 +283,9 @@ public class AuthActivity extends BaseActivity {
     private void startMainActivity() {
         Intent mainActivityIntent = new Intent(this, MainActivity.class);
         startActivity(mainActivityIntent);
-        hideProgress();
+        if (mProgressDialog != null) {
+            hideProgress();
+        }
+        finish();
     }
 }

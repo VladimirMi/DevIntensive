@@ -44,7 +44,6 @@ public class LoadRepositories extends ChronosOperation<HashMap<String, List<Repo
             } else {
                 repositories.add(repository);
                 result.put(repository.getUserRemoteId(), repositories);
-
             }
         }
         return result;

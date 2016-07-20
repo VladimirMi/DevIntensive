@@ -2,28 +2,21 @@ package com.softdesign.devintensive.ui.activities;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.storage.models.UserDTO;
 import com.softdesign.devintensive.ui.adapters.RepositoriesAdapter;
-import com.softdesign.devintensive.ui.views.RepositoryDeviderView;
-import com.softdesign.devintensive.ui.views.RepositoryView;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.UiHelper;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -56,6 +49,14 @@ public class ProfileUserActivity extends AppCompatActivity {
         initProfileData();
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent parentIntent = getSupportParentActivityIntent();
+        if (parentIntent != null) {
+            parentIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        }
+        startActivity(parentIntent);
+    }
 
     private void setupToolbar() {
         setSupportActionBar(mToolbar);
@@ -88,10 +89,6 @@ public class ProfileUserActivity extends AppCompatActivity {
         mUserBio.setText(mUser.getBio());
         mCollapsingToolbar.setTitle(mUser.getFullName());
 
-        Picasso.with(this)
-                .load(mUser.getPhoto())
-                .placeholder(R.drawable.user_bg)
-                .error(R.drawable.user_bg)
-                .into(mProfileImage);
+        UiHelper.setUserPhoto(this, mUser.getPhoto(), mProfileImage);
     }
 }

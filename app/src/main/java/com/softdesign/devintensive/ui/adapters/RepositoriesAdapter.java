@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.softdesign.devintensive.R;
-import com.softdesign.devintensive.data.storage.models.Repository;
 import com.softdesign.devintensive.utils.ConstantManager;
 
 import java.util.ArrayList;
@@ -77,7 +76,7 @@ public class RepositoriesAdapter extends BaseAdapter implements View.OnClickList
     @Override
     public void onClick(View v) {
         if (mListener != null) {
-            mListener.onItemClickListener(Uri.parse(ConstantManager.HTTPS_SCHEME + ((ImageView) v).getContentDescription()));
+            mListener.onItemClickListener(Uri.parse(ConstantManager.HTTPS_SCHEME + v.getContentDescription()));
         }
     }
 

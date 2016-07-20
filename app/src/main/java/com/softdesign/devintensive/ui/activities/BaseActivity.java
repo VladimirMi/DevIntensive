@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -70,11 +69,10 @@ public class BaseActivity extends AppCompatActivity {
             mProgressDialog.show();
             mProgressDialog.setContentView(R.layout.progress_splash);
         }
-        runWithDelay();
     }
 
     public void hideProgress() {
-        mProgressDialog.hide();
+        mProgressDialog.dismiss();
     }
 
     public void showError(String message, Exception error) {
@@ -86,15 +84,6 @@ public class BaseActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-    private void runWithDelay() {
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                hideProgress();
-            }
-        }, 5000);
-    }
 
     public final int runOperation(@NonNull final ChronosOperation operation) {
         return mConnector.runOperation(operation, false);

@@ -42,12 +42,16 @@ public class User {
 
     private String bio;
 
+    private int order;
+
+    private boolean deleted;
+
     @ToMany(joinProperties = {
             @JoinProperty(name = "remoteId", referencedName = "userRemoteId")
     })
     private List<Repository> repositories;
 
-    public User(UserListRes.UserData userData) {
+    public User(UserListRes.UserData userData, int order) {
         this.remoteId = userData.getId();
         this.photo = userData.getPublicInfo().getPhoto();
         this.fullName = userData.getFullName();
@@ -56,6 +60,8 @@ public class User {
         this.codeLines = userData.getProfileValues().getCodeLines();
         this.projects = userData.getProfileValues().getProjects();
         this.bio = userData.getPublicInfo().getBio();
+        this.order = order;
+        this.deleted = false;
     }
 
     /**
@@ -217,10 +223,27 @@ public class User {
         this.id = id;
     }
 
-    @Generated(hash = 1023608416)
-    public User(Long id, @NotNull String remoteId, String photo,
-                @NotNull String fullName, @NotNull String searchName, int rating,
-                int codeLines, int projects, String bio) {
+    public int getOrder() {
+        return this.order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public boolean getDeleted() {
+        return this.deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+
+    @Generated(hash = 1815241646)
+    public User(Long id, @NotNull String remoteId, String photo, @NotNull String fullName,
+            @NotNull String searchName, int rating, int codeLines, int projects, String bio,
+            int order, boolean deleted) {
         this.id = id;
         this.remoteId = remoteId;
         this.photo = photo;
@@ -230,6 +253,8 @@ public class User {
         this.codeLines = codeLines;
         this.projects = projects;
         this.bio = bio;
+        this.order = order;
+        this.deleted = deleted;
     }
 
     @Generated(hash = 586692638)

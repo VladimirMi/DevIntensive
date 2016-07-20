@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -23,6 +24,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -36,22 +38,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.softdesign.devintensive.R;
-import com.softdesign.devintensive.data.managers.DataManager;
-import com.softdesign.devintensive.data.managers.PreferencesManager;
 import com.softdesign.devintensive.data.network.res.UploadImageRes;
 import com.softdesign.devintensive.ui.views.RepositoryDeviderView;
 import com.softdesign.devintensive.ui.views.RepositoryView;
 import com.softdesign.devintensive.utils.AppConfig;
-import com.softdesign.devintensive.utils.CircleTransformation;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.ExStorageState;
 import com.softdesign.devintensive.utils.MyTextWatcher;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
+import com.softdesign.devintensive.utils.UiHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +76,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     @BindView(R.id.profile_placeholder) RelativeLayout mProfilePlaceholder;
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
     @BindView(R.id.navigation_drawer) DrawerLayout mNavigationDrawer;
+    @BindView(R.id.navigation_view) NavigationView mNavigationView;
+    @BindView(R.id.nested_scroll) NestedScrollView mNestedScrollView;
 
     @BindView(R.id.repositories_list) LinearLayout mRepoListView;
 
@@ -101,8 +98,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     TextView[] mUserStatisticViews;
 
     private boolean mEditMode;
-    private DataManager mDataManager;
-    private PreferencesManager mPreferencesManager;
     private File mPhotoFile = null;
     private AppBarLayout.LayoutParams mAppBarParams = null;
     private Uri mOriginPhotoUri;
@@ -115,14 +110,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         Log.d(TAG, "onCreate");
         ButterKnife.bind(this);
 
-        mDataManager = DataManager.getInstance();
-        mPreferencesManager = mDataManager.getPreferencesManager();
-
-        mUserInfoViews = new ArrayList<>();
-        mUserInfoViews.add(mUserPhone);
-        mUserInfoViews.add(mUserEmail);
-        mUserInfoViews.add(mUserVk);
-
         mActionIcons = new ArrayList<>();
         mActionIcons.add(mPhoneIcon);
         mActionIcons.add(mEmailIcon);
@@ -132,8 +119,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             actionIcon.setOnClickListener(this);
         }
 
+        mUserInfoViews = new ArrayList<>();
+        mUserInfoViews.add(mUserPhone);
+        mUserInfoViews.add(mUserEmail);
+        mUserInfoViews.add(mUserVk);
         initRepositoriesView();
-
         mUserInfoViews.add(mUserBio);
 
         mFab.setOnClickListener(this);
@@ -166,41 +156,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(TAG, "onStart");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d(TAG, "onPause");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d(TAG, "onStop");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-    }
-
-    @Override
     protected void onRestart() {
         super.onRestart();
         Log.d(TAG, "onRestart");
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
-        navigationView.getMenu().getItem(0).setChecked(true);
+        mNavigationView.getMenu().getItem(0).setChecked(true);
     }
 
     @Override
@@ -234,7 +193,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                     mEditMode = !mEditMode;
                     setupEditMode();
                 } else {
-                    mOriginPhotoUri = mPreferencesManager.loadUserPhoto();
+                    mOriginPhotoUri = Uri.parse(mPreferencesManager.loadUserPhoto());
                     mEditMode = !mEditMode;
                     setupEditMode();
                 }
@@ -257,7 +216,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ConstantManager.EDIT_MODE_KEY, mEditMode);
         saveUserInfo();
@@ -348,16 +307,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(mPreferencesManager.loadUserName());
         }
-        actionBar.setTitle(mPreferencesManager.loadUserName());
     }
 
     private void setupDrawer() {
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
-
-        assert navigationView != null;
-        navigationView.getMenu().getItem(0).setChecked(true);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        mNavigationView.getMenu().getItem(0).setChecked(true);
+        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 mNavigationDrawer.closeDrawer(GravityCompat.START);
@@ -380,46 +336,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         });
 
         // установка круглого аватара
-        final ImageView userAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.user_avatar);
-        Picasso.with(this)
-                .load(mPreferencesManager.loadUserAvatar())
-                .fit()
-                .centerCrop()
-                .placeholder(R.drawable.user_bg)
-                .error(R.drawable.user_bg)
-                .transform(new CircleTransformation())
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .into(userAvatar, new com.squareup.picasso.Callback() {
-                    @Override
-                    public void onSuccess() {
-                        Log.d(TAG, "Load from cache");
-                    }
+        final ImageView userAvatar = (ImageView) mNavigationView.getHeaderView(0).findViewById(R.id.user_avatar);
+        UiHelper.setUserAvatar(this, mPreferencesManager.loadUserAvatar(), userAvatar);
 
-                    @Override
-                    public void onError() {
-                        DataManager.getInstance().getPicasso()
-                                .load(mPreferencesManager.loadUserAvatar())
-                                .fit()
-                                .centerCrop()
-                                .placeholder(R.drawable.user_bg)
-                                .error(R.drawable.user_bg)
-                                .networkPolicy(NetworkPolicy.OFFLINE)
-                                .into(userAvatar, new com.squareup.picasso.Callback() {
-                                    @Override
-                                    public void onSuccess() {
-                                        Log.d(TAG, "Load from net");
-                                    }
-
-                                    @Override
-                                    public void onError() {
-                                        Log.d(TAG, "Could not fetch the image");
-                                    }
-                                });
-                    }
-                });
-
-        TextView userName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_txt);
-        TextView userEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_email_txt);
+        TextView userName = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.user_name_txt);
+        TextView userEmail = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.user_email_txt);
         userName.setText(mPreferencesManager.loadUserName());
         userEmail.setText(mPreferencesManager.loadUserInfo().get(1));
     }
@@ -454,6 +375,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 //            unlockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(android.R.color.white));
             mFab.setImageResource(R.drawable.ic_mode_edit_24dp);
+            mNestedScrollView.scrollTo(0, 0);
         }
 
     }
@@ -478,7 +400,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         }
     }
 
-
     private void loadUserInfo() {
         List<String> userInfo = mPreferencesManager.loadUserInfo();
         for (int i = 0; i < userInfo.size(); i++) {
@@ -494,10 +415,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     private void loadUserPhoto() {
-        Picasso.with(this)
-                .load(mPreferencesManager.loadUserPhoto())
-                .placeholder(R.color.grey_light)
-                .into(mProfilePhoto);
+        UiHelper.setUserPhoto(this, mPreferencesManager.loadUserPhoto(), mProfilePhoto);
     }
 
 
@@ -507,7 +425,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         StringBuilder repositories = new StringBuilder();
         for (EditText userInfoView : mUserInfoViews) {
             if (userInfoView.getTag().equals(getString(R.string.git_tag))) {
-                repositories.append(userInfoView.getText().toString() + " ");
+                repositories.append(userInfoView.getText().toString()).append(" ");
             } else {
                 userInfo.add(userInfoView.getText().toString());
             }
@@ -574,14 +492,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             case ConstantManager.REQUEST_CAMERA_PICTURE:
                 if (mPhotoFile != null && resultCode == RESULT_OK) {
                     selectedImage = Uri.fromFile(mPhotoFile);
-                    insertProfileImage(selectedImage);
+                    mPreferencesManager.saveUserPhoto(selectedImage);
+                    loadUserPhoto();
                 }
                 break;
             case ConstantManager.REQUEST_GALLERY_PICTURE:
                 if (data != null && resultCode == RESULT_OK) {
                     selectedImage = data.getData();
                     mPhotoFile = new File(selectedImage.getPath());
-                    insertProfileImage(selectedImage);
+                    mPreferencesManager.saveUserPhoto(selectedImage);
+                    loadUserPhoto();
                 }
                 break;
         }
@@ -597,7 +517,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
     private void lockToolbar() {
         mAppBarLayout.setExpanded(true, true);
-        mAppBarParams.setScrollFlags(0);
+        //убирает конфликт с анимацией
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mAppBarParams.setScrollFlags(0);
+            }
+        }, 500);
+
         mCollapsingToolbar.setLayoutParams(mAppBarParams);
     }
 
@@ -636,58 +564,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         }
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+        values.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis());
         values.put(MediaStore.Images.Media.MIME_TYPE, ConstantManager.MIME_TYPE_JPEG);
         values.put(MediaStore.MediaColumns.DATA, imageFile.getAbsolutePath());
 
         this.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
         return imageFile;
-    }
-
-    /**
-     * Установка фотографии профайла
-     *
-     * @param selectedImage URI выбранного изображения
-     */
-    private void insertProfileImage(final Uri selectedImage) {
-
-        Picasso.with(this)
-                .load(selectedImage)
-                .fit()
-                .centerCrop()
-                .placeholder(R.drawable.user_bg)
-                .error(R.drawable.user_bg)
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .into(mProfilePhoto, new com.squareup.picasso.Callback() {
-                    @Override
-                    public void onSuccess() {
-                        Log.d(TAG, "Load from cache");
-                    }
-
-                    @Override
-                    public void onError() {
-                        DataManager.getInstance().getPicasso()
-                                .load(selectedImage)
-                                .fit()
-                                .centerCrop()
-                                .placeholder(R.drawable.user_bg)
-                                .error(R.drawable.user_bg)
-                                .networkPolicy(NetworkPolicy.OFFLINE)
-                                .into(mProfilePhoto, new com.squareup.picasso.Callback() {
-                                    @Override
-                                    public void onSuccess() {
-                                        Log.d(TAG, "Load from net");
-                                    }
-
-                                    @Override
-                                    public void onError() {
-                                        Log.d(TAG, "Could not fetch the image");
-                                    }
-                                });
-                    }
-                });
-
-        mPreferencesManager.saveUserPhoto(selectedImage);
     }
 
     /**

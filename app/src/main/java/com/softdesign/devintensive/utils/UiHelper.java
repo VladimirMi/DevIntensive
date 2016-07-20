@@ -2,15 +2,20 @@ package com.softdesign.devintensive.utils;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 public class UiHelper {
     private static Context sContext = DataManager.getInstance().getContext();
@@ -56,5 +61,81 @@ public class UiHelper {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(displaymetrics);
         return displaymetrics.heightPixels;
+    }
+
+    public static void setUserPhoto(final Context context, final String path, final ImageView view) {
+        Picasso.with(context)
+                .load(path)
+                .fit()
+                .centerCrop()
+                .placeholder(context.getResources().getDrawable(R.drawable.user_bg))
+                .error(context.getResources().getDrawable(R.drawable.user_bg))
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(view, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(path, "Load from cache");
+                    }
+
+                    @Override
+                    public void onError() {
+                        DataManager.getInstance().getPicasso()
+                                .load(path)
+                                .fit()
+                                .centerCrop()
+                                .placeholder(context.getResources().getDrawable(R.drawable.user_bg))
+                                .error(context.getResources().getDrawable(R.drawable.user_bg))
+                                .into(view, new Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(path, "Load from net");
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.d(path, "Could not fetch the image");
+                                    }
+                                });
+                    }
+                });
+    }
+
+    public static void setUserAvatar(final Context context, final String path, final ImageView view) {
+        Picasso.with(context)
+                .load(path)
+                .fit()
+                .centerCrop()
+                .transform(new CircleTransformation())
+                .placeholder(context.getResources().getDrawable(R.drawable.user_bg))
+                .error(context.getResources().getDrawable(R.drawable.user_bg))
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(view, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(path, "Load from cache");
+                    }
+
+                    @Override
+                    public void onError() {
+                        DataManager.getInstance().getPicasso()
+                                .load(path)
+                                .fit()
+                                .centerCrop()
+                                .transform(new CircleTransformation())
+                                .placeholder(context.getResources().getDrawable(R.drawable.user_bg))
+                                .error(context.getResources().getDrawable(R.drawable.user_bg))
+                                .into(view, new Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(path, "Load from net");
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.d(path, "Could not fetch the image");
+                                    }
+                                });
+                    }
+                });
     }
 }

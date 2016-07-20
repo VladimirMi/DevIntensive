@@ -10,10 +10,11 @@ import com.softdesign.devintensive.data.storage.models.Repository;
 import com.softdesign.devintensive.data.storage.models.RepositoryDao;
 import com.softdesign.devintensive.data.storage.models.User;
 import com.softdesign.devintensive.data.storage.models.UserDao;
+import com.softdesign.devintensive.utils.ConstantManager;
 
 import java.util.List;
 
-public class SaveUsersList extends ChronosOperation<Boolean> {
+public class SaveUsersList extends ChronosOperation<String> {
     private final List<User> mUsers;
     private final List<Repository> mRepositories;
     private UserDao mUserDao;
@@ -28,24 +29,30 @@ public class SaveUsersList extends ChronosOperation<Boolean> {
 
     @Nullable
     @Override
-    public Boolean run() {
+    public String run() {
         try {
-            mUserDao.insertInTx(mUsers);
-            mRepositoryDao.insertOrReplaceInTx(mRepositories);
+            if (DataManager.getInstance().getPreferencesManager().isUsersListExists()) {
+                mUserDao.updateInTx(mUsers);
+                mRepositoryDao.updateInTx(mRepositories);
+                return ConstantManager.USER_LIST_UPDATED;
+            } else {
+                mUserDao.insertOrReplaceInTx(mUsers);
+                mRepositoryDao.insertOrReplaceInTx(mRepositories);
+                return ConstantManager.USER_LIST_CREATED;
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return ConstantManager.USER_LIST_FAIL;
         }
-        return true;
     }
 
     @NonNull
     @Override
-    public Class<? extends ChronosOperationResult<Boolean>> getResultClass() {
+    public Class<? extends ChronosOperationResult<String>> getResultClass() {
         return Result.class;
     }
 
-    public final static class Result extends ChronosOperationResult<Boolean> {
+    public final static class Result extends ChronosOperationResult<String> {
         public Result() {}
     }
 }
