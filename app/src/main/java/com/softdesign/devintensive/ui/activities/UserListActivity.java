@@ -1,11 +1,15 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.animation.FastOutLinearInInterpolator;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
@@ -16,6 +20,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.CycleInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,6 +40,7 @@ import com.softdesign.devintensive.data.tasks.LoadUsersList;
 import com.softdesign.devintensive.ui.adapters.UsersAdapter;
 import com.softdesign.devintensive.utils.CircleTransformation;
 import com.softdesign.devintensive.utils.ConstantManager;
+import com.softdesign.devintensive.utils.UiHelper;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -54,6 +64,7 @@ public class UserListActivity extends BaseActivity
     private UsersAdapter mUsersAdapter;
     private List<User> mUsers;
     private HashMap<String, List<Repository>> mRepositories;
+    private boolean pendingIntroAnimation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +85,10 @@ public class UserListActivity extends BaseActivity
         runOperation(loadUsersListTask);
         ChronosOperation<HashMap<String, List<Repository>>> loadRepositoriesTask = new LoadRepositories();
         runOperation(loadRepositoriesTask);
+
+        if (savedInstanceState == null) {
+            pendingIntroAnimation = true;
+        }
     }
 
     @Override
@@ -109,6 +124,7 @@ public class UserListActivity extends BaseActivity
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
     protected void onRestart() {
         super.onRestart();
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
@@ -135,7 +151,6 @@ public class UserListActivity extends BaseActivity
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
-                item.setChecked(true);
                 mNavigationDrawer.closeDrawer(GravityCompat.START);
                 int itemId = item.getItemId();
                 switch (itemId) {
@@ -182,6 +197,18 @@ public class UserListActivity extends BaseActivity
             }
         });
         mRecyclerView.setAdapter(mUsersAdapter);
+        mRecyclerView.setTranslationY(UiHelper.getScreenHeight(this));
+        mRecyclerView.setAlpha(0f);
+        mRecyclerView.setScaleX(0.0f);
+        mRecyclerView.setScaleY(0.0f);
+        mRecyclerView.animate()
+                .translationY(0)
+                .scaleX(1.0f)
+                .scaleY(1.0f)
+                .setDuration(1000)
+                .alpha(1f)
+                .setInterpolator(new FastOutSlowInInterpolator())
+                .start();
     }
 
     @Override
@@ -214,19 +241,4 @@ public class UserListActivity extends BaseActivity
             Log.e(TAG, "onSaveUserListFinished: " + result.getErrorMessage());
         }
     }
-
-//    @Override
-//    public void onResponse(Call<UserListRes> call, Response<UserListRes> response) {
-//        try {
-//            mUsers = response.body().getData();
-//            setupRecycler();
-//        } catch (NullPointerException e) {
-//            Log.e(TAG, e.toString());
-//        }
-//    }
-//
-//    @Override
-//    public void onFailure(Call<UserListRes> call, Throwable t) {
-//        // TODO: 7/15/2016 обработать ошибки
-//    }
 }

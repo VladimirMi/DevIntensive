@@ -7,7 +7,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -24,6 +28,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import butterknife.BindDrawable;
 import butterknife.BindView;
@@ -36,6 +41,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     private Context mContext;
     private List<User> mUsers;
     private List<User> mUsersCopy = new ArrayList<>();
+    public boolean isAnimate = true;
 
     public UsersAdapter(List<User> users, UserViewHolder.CustomClickListener clickListener) {
         mUsers = users;
@@ -109,6 +115,8 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             holder.mBio.setVisibility(View.VISIBLE);
             holder.mBio.setText(user.getBio());
         }
+
+        setFadeAnimation(holder.itemView);
     }
 
     @Override
@@ -133,6 +141,13 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         }
         notifyDataSetChanged();
     }
+
+    private void setFadeAnimation(View view) {
+        AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
+        anim.setDuration(500);
+        view.startAnimation(anim);
+    }
+
 
     public static class UserViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.user_photo) AspectRatioImageView mUserPhoto;

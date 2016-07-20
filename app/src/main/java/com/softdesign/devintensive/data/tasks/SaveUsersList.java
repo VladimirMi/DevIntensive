@@ -31,7 +31,7 @@ public class SaveUsersList extends ChronosOperation<Boolean> {
     public Boolean run() {
         try {
             mUserDao.insertInTx(mUsers);
-            mRepositoryDao.insertInTx(mRepositories);
+            mRepositoryDao.insertOrReplaceInTx(mRepositories);
         } catch (Exception e) {
             e.printStackTrace();
             return false;

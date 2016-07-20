@@ -269,7 +269,6 @@ public class AuthActivity extends BaseActivity {
     }
 
     private void decideStartMainActivity() {
-        hideProgress();
         isLoggedIn = !mPreferencesManager.getAuthToken().equals(ConstantManager.INVALID_TOKEN);
 
         if (isUsersListSaved) {
@@ -282,11 +281,13 @@ public class AuthActivity extends BaseActivity {
         } else {
             setContentView(R.layout.activity_login);
             ButterKnife.bind(this);
+            hideProgress();
         }
     }
 
     private void startMainActivity() {
         Intent mainActivityIntent = new Intent(this, MainActivity.class);
         startActivity(mainActivityIntent);
+        hideProgress();
     }
 }
