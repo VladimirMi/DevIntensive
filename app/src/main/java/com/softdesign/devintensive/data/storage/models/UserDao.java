@@ -33,7 +33,7 @@ public class UserDao extends AbstractDao<User, Long> {
         public final static Property Bio = new Property(8, String.class, "bio", false, "BIO");
         public final static Property Order = new Property(9, int.class, "order", false, "ORDER");
         public final static Property Deleted = new Property(10, boolean.class, "deleted", false, "DELETED");
-    }
+    };
 
     private DaoSession daoSession;
 
