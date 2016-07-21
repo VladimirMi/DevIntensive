@@ -2,6 +2,7 @@ package com.softdesign.devintensive.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -33,6 +34,7 @@ import com.softdesign.devintensive.data.tasks.LoadRepositories;
 import com.softdesign.devintensive.data.tasks.LoadUsersList;
 import com.softdesign.devintensive.ui.adapters.UsersAdapter;
 import com.softdesign.devintensive.ui.behaviors.CustomItemTouchHelperCallback;
+import com.softdesign.devintensive.utils.AppConfig;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.UiHelper;
 
@@ -52,12 +54,12 @@ public class UserListActivity extends BaseActivity {
     @BindView(R.id.user_list) RecyclerView mRecyclerView;
     @BindView(R.id.navigation_view) NavigationView mNavigationView;
 
-    private DataManager mDataManager;
-    private PreferencesManager mPreferencesManager;
     private UsersAdapter mUsersAdapter;
     private List<User> mUsers;
+    private List<User> mUsersCopy;
     private HashMap<String, List<Repository>> mRepositories;
 
+    private ItemTouchHelper mItemTouchHelper;
     private boolean isAnimate = true;
 
     @Override
@@ -71,6 +73,9 @@ public class UserListActivity extends BaseActivity {
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
+
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(mUsersAdapter);
+        mItemTouchHelper = new ItemTouchHelper(callback);
 
         setupToolbar();
         setupDrawer();
@@ -121,8 +126,7 @@ public class UserListActivity extends BaseActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                mUsersAdapter.filter(newText);
-                mRecyclerView.scrollToPosition(0);
+                filter(newText);
                 return true;
             }
         });
@@ -135,6 +139,7 @@ public class UserListActivity extends BaseActivity {
         super.onRestart();
         mNavigationView.getMenu().getItem(2).setChecked(true);
     }
+
 
     private void setupToolbar() {
         setSupportActionBar(mToolbar);
@@ -162,6 +167,7 @@ public class UserListActivity extends BaseActivity {
                         mPreferencesManager.clearAllData();
                         mPreferencesManager.saveAuthToken(ConstantManager.INVALID_TOKEN);
                         Intent loginIntent = new Intent(UserListActivity.this, AuthActivity.class);
+                        loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(loginIntent);
                         finish();
                         return true;
@@ -198,6 +204,7 @@ public class UserListActivity extends BaseActivity {
         });
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mUsersAdapter);
+        mItemTouchHelper.attachToRecyclerView(mRecyclerView);
 
         if (isAnimate) {
             mRecyclerView.setTranslationY(UiHelper.getScreenHeight(this));
@@ -213,16 +220,45 @@ public class UserListActivity extends BaseActivity {
                     .setInterpolator(new FastOutSlowInInterpolator())
                     .start();
         }
+    }
 
-        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(mUsersAdapter);
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
-        itemTouchHelper.attachToRecyclerView(mRecyclerView);
+    private void filter(final String query) {
+        if (query.isEmpty()) {
+            mUsers = mUsersCopy;
+            swapAdapter();
+        } else {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mUsers = mDataManager.searchUsers(query.toUpperCase());
+                    swapAdapter();
+                }
+            }, AppConfig.SEARCH_DELAY);
+        }
+    }
+
+    private void swapAdapter() {
+        mUsersAdapter = new UsersAdapter(mUsers, new UsersAdapter.UserViewHolder.CustomClickListener() {
+            @Override
+            public void onUserItemClickListener(int position) {
+                UserDTO userDTO = new UserDTO(mUsers.get(position), mRepositories.get(mUsers.get(position).getRemoteId()));
+
+                Intent profileIntent = new Intent(UserListActivity.this, ProfileUserActivity.class);
+                profileIntent.putExtra(ConstantManager.PARCELABLE_KEY, userDTO);
+                startActivity(profileIntent);
+            }
+        });
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.swapAdapter(mUsersAdapter, false);
+        mItemTouchHelper.attachToRecyclerView(mRecyclerView);
     }
 
 
     public void onOperationFinished(final LoadUsersList.Result result) {
         if (result.isSuccessful()) {
             mUsers = result.getOutput();
+            mUsersCopy = result.getOutput();
             setupRecycler();
         } else {
             Log.e(TAG, "onSaveUserListFinished: " + result.getErrorMessage());

@@ -35,13 +35,11 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     private static final String TAG = ConstantManager.TAG_PREFIX + "UsersAdapter";
     private UserViewHolder.CustomClickListener mListener;
     private Context mContext;
-    private List<User> mUsers = new ArrayList<>();
-    private List<User> mUsersCopy = new ArrayList<>();
+    private List<User> mUsers;
 
 
     public UsersAdapter(List<User> users, UserViewHolder.CustomClickListener clickListener) {
         mUsers = users;
-        mUsersCopy = users;
         mListener = clickListener;
     }
 
@@ -82,22 +80,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     @Override
     public int getItemCount() {
         return mUsers.size();
-    }
-
-    public void filter(final String query) {
-        if (query.isEmpty()) {
-            mUsers = mUsersCopy;
-            notifyDataSetChanged();
-        } else {
-            mUsers = DataManager.getInstance().searchUsers(query.toUpperCase());
-            Handler handler= new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    notifyDataSetChanged();
-                }
-            }, AppConfig.SEARCH_DELAY);
-        }
     }
 
 

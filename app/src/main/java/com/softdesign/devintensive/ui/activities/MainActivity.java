@@ -323,6 +323,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                         mPreferencesManager.clearAllData();
                         mPreferencesManager.saveAuthToken(ConstantManager.INVALID_TOKEN);
                         Intent loginIntent = new Intent(MainActivity.this, AuthActivity.class);
+                        loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(loginIntent);
                         finish();
                         return true;

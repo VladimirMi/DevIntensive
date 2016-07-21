@@ -131,6 +131,7 @@ public class DataManager {
         List<User> users = new ArrayList<>();
         try {
             users = mDaoSession.queryBuilder(User.class)
+                    .orderAsc(UserDao.Properties.Order)
                     .build()
                     .list();
         } catch (Exception e) {
