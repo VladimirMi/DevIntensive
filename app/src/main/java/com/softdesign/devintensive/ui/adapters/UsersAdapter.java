@@ -41,11 +41,11 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     public UsersAdapter(List<User> users, UserViewHolder.CustomClickListener clickListener) {
         mUsers = users;
         mListener = clickListener;
+        mContext = DataManager.getInstance().getContext();
     }
 
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        mContext = parent.getContext();
         View converView = LayoutInflater.from(mContext).inflate(R.layout.item_user_list, parent, false);
         return new UserViewHolder(converView, mListener);
     }
