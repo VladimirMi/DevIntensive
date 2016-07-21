@@ -59,7 +59,6 @@ public class UserListActivity extends BaseActivity {
     private List<User> mUsersCopy;
     private HashMap<String, List<Repository>> mRepositories;
 
-    private ItemTouchHelper mItemTouchHelper;
     private boolean isAnimate = true;
 
     @Override
@@ -73,9 +72,6 @@ public class UserListActivity extends BaseActivity {
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
-
-        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(mUsersAdapter);
-        mItemTouchHelper = new ItemTouchHelper(callback);
 
         setupToolbar();
         setupDrawer();
@@ -204,7 +200,10 @@ public class UserListActivity extends BaseActivity {
         });
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mUsersAdapter);
-        mItemTouchHelper.attachToRecyclerView(mRecyclerView);
+
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(mUsersAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(mRecyclerView);
 
         if (isAnimate) {
             mRecyclerView.setTranslationY(UiHelper.getScreenHeight(this));
@@ -251,7 +250,10 @@ public class UserListActivity extends BaseActivity {
         });
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.swapAdapter(mUsersAdapter, false);
-        mItemTouchHelper.attachToRecyclerView(mRecyclerView);
+
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(mUsersAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(mRecyclerView);
     }
 
 
