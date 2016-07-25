@@ -2,6 +2,8 @@ package com.softdesign.devintensive.ui.activities;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,6 +42,7 @@ import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.network.res.UploadImageRes;
+import com.softdesign.devintensive.ui.fragments.UserProfileFragment;
 import com.softdesign.devintensive.ui.views.RepositoryDeviderView;
 import com.softdesign.devintensive.ui.views.RepositoryView;
 import com.softdesign.devintensive.utils.AppConfig;
@@ -65,42 +68,43 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener, View.OnFocusChangeListener {
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = ConstantManager.TAG_PREFIX + "Main Activity";
     @BindView(R.id.main_coordinator_container) CoordinatorLayout mCoordinatorLayout;
     @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
     @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
     @BindView(R.id.toolbar) Toolbar mToolbar;
+    @BindView(R.id.navigation_drawer) DrawerLayout mNavigationDrawer;
+    @BindView(R.id.navigation_view) NavigationView mNavigationView;
     @BindView(R.id.fab) FloatingActionButton mFab;
     @BindView(R.id.profile_placeholder) RelativeLayout mProfilePlaceholder;
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
-    @BindView(R.id.navigation_drawer) DrawerLayout mNavigationDrawer;
-    @BindView(R.id.navigation_view) NavigationView mNavigationView;
-    @BindView(R.id.nested_scroll) NestedScrollView mNestedScrollView;
-
-    @BindView(R.id.repositories_list) LinearLayout mRepoListView;
-
-    @BindView(R.id.phone_et) EditText mUserPhone;
-    @BindView(R.id.email_et) EditText mUserEmail;
-    @BindView(R.id.vk_et) EditText mUserVk;
-    @BindView(R.id.bio_et) EditText mUserBio;
-
-    @BindView(R.id.make_call_img) ImageView mPhoneIcon;
-    @BindView(R.id.send_email_img) ImageView mEmailIcon;
-    @BindView(R.id.vk_img) ImageView mVkIcon;
-
-    List<EditText> mUserInfoViews;
-
-    List<ImageView> mActionIcons;
-
-    @BindViews({R.id.rating_txt, R.id.code_lines_txt, R.id.projects_txt})
-    TextView[] mUserStatisticViews;
+//    @BindView(R.id.nested_scroll) NestedScrollView mNestedScrollView;
+//6
+//    @BindView(R.id.repositories_list) LinearLayout mRepoListView;
+//
+//    @BindView(R.id.phone_et) EditText mUserPhone;
+//    @BindView(R.id.email_et) EditText mUserEmail;
+//    @BindView(R.id.vk_et) EditText mUserVk;
+//    @BindView(R.id.bio_et) EditText mUserBio;
+//
+//    @BindView(R.id.make_call_img) ImageView mPhoneIcon;
+//    @BindView(R.id.send_email_img) ImageView mEmailIcon;
+//    @BindView(R.id.vk_img) ImageView mVkIcon;
+//
+//    List<EditText> mUserInfoViews;
+//
+//    List<ImageView> mActionIcons;
+//
+//    @BindViews({R.id.rating_txt, R.id.code_lines_txt, R.id.projects_txt})
+//    TextView[] mUserStatisticViews;
 
     private boolean mEditMode;
     private File mPhotoFile = null;
     private AppBarLayout.LayoutParams mAppBarParams = null;
     private Uri mOriginPhotoUri;
+    private UserProfileFragment mUserProfileFragment;
 
 
     @Override
@@ -110,40 +114,46 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         Log.d(TAG, "onCreate");
         ButterKnife.bind(this);
 
-        mActionIcons = new ArrayList<>();
-        mActionIcons.add(mPhoneIcon);
-        mActionIcons.add(mEmailIcon);
-        mActionIcons.add(mVkIcon);
+//        mActionIcons = new ArrayList<>();
+//        mActionIcons.add(mPhoneIcon);
+//        mActionIcons.add(mEmailIcon);
+//        mActionIcons.add(mVkIcon);
+//
+//        for (View actionIcon : mActionIcons) {
+//            actionIcon.setOnClickListener(this);
+//        }
+//
+//        mUserInfoViews = new ArrayList<>();
+//        mUserInfoViews.add(mUserPhone);
+//        mUserInfoViews.add(mUserEmail);
+//        mUserInfoViews.add(mUserVk);
+//        initRepositoriesView();
+//        mUserInfoViews.add(mUserBio);
+//
+//        mFab.setOnClickListener(this);
+//        mProfilePlaceholder.setOnClickListener(this);
+//
+//        for (int i = 0; i < mUserInfoViews.size() - 1; i++) {
+//            mUserInfoViews.get(i).addTextChangedListener(new MyTextWatcher(this,
+//                    mUserInfoViews.get(i), mActionIcons.get(i)));
+//        }
+//
+//        if (savedInstanceState != null) {
+//            mEditMode = savedInstanceState.getBoolean(ConstantManager.EDIT_MODE_KEY, false);
+//        }
 
-        for (View actionIcon : mActionIcons) {
-            actionIcon.setOnClickListener(this);
-        }
-
-        mUserInfoViews = new ArrayList<>();
-        mUserInfoViews.add(mUserPhone);
-        mUserInfoViews.add(mUserEmail);
-        mUserInfoViews.add(mUserVk);
-        initRepositoriesView();
-        mUserInfoViews.add(mUserBio);
-
-        mFab.setOnClickListener(this);
-        mProfilePlaceholder.setOnClickListener(this);
-
-        for (int i = 0; i < mUserInfoViews.size() - 1; i++) {
-            mUserInfoViews.get(i).addTextChangedListener(new MyTextWatcher(this,
-                    mUserInfoViews.get(i), mActionIcons.get(i)));
-        }
-
-        if (savedInstanceState != null) {
-            mEditMode = savedInstanceState.getBoolean(ConstantManager.EDIT_MODE_KEY, false);
-        }
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        mUserProfileFragment = new UserProfileFragment();
+        transaction.add(R.id.fragment_container, mUserProfileFragment);
+        transaction.commit();
 
         setupToolbar();
         setupDrawer();
         setupEditMode();
 
-        loadUserInfo();
-        loadUserStatistic();
+//        loadUserInfo();
+//        loadUserStatistic();
         loadUserPhoto();
     }
 
@@ -162,7 +172,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         mNavigationView.getMenu().getItem(0).setChecked(true);
     }
 
-    @Override
+    /*@Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.make_call_img:
@@ -213,22 +223,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 }
                 break;
         }
-    }
+    }*/
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ConstantManager.EDIT_MODE_KEY, mEditMode);
-        saveUserInfo();
+//        saveUserInfo();
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        loadUserInfo();
+//        loadUserInfo();
     }
 
-    @Override
+    /*@Override
     public void onBackPressed() {
         if (mNavigationDrawer.isDrawerOpen(GravityCompat.START)) {
             mNavigationDrawer.closeDrawer(GravityCompat.START);
@@ -237,7 +247,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         } else {
             super.onBackPressed();
         }
-    }
+    }*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -301,14 +311,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
     private void setupToolbar() {
         setSupportActionBar(mToolbar);
-        ActionBar actionBar = getSupportActionBar();
-
-        mAppBarParams = (AppBarLayout.LayoutParams) mCollapsingToolbar.getLayoutParams();
-        if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(mPreferencesManager.loadUserName());
-        }
+//        ActionBar actionBar = getSupportActionBar();
+//
+//        mAppBarParams = (AppBarLayout.LayoutParams) mCollapsingToolbar.getLayoutParams();
+//        if (actionBar != null) {
+//            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
+//            actionBar.setDisplayHomeAsUpEnabled(true);
+//            actionBar.setTitle(mPreferencesManager.loadUserName());
+//        }
     }
 
     private void setupDrawer() {
@@ -349,39 +359,39 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     /**
      * переключает режим редактирования
      */
-    private void setupEditMode() {
+    public void setupEditMode() {
         if (mEditMode) {
-            for (EditText userValue : mUserInfoViews) {
-                userValue.setFocusableInTouchMode(true);
-                userValue.setFocusable(true);
-                userValue.setEnabled(true);
-            }
-            for (ImageView actionIcon : mActionIcons) {
-                actionIcon.setClickable(false);
-            }
+//            for (EditText userValue : mUserInfoViews) {
+//                userValue.setFocusableInTouchMode(true);
+//                userValue.setFocusable(true);
+//                userValue.setEnabled(true);
+//            }
+//            for (ImageView actionIcon : mActionIcons) {
+//                actionIcon.setClickable(false);
+//            }
             showProfilePlaceholder();
 //            lockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
             mFab.setImageResource(R.drawable.ic_check_24dp);
-            requestFocus(mUserInfoViews.get(0));
+//            requestFocus(mUserInfoViews.get(0));
         } else {
-            for (EditText userValue : mUserInfoViews) {
-                userValue.setFocusable(false);
-                userValue.setEnabled(false);
-            }
-            for (ImageView actionIcon : mActionIcons) {
-                actionIcon.setClickable(true);
-            }
+//            for (EditText userValue : mUserInfoViews) {
+//                userValue.setFocusable(false);
+//                userValue.setEnabled(false);
+//            }
+//            for (ImageView actionIcon : mActionIcons) {
+//                actionIcon.setClickable(true);
+//            }
             hideProfilePlaceholder();
 //            unlockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(android.R.color.white));
             mFab.setImageResource(R.drawable.ic_mode_edit_24dp);
-            mNestedScrollView.scrollTo(0, 0);
+//            mNestedScrollView.scrollTo(0, 0);
         }
-
+//        mUserProfileFragment.setupEditMode();
     }
 
-    private void initRepositoriesView() {
+    /*private void initRepositoriesView() {
 
         for (int i = 0; i < mPreferencesManager.getRepositoriesSize(); i++) {
             RepositoryView repositoryView = new RepositoryView(this, new RepositoryView.CustomClickListener() {
@@ -413,14 +423,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         for (int i = 0; i < userStatistic.size(); i++) {
             mUserStatisticViews[i].setText(userStatistic.get(i));
         }
-    }
+    }*/
 
     private void loadUserPhoto() {
         UiHelper.setUserPhoto(this, mPreferencesManager.loadUserPhoto(), mProfilePhoto);
     }
 
 
-    private void saveUserInfo() {
+    /*private void saveUserInfo() {
         List<String> userInfo = new ArrayList<>();
 
         StringBuilder repositories = new StringBuilder();
@@ -433,7 +443,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         }
         userInfo.add(3, repositories.toString());
         mPreferencesManager.saveUserInfo(userInfo);
-    }
+    }*/
 
     private void loadPhotoFromGallery() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
@@ -478,7 +488,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         }
     }
 
-    /**
+    /*/**
      * Получение рузультата из другой Activity (фото из галлереи или камеры)
      *
      * @param requestCode The integer request code originally supplied to startActivityForResult(),
@@ -486,7 +496,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
      * @param resultCode  The integer result code returned by the child activity through its setResult().
      * @param data        An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
      */
-    @Override
+    /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Uri selectedImage;
         switch (requestCode) {
@@ -506,7 +516,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 }
                 break;
         }
-    }
+    }*/
 
     private void hideProfilePlaceholder() {
         mProfilePlaceholder.setVisibility(View.INVISIBLE);

@@ -7,20 +7,20 @@
             android:id="@+id/user_profile_menu"
             android:checkable="true"
             android:icon="@drawable/ic_account_circle_24dp"
-            android:title="@string/profile_menu"/>
+            android:title="@string/profile_menu" />
 
         <item
             android:id="@+id/team_menu"
             android:icon="@drawable/ic_people_24dp"
-            android:title="@string/team_menu"/>
-
+            android:title="@string/team_menu" />
     </group>
     <group
         android:id="@+id/settings_group"
         android:checkableBehavior="single">
+
         <item
             android:id="@+id/login_menu"
             android:icon="@drawable/logout"
-            android:title="@string/log_out"/>
+            android:title="@string/log_out" />
     </group>
 </menu>

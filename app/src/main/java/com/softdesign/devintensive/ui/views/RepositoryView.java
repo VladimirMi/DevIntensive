@@ -22,7 +22,7 @@ public class RepositoryView extends LinearLayout implements View.OnFocusChangeLi
 
     public RepositoryView(Context context, CustomClickListener listener) {
         super(context);
-        inflate(getContext(), R.layout.item_repositories_list, this);
+        inflate(context, R.layout.item_repositories_list, this);
         ButterKnife.bind(this);
 
         mListener = listener;

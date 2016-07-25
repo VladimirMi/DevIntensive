@@ -1,5 +1,6 @@
 package com.softdesign.devintensive.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
@@ -16,9 +17,9 @@ public class MyTextWatcher implements TextWatcher {
     private final EditText mEditText;
     private final TextInputLayout mInputLayout;
     private final ImageView mActionIcon;
-    private MainActivity mActivityReference;
+    private Activity mActivityReference;
 
-    public MyTextWatcher(MainActivity activity, EditText editText, ImageView actionIcon) {
+    public MyTextWatcher(Activity activity, EditText editText, ImageView actionIcon) {
         mEditText = editText;
         mInputLayout = (TextInputLayout) mEditText.getParent();
         mActionIcon = actionIcon;

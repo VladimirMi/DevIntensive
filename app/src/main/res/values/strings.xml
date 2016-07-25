@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DevintensiveApp</string>
+    <string name="app_name">MV-DevIntensiveApp</string>
     <string name="phone_hint">Мобильный</string>
     <string name="email_hint">E-mail</string>
     <string name="vk_hint">Профиль в VK</string>
