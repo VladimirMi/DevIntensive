@@ -25,16 +25,20 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -42,12 +46,15 @@ import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.network.res.UploadImageRes;
+import com.softdesign.devintensive.ui.fragments.UserListFragment;
 import com.softdesign.devintensive.ui.fragments.UserProfileFragment;
+import com.softdesign.devintensive.ui.fragments.UserStatisticFragment;
 import com.softdesign.devintensive.ui.views.RepositoryDeviderView;
 import com.softdesign.devintensive.ui.views.RepositoryView;
 import com.softdesign.devintensive.utils.AppConfig;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.ExStorageState;
+import com.softdesign.devintensive.utils.Helper;
 import com.softdesign.devintensive.utils.MyTextWatcher;
 import com.softdesign.devintensive.utils.UiHelper;
 
@@ -68,43 +75,31 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements View.OnClickListener{
 
     private static final String TAG = ConstantManager.TAG_PREFIX + "Main Activity";
     @BindView(R.id.main_coordinator_container) CoordinatorLayout mCoordinatorLayout;
-    @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
-    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
+    @BindView(R.id.appbar_layout) public AppBarLayout mAppBarLayout;
+    @BindView(R.id.collapsing_toolbar) public CollapsingToolbarLayout mCollapsingToolbar;
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.navigation_drawer) DrawerLayout mNavigationDrawer;
     @BindView(R.id.navigation_view) NavigationView mNavigationView;
     @BindView(R.id.fab) FloatingActionButton mFab;
     @BindView(R.id.profile_placeholder) RelativeLayout mProfilePlaceholder;
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
-//    @BindView(R.id.nested_scroll) NestedScrollView mNestedScrollView;
-//6
-//    @BindView(R.id.repositories_list) LinearLayout mRepoListView;
-//
-//    @BindView(R.id.phone_et) EditText mUserPhone;
-//    @BindView(R.id.email_et) EditText mUserEmail;
-//    @BindView(R.id.vk_et) EditText mUserVk;
-//    @BindView(R.id.bio_et) EditText mUserBio;
-//
-//    @BindView(R.id.make_call_img) ImageView mPhoneIcon;
-//    @BindView(R.id.send_email_img) ImageView mEmailIcon;
-//    @BindView(R.id.vk_img) ImageView mVkIcon;
-//
-//    List<EditText> mUserInfoViews;
-//
-//    List<ImageView> mActionIcons;
-//
-//    @BindViews({R.id.rating_txt, R.id.code_lines_txt, R.id.projects_txt})
-//    TextView[] mUserStatisticViews;
 
-    private boolean mEditMode;
+    @BindView(R.id.fragment_statistic_container) FrameLayout mStatisticContainer;
+
+    public boolean mEditMode;
     private File mPhotoFile = null;
     private AppBarLayout.LayoutParams mAppBarParams = null;
     private Uri mOriginPhotoUri;
+
+    private FragmentManager mFragmentManager;
     private UserProfileFragment mUserProfileFragment;
+    private UserStatisticFragment mUserStatisticFragment;
+    private UserListFragment mUserListFragment;
+    private MenuItem mSearchItem;
 
 
     @Override
@@ -114,47 +109,26 @@ public class MainActivity extends BaseActivity {
         Log.d(TAG, "onCreate");
         ButterKnife.bind(this);
 
-//        mActionIcons = new ArrayList<>();
-//        mActionIcons.add(mPhoneIcon);
-//        mActionIcons.add(mEmailIcon);
-//        mActionIcons.add(mVkIcon);
-//
-//        for (View actionIcon : mActionIcons) {
-//            actionIcon.setOnClickListener(this);
-//        }
-//
-//        mUserInfoViews = new ArrayList<>();
-//        mUserInfoViews.add(mUserPhone);
-//        mUserInfoViews.add(mUserEmail);
-//        mUserInfoViews.add(mUserVk);
-//        initRepositoriesView();
-//        mUserInfoViews.add(mUserBio);
-//
-//        mFab.setOnClickListener(this);
-//        mProfilePlaceholder.setOnClickListener(this);
-//
-//        for (int i = 0; i < mUserInfoViews.size() - 1; i++) {
-//            mUserInfoViews.get(i).addTextChangedListener(new MyTextWatcher(this,
-//                    mUserInfoViews.get(i), mActionIcons.get(i)));
-//        }
-//
-//        if (savedInstanceState != null) {
-//            mEditMode = savedInstanceState.getBoolean(ConstantManager.EDIT_MODE_KEY, false);
-//        }
+        mFragmentManager = getFragmentManager();
 
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        mUserProfileFragment = new UserProfileFragment();
-        transaction.add(R.id.fragment_container, mUserProfileFragment);
-        transaction.commit();
+        mFab.setOnClickListener(this);
+        mProfilePlaceholder.setOnClickListener(this);
 
         setupToolbar();
         setupDrawer();
         setupEditMode();
 
-//        loadUserInfo();
-//        loadUserStatistic();
         loadUserPhoto();
+        if (savedInstanceState == null) {
+            FragmentTransaction transaction = mFragmentManager.beginTransaction();
+            mUserStatisticFragment = new UserStatisticFragment();
+            mUserProfileFragment = new UserProfileFragment();
+
+            transaction.add(R.id.fragment_statistic_container, mUserStatisticFragment);
+            transaction.replace(R.id.fragment_content_container, mUserProfileFragment);
+
+            transaction.commit();
+        }
     }
 
     @Override
@@ -166,79 +140,45 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.d(TAG, "onRestart");
-        mNavigationView.getMenu().getItem(0).setChecked(true);
-    }
-
-    /*@Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.make_call_img:
-                makeActionView(Uri.parse(ConstantManager.TELEPHONE_SCHEME + mUserPhone.getText()));
-                break;
-            case R.id.send_email_img:
-                sendEmail(Uri.parse(ConstantManager.MAIL_SCHEME + mUserEmail.getText()));
-                break;
-            case R.id.vk_img:
-                makeActionView(Uri.parse(ConstantManager.HTTPS_SCHEME + mUserVk.getText()));
-                break;
             case R.id.profile_placeholder:
                 showDialog(ConstantManager.LOAD_PROFILE_PHOTO);
                 break;
             case R.id.fab:
-                if (mEditMode) {
-                    for (EditText userInfoView : mUserInfoViews) {
-                        if (!MyTextWatcher.isValid(userInfoView)) {
-                            requestFocus(userInfoView);
+                if (mUserProfileFragment.onFabClick()) {
+                    if (mEditMode) {
+                        if (mPhotoFile != null) {
+                            Uri editorPhotoUri = Uri.fromFile(mPhotoFile);
+                            if (!mOriginPhotoUri.equals(editorPhotoUri)) {
+                                uploadPhoto();
+                            }
                         }
+                        mEditMode = false;
+                        setupEditMode();
+                    } else {
+                        mOriginPhotoUri = Uri.parse(mPreferencesManager.loadUserPhoto());
+                        mEditMode = true;
+                        setupEditMode();
                     }
-                    if (mPhotoFile != null) {
-                        Uri editorPhotoUri = Uri.fromFile(mPhotoFile);
-                        if (!mOriginPhotoUri.equals(editorPhotoUri)) {
-                            uploadPhoto();
-                        }
-                    }
-                    mEditMode = !mEditMode;
-                    setupEditMode();
-                } else {
-                    mOriginPhotoUri = Uri.parse(mPreferencesManager.loadUserPhoto());
-                    mEditMode = !mEditMode;
-                    setupEditMode();
                 }
                 break;
         }
     }
-
-    @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-        switch (v.getId()) {
-            // отсекает лишние символы перед "vk"
-            case R.id.vk_et:
-                String value = mUserVk.getText().toString();
-                int startIndex = value.indexOf("vk");
-                if (startIndex > 0) {
-                    mUserVk.setText(value.substring(startIndex));
-                }
-                break;
-        }
-    }*/
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ConstantManager.EDIT_MODE_KEY, mEditMode);
-//        saveUserInfo();
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-//        loadUserInfo();
+        mEditMode = savedInstanceState.getBoolean(ConstantManager.EDIT_MODE_KEY, false);
     }
 
-    /*@Override
+    @Override
     public void onBackPressed() {
         if (mNavigationDrawer.isDrawerOpen(GravityCompat.START)) {
             mNavigationDrawer.closeDrawer(GravityCompat.START);
@@ -247,7 +187,7 @@ public class MainActivity extends BaseActivity {
         } else {
             super.onBackPressed();
         }
-    }*/
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -311,24 +251,43 @@ public class MainActivity extends BaseActivity {
 
     private void setupToolbar() {
         setSupportActionBar(mToolbar);
-//        ActionBar actionBar = getSupportActionBar();
-//
-//        mAppBarParams = (AppBarLayout.LayoutParams) mCollapsingToolbar.getLayoutParams();
-//        if (actionBar != null) {
-//            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
-//            actionBar.setDisplayHomeAsUpEnabled(true);
-//            actionBar.setTitle(mPreferencesManager.loadUserName());
-//        }
+        mAppBarParams = (AppBarLayout.LayoutParams) mCollapsingToolbar.getLayoutParams();
     }
 
     private void setupDrawer() {
-        mNavigationView.getMenu().getItem(0).setChecked(true);
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 mNavigationDrawer.closeDrawer(GravityCompat.START);
                 int itemId = item.getItemId();
                 switch (itemId) {
+                    case R.id.user_profile_menu:
+                        unlockToolbar();
+                        expandToolbar();
+                        mSearchItem.setVisible(false);
+                        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+                        mUserStatisticFragment = new UserStatisticFragment();
+                        mUserProfileFragment = new UserProfileFragment();
+
+                        transaction.add(R.id.fragment_statistic_container, mUserStatisticFragment);
+                        transaction.replace(R.id.fragment_content_container, mUserProfileFragment);
+
+                        transaction.commit();
+                        return true;
+
+                    case R.id.team_menu:
+                        collapseToolbar();
+                        lockToolbar();
+                        mSearchItem.setVisible(true);
+                        transaction = mFragmentManager.beginTransaction();
+                        mUserListFragment = new UserListFragment();
+
+                        transaction.remove(mUserStatisticFragment);
+                        transaction.replace(R.id.fragment_content_container, mUserListFragment);
+
+                        transaction.commit();
+                        return true;
+
                     case R.id.login_menu:
                         mPreferencesManager.clearAllData();
                         mPreferencesManager.saveAuthToken(ConstantManager.INVALID_TOKEN);
@@ -336,10 +295,6 @@ public class MainActivity extends BaseActivity {
                         loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(loginIntent);
                         finish();
-                        return true;
-                    case R.id.team_menu:
-                        Intent usersIntent = new Intent(MainActivity.this, UserListActivity.class);
-                        startActivity(usersIntent);
                         return true;
                 }
                 return false;
@@ -359,91 +314,26 @@ public class MainActivity extends BaseActivity {
     /**
      * переключает режим редактирования
      */
-    public void setupEditMode() {
+    private void setupEditMode() {
         if (mEditMode) {
-//            for (EditText userValue : mUserInfoViews) {
-//                userValue.setFocusableInTouchMode(true);
-//                userValue.setFocusable(true);
-//                userValue.setEnabled(true);
-//            }
-//            for (ImageView actionIcon : mActionIcons) {
-//                actionIcon.setClickable(false);
-//            }
-            showProfilePlaceholder();
+
+            mProfilePlaceholder.setVisibility(View.VISIBLE);
 //            lockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
             mFab.setImageResource(R.drawable.ic_check_24dp);
-//            requestFocus(mUserInfoViews.get(0));
         } else {
-//            for (EditText userValue : mUserInfoViews) {
-//                userValue.setFocusable(false);
-//                userValue.setEnabled(false);
-//            }
-//            for (ImageView actionIcon : mActionIcons) {
-//                actionIcon.setClickable(true);
-//            }
-            hideProfilePlaceholder();
+
+            mProfilePlaceholder.setVisibility(View.INVISIBLE);
 //            unlockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(android.R.color.white));
             mFab.setImageResource(R.drawable.ic_mode_edit_24dp);
-//            mNestedScrollView.scrollTo(0, 0);
-        }
-//        mUserProfileFragment.setupEditMode();
-    }
-
-    /*private void initRepositoriesView() {
-
-        for (int i = 0; i < mPreferencesManager.getRepositoriesSize(); i++) {
-            RepositoryView repositoryView = new RepositoryView(this, new RepositoryView.CustomClickListener() {
-                @Override
-                public void onIconClickListener(Uri uri) {
-                    makeActionView(uri);
-                }
-            });
-            mRepoListView.addView(repositoryView);
-
-            if (i < mPreferencesManager.getRepositoriesSize() - 1) {
-                RepositoryDeviderView deviderView = new RepositoryDeviderView(this);
-                mRepoListView.addView(deviderView);
-            }
-            mUserInfoViews.add(repositoryView.getGitEditText());
-            mActionIcons.add(repositoryView.getGitImage());
         }
     }
-
-    private void loadUserInfo() {
-        List<String> userInfo = mPreferencesManager.loadUserInfo();
-        for (int i = 0; i < userInfo.size(); i++) {
-            mUserInfoViews.get(i).setText(userInfo.get(i));
-        }
-    }
-
-    private void loadUserStatistic() {
-        List<String> userStatistic = mPreferencesManager.loadUserStatistic();
-        for (int i = 0; i < userStatistic.size(); i++) {
-            mUserStatisticViews[i].setText(userStatistic.get(i));
-        }
-    }*/
 
     private void loadUserPhoto() {
         UiHelper.setUserPhoto(this, mPreferencesManager.loadUserPhoto(), mProfilePhoto);
     }
 
-
-    /*private void saveUserInfo() {
-        List<String> userInfo = new ArrayList<>();
-
-        StringBuilder repositories = new StringBuilder();
-        for (EditText userInfoView : mUserInfoViews) {
-            if (userInfoView.getTag().equals(getString(R.string.git_tag))) {
-                repositories.append(userInfoView.getText().toString()).append(" ");
-            } else {
-                userInfo.add(userInfoView.getText().toString());
-            }
-        }
-        userInfo.add(3, repositories.toString());
-        mPreferencesManager.saveUserInfo(userInfo);
-    }*/
 
     private void loadPhotoFromGallery() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
@@ -469,7 +359,7 @@ public class MainActivity extends BaseActivity {
             Intent takeCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
             try {
-                mPhotoFile = createImageFile();
+                mPhotoFile = Helper.createImageFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -488,7 +378,7 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    /*/**
+    /**
      * Получение рузультата из другой Activity (фото из галлереи или камеры)
      *
      * @param requestCode The integer request code originally supplied to startActivityForResult(),
@@ -496,7 +386,7 @@ public class MainActivity extends BaseActivity {
      * @param resultCode  The integer result code returned by the child activity through its setResult().
      * @param data        An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
      */
-    /*@Override
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Uri selectedImage;
         switch (requestCode) {
@@ -516,27 +406,25 @@ public class MainActivity extends BaseActivity {
                 }
                 break;
         }
-    }*/
-
-    private void hideProfilePlaceholder() {
-        mProfilePlaceholder.setVisibility(View.INVISIBLE);
     }
 
-    private void showProfilePlaceholder() {
-        mProfilePlaceholder.setVisibility(View.VISIBLE);
+    private void expandToolbar() {
+        mAppBarLayout.setExpanded(true, true);
+    }
+
+    private void collapseToolbar() {
+        mAppBarLayout.setExpanded(false, true);
     }
 
     private void lockToolbar() {
-        mAppBarLayout.setExpanded(true, true);
         //убирает конфликт с анимацией
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mAppBarParams.setScrollFlags(0);
+                mAppBarParams.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED);
             }
-        }, 500);
-
+        }, 1000);
         mCollapsingToolbar.setLayoutParams(mAppBarParams);
     }
 
@@ -562,61 +450,6 @@ public class MainActivity extends BaseActivity {
         startActivityForResult(appSettingsIntent, ConstantManager.SETTINGS_PERMISSION_REQUEST_CODE);
     }
 
-    private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat(AppConfig.TIMESTAMP_FORMAT,
-                getResources().getConfiguration().locale).format(new Date());
-        String imageFileName = AppConfig.PHOTO_FILE_PREFIX + timeStamp;
-        File imageFile;
-        if (ExStorageState.isWritable()) {
-            File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            imageFile = File.createTempFile(imageFileName, ConstantManager.EXTENSION_JPEG, storageDir);
-        } else {
-            return null;
-        }
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
-        values.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis());
-        values.put(MediaStore.Images.Media.MIME_TYPE, ConstantManager.MIME_TYPE_JPEG);
-        values.put(MediaStore.MediaColumns.DATA, imageFile.getAbsolutePath());
-
-        this.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-
-        return imageFile;
-    }
-
-    /**
-     * Создание и запуск SENDTO интента
-     *
-     * @param uri цель SENDTO
-     */
-    private void sendEmail(Uri uri) {
-        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, uri);
-        startActivity(Intent.createChooser(emailIntent, getString(R.string.chooser_email)));
-    }
-
-    /**
-     * Создание и запуск ACTION_VIEW интента
-     *
-     * @param uri цель ACTION_VIEW
-     */
-    private void makeActionView(Uri uri) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        startActivity(intent);
-    }
-
-    /**
-     * Запрос фокуса у EditText и если возможно установка его и перемещение курсора
-     * в конец строки
-     *
-     * @param editText EditText у которого запрашивается фокус
-     */
-    public void requestFocus(EditText editText) {
-        if (editText.requestFocus()) {
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-            editText.setSelection(editText.length());
-        }
-    }
-
     private void uploadPhoto() {
         RequestBody requestFile = RequestBody.create(
                 MediaType.parse(ConstantManager.CONTENT_TYPE_MULTIPART), mPhotoFile);
@@ -635,5 +468,29 @@ public class MainActivity extends BaseActivity {
                 Log.d(TAG, "uploadPhoto onFailure");
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+
+        mSearchItem = menu.findItem(R.id.action_search);
+        mSearchItem.setVisible(false);
+
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(mSearchItem);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mUserListFragment.filter(newText);
+                return true;
+            }
+        });
+
+        return super.onCreateOptionsMenu(menu);
     }
 }

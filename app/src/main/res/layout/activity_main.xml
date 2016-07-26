@@ -77,9 +77,18 @@
         </android.support.design.widget.AppBarLayout>
 
         <FrameLayout
+            android:id="@+id/fragment_statistic_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/grey"
+            android:paddingBottom="@dimen/spacing_medium_28"
+            android:paddingTop="@dimen/spacing_medium_28"
+            app:layout_behavior=".ui.behaviors.UserStatisticBehavior"/>
+
+        <FrameLayout
+            android:id="@+id/fragment_content_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/fragment_container"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
         <android.support.design.widget.FloatingActionButton

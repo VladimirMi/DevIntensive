@@ -1,0 +1,193 @@
+package com.softdesign.devintensive.ui.fragments;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.redmadrobot.chronos.ChronosOperation;
+import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.storage.models.Repository;
+import com.softdesign.devintensive.data.storage.models.User;
+import com.softdesign.devintensive.data.storage.models.UserDTO;
+import com.softdesign.devintensive.data.tasks.LoadRepositories;
+import com.softdesign.devintensive.data.tasks.LoadUsersList;
+import com.softdesign.devintensive.ui.activities.MainActivity;
+import com.softdesign.devintensive.ui.activities.ProfileUserActivity;
+import com.softdesign.devintensive.ui.adapters.UsersAdapter;
+import com.softdesign.devintensive.ui.behaviors.CustomItemTouchHelperCallback;
+import com.softdesign.devintensive.utils.AppConfig;
+import com.softdesign.devintensive.utils.ConstantManager;
+import com.softdesign.devintensive.utils.UiHelper;
+
+import java.util.HashMap;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class UserListFragment extends BaseFragment {
+
+    private static final String TAG = ConstantManager.TAG_PREFIX + "UserListFragment";
+
+    @BindView(R.id.user_list) RecyclerView mRecyclerView;
+
+    private UsersAdapter mUsersAdapter;
+    private List<User> mUsers;
+    private List<User> mUsersCopy;
+    private HashMap<String, List<Repository>> mRepositories;
+
+    private MainActivity mActivity;
+
+    private boolean isAnimate = true;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            isAnimate = false;
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof MainActivity) {
+            mActivity = (MainActivity) context;
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mActivity = null;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_user_list, container, false);
+        ButterKnife.bind(this, view);
+
+        setupToolbar();
+        ChronosOperation<List<User>> loadUsersListTask = new LoadUsersList();
+        runOperation(loadUsersListTask);
+        ChronosOperation<HashMap<String, List<Repository>>> loadRepositoriesTask = new LoadRepositories();
+        runOperation(loadRepositoriesTask);
+
+        return view;
+    }
+
+
+    private void setupToolbar() {
+        ActionBar actionBar = mActivity.getSupportActionBar();
+
+        if (actionBar != null) {
+//            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
+//            actionBar.setDisplayHomeAsUpEnabled(true);
+//            actionBar.setTitle(mPreferencesManager.loadUserName());
+        }
+    }
+
+    private void setupRecycler() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+
+        mUsersAdapter = new UsersAdapter(mUsers, new UsersAdapter.UserViewHolder.CustomClickListener() {
+            @Override
+            public void onUserItemClickListener(int position) {
+                UserDTO userDTO = new UserDTO(mUsers.get(position), mRepositories.get(mUsers.get(position).getRemoteId()));
+
+                Intent profileIntent = new Intent(mActivity, ProfileUserActivity.class);
+                profileIntent.putExtra(ConstantManager.PARCELABLE_KEY, userDTO);
+                startActivity(profileIntent);
+            }
+        });
+        mRecyclerView.setAdapter(mUsersAdapter);
+
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(mUsersAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(mRecyclerView);
+
+        if (isAnimate) {
+            mRecyclerView.setTranslationY(UiHelper.getScreenHeight(mContext));
+            mRecyclerView.setAlpha(0f);
+            mRecyclerView.setScaleX(0.0f);
+            mRecyclerView.setScaleY(0.0f);
+            mRecyclerView.animate()
+                    .translationY(0)
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .setDuration(1000)
+                    .alpha(1f)
+                    .setInterpolator(new FastOutSlowInInterpolator())
+                    .start();
+        }
+    }
+
+    public void filter(final String query) {
+        if (query.isEmpty()) {
+            mUsers = mUsersCopy;
+            swapAdapter();
+        } else {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mUsers = mDataManager.searchUsers(query.toUpperCase());
+                    swapAdapter();
+                }
+            }, AppConfig.SEARCH_DELAY);
+        }
+    }
+
+    private void swapAdapter() {
+        mUsersAdapter = new UsersAdapter(mUsers, new UsersAdapter.UserViewHolder.CustomClickListener() {
+            @Override
+            public void onUserItemClickListener(int position) {
+                UserDTO userDTO = new UserDTO(mUsers.get(position), mRepositories.get(mUsers.get(position).getRemoteId()));
+
+                Intent profileIntent = new Intent(mActivity, ProfileUserActivity.class);
+                profileIntent.putExtra(ConstantManager.PARCELABLE_KEY, userDTO);
+                startActivity(profileIntent);
+            }
+        });
+        mRecyclerView.swapAdapter(mUsersAdapter, false);
+
+        ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(mUsersAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(mRecyclerView);
+    }
+
+
+    public void onOperationFinished(final LoadUsersList.Result result) {
+        if (result.isSuccessful()) {
+            mUsers = result.getOutput();
+            mUsersCopy = result.getOutput();
+            setupRecycler();
+        } else {
+            Log.e(TAG, "onSaveUserListFinished: " + result.getErrorMessage());
+        }
+    }
+
+    public void onOperationFinished(final LoadRepositories.Result result) {
+        if (result.isSuccessful()) {
+            mRepositories = result.getOutput();
+        } else {
+
+            Log.e(TAG, "onSaveUserListFinished: " + result.getErrorMessage());
+        }
+    }
+}

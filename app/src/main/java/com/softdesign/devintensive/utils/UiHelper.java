@@ -74,7 +74,7 @@ public class UiHelper {
                 .into(view, new Callback() {
                     @Override
                     public void onSuccess() {
-                        Log.d(path, "Load from cache");
+//                        Log.d(path, "Load from cache");
                     }
 
                     @Override
@@ -88,12 +88,12 @@ public class UiHelper {
                                 .into(view, new Callback() {
                                     @Override
                                     public void onSuccess() {
-                                        Log.d(path, "Load from net");
+//                                        Log.d(path, "Load from net");
                                     }
 
                                     @Override
                                     public void onError() {
-                                        Log.d(path, "Could not fetch the image");
+//                                        Log.d(path, "Could not fetch the image");
                                     }
                                 });
                     }
@@ -112,7 +112,7 @@ public class UiHelper {
                 .into(view, new Callback() {
                     @Override
                     public void onSuccess() {
-                        Log.d(path, "Load from cache");
+//                        Log.d(path, "Load from cache");
                     }
 
                     @Override
@@ -127,12 +127,12 @@ public class UiHelper {
                                 .into(view, new Callback() {
                                     @Override
                                     public void onSuccess() {
-                                        Log.d(path, "Load from net");
+//                                        Log.d(path, "Load from net");
                                     }
 
                                     @Override
                                     public void onError() {
-                                        Log.d(path, "Could not fetch the image");
+//                                        Log.d(path, "Could not fetch the image");
                                     }
                                 });
                     }

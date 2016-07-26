@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nested_scroll"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/nested_scroll">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
-        <include layout="@layout/user_statistics_content"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -148,8 +145,8 @@
                 android:id="@+id/repositories_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginLeft="@dimen/spacing_medium_32"/>
+                android:layout_marginLeft="@dimen/spacing_medium_32"
+                android:orientation="vertical"/>
 
         </LinearLayout>
 
@@ -172,9 +169,9 @@
 
             <LinearLayout
                 style="@style/user_info_item"
-                android:minHeight="@dimen/size_large_72"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/spacing_medium_32">
+                android:layout_marginRight="@dimen/spacing_medium_32"
+                android:minHeight="@dimen/size_large_72">
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/bio_til"
@@ -185,8 +182,8 @@
                         android:id="@+id/bio_et"
                         style="@style/user_info_item_text"
                         android:hint="@string/about_me_hint"
-                        android:tag="@string/bio_tag"
-                        android:inputType="textMultiLine"/>
+                        android:inputType="textMultiLine"
+                        android:tag="@string/bio_tag"/>
 
                 </android.support.design.widget.TextInputLayout>
 

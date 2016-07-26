@@ -1,6 +1,7 @@
 package com.softdesign.devintensive.ui.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,18 +39,9 @@ import butterknife.ButterKnife;
 
 public class UserProfileFragment extends BaseFragment implements View.OnClickListener, View.OnFocusChangeListener{
 
-    private static final String TAG = ConstantManager.TAG_PREFIX + "Main Activity";
-//    @BindView(R.id.main_coordinator_container) CoordinatorLayout mCoordinatorLayout;
-//    @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
-//    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
-//    @BindView(R.id.toolbar) Toolbar mToolbar;
-    FloatingActionButton mFab;
-    RelativeLayout mProfilePlaceholder;
-    ImageView mProfilePhoto;
-//    @BindView(R.id.navigation_drawer) DrawerLayout mNavigationDrawer;
-//    @BindView(R.id.navigation_view) NavigationView mNavigationView;
-    @BindView(R.id.nested_scroll) NestedScrollView mNestedScrollView;
+    private static final String TAG = ConstantManager.TAG_PREFIX + "UserProfileFragment";
 
+    @BindView(R.id.nested_scroll) NestedScrollView mNestedScrollView;
     @BindView(R.id.repositories_list) LinearLayout mRepoListView;
 
     @BindView(R.id.phone_et) EditText mUserPhone;
@@ -65,13 +57,8 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
 
     private List<ImageView> mActionIcons;
 
-    @BindViews({R.id.rating_txt, R.id.code_lines_txt, R.id.projects_txt})
-    TextView[] mUserStatisticViews;
-
     private boolean mEditMode;
-    private File mPhotoFile = null;
-    private AppBarLayout.LayoutParams mAppBarParams = null;
-    private Uri mOriginPhotoUri;
+
     private MainActivity mActivity;
 
     @Override
@@ -84,7 +71,14 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
         super.onAttach(context);
         if (context instanceof MainActivity) {
             mActivity = (MainActivity) context;
+            mEditMode = mActivity.mEditMode;
         }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mActivity = null;
     }
 
     @Nullable
@@ -109,8 +103,6 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
         initRepositoriesView();
         mUserInfoViews.add(mUserBio);
 
-//        mFab.setOnClickListener(this);
-//        mProfilePlaceholder.setOnClickListener(this);
 
         for (int i = 0; i < mUserInfoViews.size() - 1; i++) {
             mUserInfoViews.get(i).addTextChangedListener(new MyTextWatcher(mActivity,
@@ -125,10 +117,49 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
         setupEditMode();
 
         loadUserInfo();
-        loadUserStatistic();
-
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        saveUserInfo();
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        loadUserInfo();
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        switch (v.getId()) {
+            // отсекает лишние символы перед "vk"
+            case R.id.vk_et:
+                String value = mUserVk.getText().toString();
+                int startIndex = value.indexOf("vk");
+                if (startIndex > 0) {
+                    mUserVk.setText(value.substring(startIndex));
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.make_call_img:
+                makeActionView(Uri.parse(ConstantManager.TELEPHONE_SCHEME + mUserPhone.getText()));
+                break;
+            case R.id.send_email_img:
+                sendEmail(Uri.parse(ConstantManager.MAIL_SCHEME + mUserEmail.getText()));
+                break;
+            case R.id.vk_img:
+                makeActionView(Uri.parse(ConstantManager.HTTPS_SCHEME + mUserVk.getText()));
+                break;
+        }
     }
 
     private void initRepositoriesView() {
@@ -152,10 +183,8 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
     }
 
     private void setupToolbar() {
-//        setSupportActionBar(mToolbar);
         ActionBar actionBar = mActivity.getSupportActionBar();
 
-//        mAppBarParams = (AppBarLayout.LayoutParams) mActivity.mCollapsingToolbar.getLayoutParams();
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -177,10 +206,6 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
             for (ImageView actionIcon : mActionIcons) {
                 actionIcon.setClickable(false);
             }
-//            mProfilePlaceholder.setVisibility(View.VISIBLE);
-//            lockToolbar();
-//            mActivity.mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
-//            mFab.setImageResource(R.drawable.ic_check_24dp);
             requestFocus(mUserInfoViews.get(0));
         } else {
             for (EditText userValue : mUserInfoViews) {
@@ -190,10 +215,6 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
             for (ImageView actionIcon : mActionIcons) {
                 actionIcon.setClickable(true);
             }
-//            mProfilePlaceholder.setVisibility(View.INVISIBLE);
-//            unlockToolbar();
-//            mActivity.mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(android.R.color.white));
-//            mFab.setImageResource(R.drawable.ic_mode_edit_24dp);
             mNestedScrollView.scrollTo(0, 0);
         }
 
@@ -203,13 +224,6 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
         List<String> userInfo = mPreferencesManager.loadUserInfo();
         for (int i = 0; i < userInfo.size(); i++) {
             mUserInfoViews.get(i).setText(userInfo.get(i));
-        }
-    }
-
-    private void loadUserStatistic() {
-        List<String> userStatistic = mPreferencesManager.loadUserStatistic();
-        for (int i = 0; i < userStatistic.size(); i++) {
-            mUserStatisticViews[i].setText(userStatistic.get(i));
         }
     }
 
@@ -227,13 +241,39 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
         }
     }
 
-    @Override
-    public void onClick(View view) {
-
+    /**
+     * Вызывается при клике на FAB в MainActivity
+     * @return true - если режим редактирования сменился, false - если нет.
+     */
+    public boolean onFabClick() {
+        if (mEditMode) {
+            for (EditText userInfoView : mUserInfoViews) {
+                if (!MyTextWatcher.isValid(userInfoView)) {
+                    requestFocus(userInfoView);
+                    return false;
+                }
+            }
+            mEditMode = false;
+            setupEditMode();
+        } else {
+            mEditMode = true;
+            setupEditMode();
+        }
+        return true;
     }
 
-    @Override
-    public void onFocusChange(View view, boolean b) {
+    private void saveUserInfo() {
+        List<String> userInfo = new ArrayList<>();
 
+        StringBuilder repositories = new StringBuilder();
+        for (EditText userInfoView : mUserInfoViews) {
+            if (userInfoView.getTag().equals(getString(R.string.git_tag))) {
+                repositories.append(userInfoView.getText().toString()).append(" ");
+            } else {
+                userInfo.add(userInfoView.getText().toString());
+            }
+        }
+        userInfo.add(3, repositories.toString());
+        mPreferencesManager.saveUserInfo(userInfo);
     }
 }

@@ -62,7 +62,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             userPhoto = user.getPhoto();
         }
 
-        UiHelper.setUserPhoto(mContext, userPhoto, holder.mUserPhoto);
+//        UiHelper.setUserPhoto(mContext, userPhoto, holder.mUserPhoto);
 
         holder.mFullName.setText(user.getFullName());
         holder.mRating.setText(String.valueOf(user.getRating()));

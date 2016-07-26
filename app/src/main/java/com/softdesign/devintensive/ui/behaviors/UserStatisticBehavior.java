@@ -6,13 +6,14 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.UiHelper;
 
-public class UserStatisticBehavior extends CoordinatorLayout.Behavior<LinearLayout> {
+public class UserStatisticBehavior extends AppBarLayout.ScrollingViewBehavior {
     private final String TAG = ConstantManager.TAG_PREFIX + "UserStatisticBehavior";
     private final int mMaxAppBarHeight;
     private final int mMinAppBarHeight;
@@ -27,23 +28,18 @@ public class UserStatisticBehavior extends CoordinatorLayout.Behavior<LinearLayo
         mInitialPadding = context.getResources().getDimensionPixelOffset(R.dimen.spacing_medium_28);
     }
 
-    @Override
-    public boolean layoutDependsOn(CoordinatorLayout parent, LinearLayout child, View dependency) {
-        return dependency instanceof AppBarLayout;
-    }
 
     @Override
-    public boolean onDependentViewChanged(CoordinatorLayout parent, LinearLayout child, View dependency) {
+    public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
 
         int padding = ((int) dependency.getBottom() - mMinAppBarHeight) * mInitialPadding /
                 (mMaxAppBarHeight - mMinAppBarHeight);
 
-        child.setY(dependency.getBottom());
         child.setPadding(0, padding, 0, padding);
 
-        NestedScrollView scrollView = (NestedScrollView) parent.getChildAt(2);
-        scrollView.setPadding(scrollView.getPaddingLeft(), child.getHeight(),
-                scrollView.getPaddingRight(), scrollView.getPaddingBottom());
+        FrameLayout fragmentContent = (FrameLayout) parent.getChildAt(2);
+        fragmentContent.setPadding(fragmentContent.getPaddingLeft(), child.getHeight(),
+                fragmentContent.getPaddingRight(), fragmentContent.getPaddingBottom());
 
         return super.onDependentViewChanged(parent, child, dependency);
     }

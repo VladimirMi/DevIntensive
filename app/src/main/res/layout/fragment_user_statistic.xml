@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/grey"
+              android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="@dimen/size_medium_56"
+        android:layout_weight="0.25"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/rating_txt"
+            style="@style/user_statistic.value"/>
+
+        <TextView
+            style="@style/user_statistic.hint"
+            android:text="@string/rating_title"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="@dimen/line_size_2"
+        android:layout_height="@dimen/size_medium_56"
+        android:background="@color/grey_light"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="@dimen/size_medium_56"
+        android:layout_weight="0.5"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/code_lines_txt"
+            style="@style/user_statistic.value"/>
+
+        <TextView
+            style="@style/user_statistic.hint"
+            android:text="@string/code_title"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="@dimen/line_size_2"
+        android:layout_height="@dimen/size_medium_56"
+        android:background="@color/grey_light"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="@dimen/size_medium_56"
+        android:layout_weight="0.25"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/projects_txt"
+            style="@style/user_statistic.value"/>
+
+        <TextView
+            style="@style/user_statistic.hint"
+            android:text="@string/projects_title"/>
+    </LinearLayout>
+
+</LinearLayout>
