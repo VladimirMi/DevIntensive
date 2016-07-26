@@ -1,43 +1,48 @@
 package com.softdesign.devintensive.utils;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.squareup.picasso.Transformation;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 
-public class CircleTransformation implements Transformation {
-    @Override
-    public Bitmap transform(Bitmap source) {
+public class CircleTransformation extends BitmapTransformation {
+    public CircleTransformation(Context context) {
+        super(context);
+    }
+
+    @Override protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+        return circleCrop(pool, toTransform);
+    }
+
+    private static Bitmap circleCrop(BitmapPool pool, Bitmap source) {
+        if (source == null) return null;
+
         int size = Math.min(source.getWidth(), source.getHeight());
-
         int x = (source.getWidth() - size) / 2;
         int y = (source.getHeight() - size) / 2;
 
-        Bitmap squaredBitmap = Bitmap.createBitmap(source, x, y, size, size);
-        if (squaredBitmap != source) {
-            source.recycle();
+        Bitmap squared = Bitmap.createBitmap(source, x, y, size, size);
+
+        Bitmap result = pool.get(size, size, Bitmap.Config.ARGB_8888);
+        if (result == null) {
+            result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         }
 
-        Bitmap bitmap = Bitmap.createBitmap(size, size, source.getConfig());
-
-        Canvas canvas = new Canvas(bitmap);
+        Canvas canvas = new Canvas(result);
         Paint paint = new Paint();
-        BitmapShader shader = new BitmapShader(squaredBitmap,
-                BitmapShader.TileMode.CLAMP, BitmapShader.TileMode.CLAMP);
-        paint.setShader(shader);
+        paint.setShader(new BitmapShader(squared, BitmapShader.TileMode.CLAMP, BitmapShader.TileMode.CLAMP));
         paint.setAntiAlias(true);
-
         float r = size / 2f;
         canvas.drawCircle(r, r, r, paint);
-
-        squaredBitmap.recycle();
-        return bitmap;
+        return result;
     }
 
     @Override
-    public String key() {
-        return "circle";
+    public String getId() {
+        return "CropCircleTransformation()";
     }
 }

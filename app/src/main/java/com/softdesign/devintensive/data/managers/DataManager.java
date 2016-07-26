@@ -2,7 +2,6 @@ package com.softdesign.devintensive.data.managers;
 
 import android.content.Context;
 
-import com.softdesign.devintensive.data.network.PicassoCache;
 import com.softdesign.devintensive.data.network.RestService;
 import com.softdesign.devintensive.data.network.ServiceGenerator;
 import com.softdesign.devintensive.data.network.req.UserLoginReq;
@@ -16,7 +15,6 @@ import com.softdesign.devintensive.data.storage.models.RepositoryDao;
 import com.softdesign.devintensive.data.storage.models.User;
 import com.softdesign.devintensive.data.storage.models.UserDao;
 import com.softdesign.devintensive.utils.DevintensiveApplication;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +27,6 @@ public class DataManager {
     private PreferencesManager mPreferencesManager;
     private Context mContext;
     private RestService mRestService;
-    private Picasso mPicasso;
 
     private DaoSession mDaoSession;
 
@@ -37,7 +34,6 @@ public class DataManager {
         mPreferencesManager = new PreferencesManager();
         mContext = DevintensiveApplication.getAppContext();
         mRestService = ServiceGenerator.createService(RestService.class);
-        mPicasso = new PicassoCache(mContext).getPicassoInstance();
         mDaoSession = DevintensiveApplication.getDaoSession();
     }
 
@@ -54,10 +50,6 @@ public class DataManager {
 
     public Context getContext() {
         return mContext;
-    }
-
-    public Picasso getPicasso() {
-        return mPicasso;
     }
 
     public DaoSession getDaoSession() {

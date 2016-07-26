@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.network.CustomGlideModule;
 import com.softdesign.devintensive.data.storage.models.UserDTO;
 import com.softdesign.devintensive.ui.adapters.RepositoriesAdapter;
 import com.softdesign.devintensive.utils.ConstantManager;
@@ -89,6 +90,6 @@ public class ProfileUserActivity extends AppCompatActivity {
         mUserBio.setText(mUser.getBio());
         mCollapsingToolbar.setTitle(mUser.getFullName());
 
-        UiHelper.setUserPhoto(this, mUser.getPhoto(), mProfileImage);
+        CustomGlideModule.setUserPhoto(this, mUser.getPhoto(), mProfileImage);
     }
 }

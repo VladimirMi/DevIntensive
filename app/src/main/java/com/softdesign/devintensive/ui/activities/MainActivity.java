@@ -45,6 +45,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.network.CustomGlideModule;
 import com.softdesign.devintensive.data.network.res.UploadImageRes;
 import com.softdesign.devintensive.ui.fragments.UserListFragment;
 import com.softdesign.devintensive.ui.fragments.UserProfileFragment;
@@ -75,7 +76,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener{
+public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = ConstantManager.TAG_PREFIX + "Main Activity";
     @BindView(R.id.main_coordinator_container) CoordinatorLayout mCoordinatorLayout;
@@ -89,6 +90,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
 
     @BindView(R.id.fragment_statistic_container) FrameLayout mStatisticContainer;
+    @BindView(R.id.profile_photo_container) FrameLayout mPhotoContainer;
+
 
     public boolean mEditMode;
     private File mPhotoFile = null;
@@ -126,8 +129,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
             transaction.add(R.id.fragment_statistic_container, mUserStatisticFragment);
             transaction.replace(R.id.fragment_content_container, mUserProfileFragment);
-
+            transaction.addToBackStack(null);
             transaction.commit();
+            mNavigationView.getMenu().getItem(0).setChecked(true);
         }
     }
 
@@ -264,6 +268,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                     case R.id.user_profile_menu:
                         unlockToolbar();
                         expandToolbar();
+                        mPhotoContainer.setVisibility(View.VISIBLE);
                         mSearchItem.setVisible(false);
                         FragmentTransaction transaction = mFragmentManager.beginTransaction();
                         mUserStatisticFragment = new UserStatisticFragment();
@@ -271,7 +276,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
                         transaction.add(R.id.fragment_statistic_container, mUserStatisticFragment);
                         transaction.replace(R.id.fragment_content_container, mUserProfileFragment);
-
+                        transaction.addToBackStack(null);
                         transaction.commit();
                         return true;
 
@@ -284,7 +289,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
                         transaction.remove(mUserStatisticFragment);
                         transaction.replace(R.id.fragment_content_container, mUserListFragment);
-
+                        transaction.addToBackStack(null);
                         transaction.commit();
                         return true;
 
@@ -303,7 +308,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
         // установка круглого аватара
         final ImageView userAvatar = (ImageView) mNavigationView.getHeaderView(0).findViewById(R.id.user_avatar);
-        UiHelper.setUserAvatar(this, mPreferencesManager.loadUserAvatar(), userAvatar);
+        CustomGlideModule.setUserAvatar(this, mPreferencesManager.loadUserAvatar(), userAvatar);
 
         TextView userName = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.user_name_txt);
         TextView userEmail = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.user_email_txt);
@@ -331,7 +336,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     }
 
     private void loadUserPhoto() {
-        UiHelper.setUserPhoto(this, mPreferencesManager.loadUserPhoto(), mProfilePhoto);
+        CustomGlideModule.setUserPhoto(this, mPreferencesManager.loadUserPhoto(), mProfilePhoto);
     }
 
 
@@ -422,9 +427,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mAppBarParams.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED);
+                mAppBarParams.setScrollFlags(0);
             }
         }, 1000);
+
         mCollapsingToolbar.setLayoutParams(mAppBarParams);
     }
 

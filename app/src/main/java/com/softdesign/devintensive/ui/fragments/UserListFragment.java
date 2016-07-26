@@ -81,24 +81,12 @@ public class UserListFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_user_list, container, false);
         ButterKnife.bind(this, view);
 
-        setupToolbar();
         ChronosOperation<List<User>> loadUsersListTask = new LoadUsersList();
         runOperation(loadUsersListTask);
         ChronosOperation<HashMap<String, List<Repository>>> loadRepositoriesTask = new LoadRepositories();
         runOperation(loadRepositoriesTask);
 
         return view;
-    }
-
-
-    private void setupToolbar() {
-        ActionBar actionBar = mActivity.getSupportActionBar();
-
-        if (actionBar != null) {
-//            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
-//            actionBar.setDisplayHomeAsUpEnabled(true);
-//            actionBar.setTitle(mPreferencesManager.loadUserName());
-        }
     }
 
     private void setupRecycler() {

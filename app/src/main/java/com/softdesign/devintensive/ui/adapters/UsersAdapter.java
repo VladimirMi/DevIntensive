@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
+import com.softdesign.devintensive.data.network.CustomGlideModule;
 import com.softdesign.devintensive.data.storage.models.User;
 import com.softdesign.devintensive.ui.behaviors.CustomItemTouchHelperCallback;
 import com.softdesign.devintensive.ui.views.AspectRatioImageView;
@@ -62,7 +63,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             userPhoto = user.getPhoto();
         }
 
-//        UiHelper.setUserPhoto(mContext, userPhoto, holder.mUserPhoto);
+        CustomGlideModule.setUserPhoto(mContext, userPhoto, holder.mUserPhoto);
 
         holder.mFullName.setText(user.getFullName());
         holder.mRating.setText(String.valueOf(user.getRating()));
