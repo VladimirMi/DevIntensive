@@ -8,6 +8,7 @@ import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.DevintensiveApplication;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PreferencesManager {
@@ -42,8 +43,12 @@ public class PreferencesManager {
 
     public List<String> loadUserInfo() {
         List<String> userFields = new ArrayList<>();
-        for (String userFieldKey : USER_INFO) {
-            userFields.add(mSharedPreferences.getString(userFieldKey, ""));
+        for (String aUSER_INFO : USER_INFO) {
+            if (aUSER_INFO.equals(ConstantManager.USER_GIT_KEY)) {
+                Collections.addAll(userFields, mSharedPreferences.getString(aUSER_INFO, "null").split(" "));
+            } else {
+                userFields.add(mSharedPreferences.getString(aUSER_INFO, "null"));
+            }
         }
         return userFields;
     }
@@ -54,9 +59,8 @@ public class PreferencesManager {
         editor.apply();
     }
 
-    public Uri loadUserPhoto() {
-        return Uri.parse(mSharedPreferences.getString(ConstantManager.USER_PHOTO_KEY,
-                ""));
+    public String loadUserPhoto() {
+        return mSharedPreferences.getString(ConstantManager.USER_PHOTO_KEY, "null");
     }
 
     public void saveAuthToken(String authToken) {
@@ -66,7 +70,7 @@ public class PreferencesManager {
     }
 
     public String getAuthToken() {
-        return mSharedPreferences.getString(ConstantManager.AUTH_TOKEN_KEY, "");
+        return mSharedPreferences.getString(ConstantManager.AUTH_TOKEN_KEY, ConstantManager.INVALID_TOKEN);
     }
 
     public void saveUserId(String userId) {
@@ -76,7 +80,7 @@ public class PreferencesManager {
     }
 
     public String getUserId() {
-        return mSharedPreferences.getString(ConstantManager.USER_ID_KEY, "");
+        return mSharedPreferences.getString(ConstantManager.USER_ID_KEY, "null");
     }
 
     public void saveUserStatistic(List<String> userStatistic) {
@@ -91,7 +95,7 @@ public class PreferencesManager {
     public List<String> loadUserStatistic() {
         List<String> userStatistic = new ArrayList<>();
         for (String userFieldKey : USER_STATISTIC) {
-            userStatistic.add(mSharedPreferences.getString(userFieldKey, ""));
+            userStatistic.add(mSharedPreferences.getString(userFieldKey, "null"));
         }
         return userStatistic;
     }
@@ -102,44 +106,67 @@ public class PreferencesManager {
         editor.apply();
     }
 
-    public Uri loadUserAvatar() {
-        return Uri.parse(mSharedPreferences.getString(ConstantManager.USER_AVATAR_KEY, ""));
+    public String loadUserAvatar() {
+        return mSharedPreferences.getString(ConstantManager.USER_AVATAR_KEY, "null");
+    }
+
+    public void saveUserName(String fullName) {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(ConstantManager.USER_NAME_KEY, fullName);
+        editor.apply();
+    }
+
+    public String loadUserName() {
+        return mSharedPreferences.getString(ConstantManager.USER_NAME_KEY, "null");
+    }
+
+    public void saveUserData(UserModelRes.Data userData) {
+        saveUserId(userData.getId());
+
+        List<String> userStatistic = new ArrayList<>();
+        userStatistic.add(String.valueOf(userData.getProfileValues().getRating()));
+        userStatistic.add(String.valueOf(userData.getProfileValues().getCodeLines()));
+        userStatistic.add(String.valueOf(userData.getProfileValues().getProjects()));
+        saveUserStatistic(userStatistic);
+
+        List<String> userInfo = new ArrayList<>();
+        userInfo.add(userData.getContacts().getPhone());
+        userInfo.add(userData.getContacts().getEmail());
+        userInfo.add(userData.getContacts().getVk());
+
+        StringBuilder repositories = new StringBuilder();
+        for (UserModelRes.Repo repo : userData.getRepositories().getRepo()) {
+            repositories.append(repo.getGit()).append(" ");
+        }
+        userInfo.add(repositories.toString());
+
+        userInfo.add(userData.getPublicInfo().getBio());
+        saveUserInfo(userInfo);
+
+        saveUserPhoto(Uri.parse(userData.getPublicInfo().getPhoto()));
+
+        saveUserAvatar(Uri.parse(userData.getPublicInfo().getAvatar()));
+
+        saveUserName(userData.getFullName());
+    }
+
+    public int getRepositoriesSize() {
+        return mSharedPreferences.getString(ConstantManager.USER_GIT_KEY, "null").split(" ").length;
+    }
+
+    public void setUsersListExists(boolean isUsersListExists) {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean(ConstantManager.USERS_LIST_EXISTS_KEY, isUsersListExists);
+        editor.apply();
+    }
+
+    public boolean isUsersListExists() {
+        return mSharedPreferences.getBoolean(ConstantManager.USERS_LIST_EXISTS_KEY, false);
     }
 
     public void clearAllData() {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.clear();
         editor.apply();
-    }
-
-    public void saveUserName(String firstName, String secondName) {
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(ConstantManager.USER_NAME_KEY, secondName + " " + firstName);
-        editor.apply();
-    }
-
-    public String loadUserName() {
-        return mSharedPreferences.getString(ConstantManager.USER_NAME_KEY, "");
-    }
-
-    public void saveUserValues(UserModelRes.Data userModel) {
-        List<String> userStatistic = new ArrayList<>();
-        userStatistic.add(String.valueOf(userModel.getProfileValues().getRating()));
-        userStatistic.add(String.valueOf(userModel.getProfileValues().getLinesCode()));
-        userStatistic.add(String.valueOf(userModel.getProfileValues().getProjects()));
-
-        List<String> userInfo = new ArrayList<>();
-        userInfo.add(userModel.getContacts().getPhone());
-        userInfo.add(userModel.getContacts().getEmail());
-        userInfo.add(userModel.getContacts().getVk());
-        // TODO: 7/10/2016 разобраться с множественными репозиториями
-        userInfo.add(userModel.getRepositories().getRepo().get(0).getGit());
-        userInfo.add(userModel.getPublicInfo().getBio());
-
-        saveUserStatistic(userStatistic);
-        saveUserInfo(userInfo);
-        saveUserPhoto(Uri.parse(userModel.getPublicInfo().getPhoto()));
-        saveUserAvatar(Uri.parse(userModel.getPublicInfo().getAvatar()));
-        saveUserName(userModel.getFirstName(), userModel.getSecondName());
     }
 }

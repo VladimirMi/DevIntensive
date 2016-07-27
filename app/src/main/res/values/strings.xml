@@ -5,7 +5,6 @@
     <string name="vk_hint">Профиль в VK</string>
     <string name="github_hint">Репозиторий</string>
     <string name="about_me_hint">О себе</string>
-    <string name="email">vladimirmsm@yandex.ru</string>
     <string name="rating_title">Рейтинг</string>
     <string name="code_title">Написано строк кода</string>
     <string name="projects_title">Проектов</string>
@@ -36,4 +35,10 @@
     <string name="profile_menu">Мой профиль</string>
     <string name="users_menu">Все пользаватели</string>
     <string name="action_search">Поиск</string>
+    <string name="phone_tag">phone</string>
+    <string name="email_tag">email</string>
+    <string name="vk_tag">vk</string>
+    <string name="git_tag">git</string>
+    <string name="bio_tag">bio</string>
+    <string name="err_msg_token">Invalid Token</string>
 </resources>

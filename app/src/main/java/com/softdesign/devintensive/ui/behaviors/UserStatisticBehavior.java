@@ -12,7 +12,7 @@ import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.UiHelper;
 
-public class UserStatisticBehavior extends AppBarLayout.ScrollingViewBehavior {
+public class UserStatisticBehavior extends CoordinatorLayout.Behavior<LinearLayout> {
     private final String TAG = ConstantManager.TAG_PREFIX + "UserStatisticBehavior";
     private final int mMaxAppBarHeight;
     private final int mMinAppBarHeight;
@@ -28,22 +28,22 @@ public class UserStatisticBehavior extends AppBarLayout.ScrollingViewBehavior {
     }
 
     @Override
-    public boolean layoutDependsOn(CoordinatorLayout parent, View child, View dependency) {
+    public boolean layoutDependsOn(CoordinatorLayout parent, LinearLayout child, View dependency) {
         return dependency instanceof AppBarLayout;
     }
 
     @Override
-    public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
+    public boolean onDependentViewChanged(CoordinatorLayout parent, LinearLayout child, View dependency) {
 
         int padding = ((int) dependency.getBottom() - mMinAppBarHeight) * mInitialPadding /
                 (mMaxAppBarHeight - mMinAppBarHeight);
 
-
+        child.setY(dependency.getBottom());
         child.setPadding(0, padding, 0, padding);
 
         NestedScrollView scrollView = (NestedScrollView) parent.getChildAt(2);
-
-        scrollView.setY(child.getBottom());
+        scrollView.setPadding(scrollView.getPaddingLeft(), child.getHeight(),
+                scrollView.getPaddingRight(), scrollView.getPaddingBottom());
 
         return super.onDependentViewChanged(parent, child, dependency);
     }
