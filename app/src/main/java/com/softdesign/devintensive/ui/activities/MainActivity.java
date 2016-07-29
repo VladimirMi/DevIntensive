@@ -327,7 +327,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                         startActivity(loginIntent);
                         finish();
                         return true;
-                    case R.id.users_menu:
+                    case R.id.team_menu:
                         Intent usersIntent = new Intent(MainActivity.this, UserListActivity.class);
                         startActivity(usersIntent);
                         return true;

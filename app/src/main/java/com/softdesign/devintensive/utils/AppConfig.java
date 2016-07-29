@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 public interface AppConfig {
     // URL
     String BASE_URL = "http://devintensive.softdesign-apps.ru/api/";
-    String FORGOT_PASS_URL = "\"http://devintensive.softdesign-apps.ru/forgotpass\"";
+    String FORGOT_PASS_URL = "http://devintensive.softdesign-apps.ru/forgotpass";
 
     // Validation patterns
     Pattern EMAIL_ADDRESS_VALIDATE = Pattern.compile(
