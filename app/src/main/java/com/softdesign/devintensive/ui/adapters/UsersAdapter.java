@@ -1,37 +1,32 @@
 package com.softdesign.devintensive.ui.adapters;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.CustomGlideModule;
+import com.softdesign.devintensive.data.storage.models.Like;
 import com.softdesign.devintensive.data.storage.models.User;
 import com.softdesign.devintensive.ui.behaviors.CustomItemTouchHelperCallback;
 import com.softdesign.devintensive.ui.views.AspectRatioImageView;
-import com.softdesign.devintensive.utils.AppConfig;
 import com.softdesign.devintensive.utils.ConstantManager;
-import com.softdesign.devintensive.utils.UiHelper;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import butterknife.BindDrawable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder>
-        implements CustomItemTouchHelperCallback.ItemTouchHelperAdapter{
+        implements CustomItemTouchHelperCallback.ItemTouchHelperAdapter {
 
     private static final String TAG = ConstantManager.TAG_PREFIX + "UsersAdapter";
     private UserViewHolder.CustomClickListener mListener;
@@ -76,6 +71,19 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             holder.mBio.setVisibility(View.VISIBLE);
             holder.mBio.setText(user.getBio());
         }
+        List<Like> likes = DataManager.getInstance().getLikesForUser(user.getRemoteId());
+        Boolean liked = false;
+        for (Like like : likes) {
+            if (like.getSubjectRemoteId().equals(DataManager.getInstance().getPreferencesManager().getUserId())) {
+                liked = true;
+            }
+        }
+        if (liked) {
+            holder.mLikeImg.setImageResource(R.drawable.heart);
+        } else {
+            holder.mLikeImg.setImageResource(R.drawable.heart_outline);
+        }
+        holder.mLikeText.setText(String.valueOf(likes.size()));
     }
 
     @Override
@@ -117,7 +125,9 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         @BindView(R.id.projects_txt) TextView mProjects;
         @BindView(R.id.bio_txt) TextView mBio;
         @BindView(R.id.more_info_btn) Button mShowMore;
-        @BindDrawable(R.drawable.user_bg) Drawable mDummy;
+        @BindView(R.id.like_img) ImageView mLikeImg;
+        @BindView(R.id.likes_txt) TextView mLikeText;
+
 
         private CustomClickListener mListener;
 
@@ -127,17 +137,26 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             ButterKnife.bind(this, itemView);
             mListener = clickListener;
             mShowMore.setOnClickListener(this);
+            mLikeImg.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
             if (mListener != null) {
-                mListener.onUserItemClickListener(getAdapterPosition());
+                switch (v.getId()) {
+                    case R.id.more_info_btn:
+                        mListener.onMoreInfoClickListener(getAdapterPosition());
+                        break;
+                    case R.id.like_img:
+                        mListener.onLikeClickListener(getAdapterPosition(), v);
+                }
             }
         }
 
         public interface CustomClickListener {
-            void onUserItemClickListener(int position);
+            void onMoreInfoClickListener(int position);
+
+            void onLikeClickListener(int position, View v);
         }
     }
 }

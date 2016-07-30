@@ -41,4 +41,5 @@
     <string name="git_tag">git</string>
     <string name="bio_tag">bio</string>
     <string name="err_msg_token">Invalid Token</string>
+    <string name="item_user_list_button">Просмотр</string>
 </resources>

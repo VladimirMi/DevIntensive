@@ -10,6 +10,8 @@ import com.softdesign.devintensive.data.network.res.UploadImageRes;
 import com.softdesign.devintensive.data.network.res.UserListRes;
 import com.softdesign.devintensive.data.network.res.UserModelRes;
 import com.softdesign.devintensive.data.storage.models.DaoSession;
+import com.softdesign.devintensive.data.storage.models.Like;
+import com.softdesign.devintensive.data.storage.models.LikeDao;
 import com.softdesign.devintensive.data.storage.models.Repository;
 import com.softdesign.devintensive.data.storage.models.RepositoryDao;
 import com.softdesign.devintensive.data.storage.models.User;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 
 public class DataManager {
@@ -73,6 +76,10 @@ public class DataManager {
     public Call<UserListRes> getUserListFromNet() {
         return mRestService.getUserList();
     }
+
+    public Call<ResponseBody> setLike(String userId) {
+        return mRestService.setLike(userId);
+    }
     // endregion
 
     // region =========== Database ===========
@@ -92,6 +99,21 @@ public class DataManager {
         }
 
         return userList;
+    }
+
+    public List<Like> getLikesForUser(String userId) {
+        List<Like> likes = new ArrayList<>();
+
+        try {
+            likes = mDaoSession.queryBuilder(Like.class)
+                    .where(LikeDao.Properties.ObjectRemoteId.eq(userId))
+                    .build()
+                    .list();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return likes;
     }
 
     public List<Repository> getRepositoriesFromDB(String userId) {

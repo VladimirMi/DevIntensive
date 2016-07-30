@@ -17,6 +17,7 @@ import com.softdesign.devintensive.data.network.req.UserLoginReq;
 import com.softdesign.devintensive.data.network.res.LoginModelRes;
 import com.softdesign.devintensive.data.network.res.UserListRes;
 import com.softdesign.devintensive.data.network.res.UserModelRes;
+import com.softdesign.devintensive.data.storage.models.Like;
 import com.softdesign.devintensive.data.storage.models.Repository;
 import com.softdesign.devintensive.data.storage.models.User;
 import com.softdesign.devintensive.data.tasks.SaveUsersList;
@@ -221,15 +222,17 @@ public class AuthActivity extends BaseActivity {
     private void saveUserList(List<UserListRes.UserData> userDataList) {
         List<User> users = new ArrayList<>();
         List<Repository> repositories = new ArrayList<>();
+        List<Like> likes = new ArrayList<>();
 
         int order = 0;
         for (UserListRes.UserData userData : userDataList) {
             users.add(new User(userData, order));
             repositories.addAll(Helper.getRepoListFromUserData(userData));
+            likes.addAll(Helper.getLikeListFromUserData(userData));
             order++;
         }
 
-        ChronosOperation<String> task = new SaveUsersList(users, repositories);
+        ChronosOperation<String> task = new SaveUsersList(users, repositories, likes);
         runOperation(task);
     }
 

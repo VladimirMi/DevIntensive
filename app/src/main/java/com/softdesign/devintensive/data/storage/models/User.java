@@ -2,7 +2,9 @@ package com.softdesign.devintensive.data.storage.models;
 
 import com.softdesign.devintensive.data.network.res.UserListRes;
 
+import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.JoinProperty;
 import org.greenrobot.greendao.annotation.NotNull;
@@ -10,9 +12,6 @@ import org.greenrobot.greendao.annotation.ToMany;
 import org.greenrobot.greendao.annotation.Unique;
 
 import java.util.List;
-
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.DaoException;
 
 @Entity(active = true, nameInDb = "USERS")
 public class User {
@@ -50,6 +49,11 @@ public class User {
             @JoinProperty(name = "remoteId", referencedName = "userRemoteId")
     })
     private List<Repository> repositories;
+
+    @ToMany(joinProperties = {
+            @JoinProperty(name = "remoteId", referencedName = "objectRemoteId")
+    })
+    private List<Like> likesBy;
 
     public User(UserListRes.UserData userData, int order) {
         this.remoteId = userData.getId();
@@ -239,6 +243,34 @@ public class User {
         this.deleted = deleted;
     }
 
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    @Generated(hash = 1778225727)
+    public synchronized void resetLikesBy() {
+        likesBy = null;
+    }
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 997856790)
+    public List<Like> getLikesBy() {
+        if (likesBy == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            LikeDao targetDao = daoSession.getLikeDao();
+            List<Like> likesByNew = targetDao._queryUser_LikesBy(remoteId);
+            synchronized (this) {
+                if(likesBy == null) {
+                    likesBy = likesByNew;
+                }
+            }
+        }
+        return likesBy;
+    }
+
 
     @Generated(hash = 1815241646)
     public User(Long id, @NotNull String remoteId, String photo, @NotNull String fullName,
@@ -260,5 +292,4 @@ public class User {
     @Generated(hash = 586692638)
     public User() {
     }
-
 }

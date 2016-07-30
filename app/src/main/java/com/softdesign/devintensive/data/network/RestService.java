@@ -8,6 +8,7 @@ import com.softdesign.devintensive.data.network.res.UserModelRes;
 
 
 import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -29,5 +30,8 @@ public interface RestService {
 
     @GET("user/list?orderBy=rating")
     Call<UserListRes> getUserList();
+
+    @POST("user/{userId}/like")
+    Call<ResponseBody> setLike(@Path("userId") String userId);
 }
 

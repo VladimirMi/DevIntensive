@@ -8,6 +8,7 @@ import android.provider.MediaStore;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.res.UserListRes;
 import com.softdesign.devintensive.data.network.res.UserModelRes;
+import com.softdesign.devintensive.data.storage.models.Like;
 import com.softdesign.devintensive.data.storage.models.Repository;
 
 import java.io.File;
@@ -60,5 +61,15 @@ public class Helper {
             repositories.add(new Repository(repo, userId));
         }
         return repositories;
+    }
+
+    public static List<Like> getLikeListFromUserData(UserListRes.UserData userData) {
+        final String userId = userData.getId();
+
+        List<Like> likes = new ArrayList<>();
+        for (String likeBy : userData.getProfileValues().getLikesBy()) {
+            likes.add(new Like(userId, likeBy));
+        }
+        return likes;
     }
 }
