@@ -50,6 +50,8 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     @Override
     public void onBindViewHolder(final UserViewHolder holder, int position) {
         final User user = mUsers.get(position);
+        List<Like> likes = DataManager.getInstance().getLikesForUser(user.getRemoteId());
+
         final String userPhoto;
         if (user.getPhoto().isEmpty()) {
             userPhoto = "null";
@@ -61,7 +63,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         CustomGlideModule.setUserPhoto(mContext, userPhoto, holder.mUserPhoto);
 
         holder.mFullName.setText(user.getFullName());
-        holder.mRating.setText(String.valueOf(user.getRating()));
+        holder.mRating.setText(String.valueOf(user.getRating() + likes.size()));
         holder.mCodeLines.setText(String.valueOf(user.getCodeLines()));
         holder.mProjects.setText(String.valueOf(user.getProjects()));
 
@@ -71,7 +73,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             holder.mBio.setVisibility(View.VISIBLE);
             holder.mBio.setText(user.getBio());
         }
-        List<Like> likes = DataManager.getInstance().getLikesForUser(user.getRemoteId());
+
         Boolean liked = false;
         for (Like like : likes) {
             if (like.getSubjectRemoteId().equals(DataManager.getInstance().getPreferencesManager().getUserId())) {

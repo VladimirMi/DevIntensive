@@ -33,5 +33,8 @@ public interface RestService {
 
     @POST("user/{userId}/like")
     Call<ResponseBody> setLike(@Path("userId") String userId);
+
+    @POST("user/{userId}/unlike")
+    Call<ResponseBody> deleteLike(@Path("userId") String userId);
 }
 

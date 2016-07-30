@@ -175,7 +175,7 @@ public class UserModelRes {
         }
 
         public int getRating() {
-            return rating;
+            return rait;
         }
 
         public List<String> getLikesBy() {

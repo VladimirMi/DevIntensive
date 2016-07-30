@@ -35,6 +35,10 @@
                 android:paddingLeft="@dimen/spacing_normal_16"
                 android:paddingRight="@dimen/spacing_normal_16"
                 android:textColor="@android:color/white"
+                android:shadowColor="@color/text_shadow"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="2"
                 android:textSize="@dimen/font_larger_24"/>
         </FrameLayout>
 

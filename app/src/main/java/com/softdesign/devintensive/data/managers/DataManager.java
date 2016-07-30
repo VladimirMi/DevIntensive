@@ -80,6 +80,10 @@ public class DataManager {
     public Call<ResponseBody> setLike(String userId) {
         return mRestService.setLike(userId);
     }
+
+    public Call<ResponseBody> deleteLike(String userId) {
+        return mRestService.deleteLike(userId);
+    }
     // endregion
 
     // region =========== Database ===========

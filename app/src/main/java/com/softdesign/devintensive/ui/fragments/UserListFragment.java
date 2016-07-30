@@ -141,15 +141,16 @@ public class UserListFragment extends BaseFragment {
 
             List<Like> likes = mDataManager.getDaoSession().getLikeDao()
                     ._queryUser_LikesBy(mUsers.get(position).getRemoteId());
-            boolean liked = false;
+            Like userLike = null;
 
             for (Like like : likes) {
                 if (like.getSubjectRemoteId().equals(mPreferencesManager.getUserId())) {
-                    liked = true;
+                    userLike = like;
                 }
             }
 
-            if (!liked) {
+            if (userLike == null) {
+
                 Call<ResponseBody> call = mDataManager.setLike(mUsers.get(position).getRemoteId());
                 call.enqueue(new Callback<ResponseBody>() {
                     @Override
@@ -158,6 +159,24 @@ public class UserListFragment extends BaseFragment {
                         mDataManager.getDaoSession().getLikeDao().insertOrReplace(
                                 new Like(mUsers.get(position).getRemoteId(), mPreferencesManager.getUserId()));
 
+                        mUsersAdapter.notifyItemChanged(position);
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                    }
+                });
+            } else {
+
+                Call<ResponseBody> call = mDataManager.deleteLike(mUsers.get(position).getRemoteId());
+                final Like finalUserLike = userLike;
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                        mDataManager.getDaoSession().getLikeDao().delete(finalUserLike);
                         mUsersAdapter.notifyItemChanged(position);
 
                     }

@@ -46,6 +46,7 @@ public class CustomGlideModule implements GlideModule {
                 .error(context.getResources().getDrawable(R.drawable.user_bg))
                 .placeholder(context.getResources().getDrawable(R.drawable.user_bg))
                 .centerCrop()
+//                .fitCenter()
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(view);
