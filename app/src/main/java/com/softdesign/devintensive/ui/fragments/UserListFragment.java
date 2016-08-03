@@ -3,7 +3,6 @@ package com.softdesign.devintensive.ui.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -36,6 +35,8 @@ import com.softdesign.devintensive.utils.NetworkStatusChecker;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,15 +58,7 @@ public class UserListFragment extends BaseFragment {
 
     private MainActivity mActivity;
 
-    private boolean isAnimate = true;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (savedInstanceState != null) {
-            isAnimate = false;
-        }
-    }
+    private TimerTask searchTask;
 
     @Override
     public void onAttach(Context context) {
@@ -95,6 +88,38 @@ public class UserListFragment extends BaseFragment {
         return view;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar_menu, menu);
+
+        final MenuItem item = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(final String newText) {
+                search(newText);
+                return true;
+            }
+        });
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    private void setupToolbar() {
+        mActivity.setSupportActionBar(mToolbar);
+        ActionBar actionBar = mActivity.getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(mPreferencesManager.loadUserName());
+        }
+    }
+
     private void setupRecycler() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         mRecyclerView.setLayoutManager(linearLayoutManager);
@@ -119,21 +144,6 @@ public class UserListFragment extends BaseFragment {
         ItemTouchHelper.Callback callback = new CustomItemTouchHelperCallback(mUsersAdapter);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
-
-//        if (isAnimate) {
-//            mRecyclerView.setTranslationY(UiHelper.getScreenHeight(mContext));
-//            mRecyclerView.setAlpha(0f);
-//            mRecyclerView.setScaleX(0.0f);
-//            mRecyclerView.setScaleY(0.0f);
-//            mRecyclerView.animate()
-//                    .translationY(0)
-//                    .scaleX(1.0f)
-//                    .scaleY(1.0f)
-//                    .setDuration(1000)
-//                    .alpha(1f)
-//                    .setInterpolator(new FastOutSlowInInterpolator())
-//                    .sta;t();
-//        }
     }
 
     private void setLike(final int position, final View view) {
@@ -191,19 +201,30 @@ public class UserListFragment extends BaseFragment {
     }
 
 
-    public void filter(final String query) {
+    public void search(final String query) {
+        Timer searchTimer = new Timer();
+
+        if (searchTask != null) {
+            searchTask.cancel();
+        }
+
+        searchTask = new TimerTask() {
+            @Override
+            public void run() {
+                mUsers = mDataManager.searchUsers(query.toUpperCase());
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        swapAdapter();
+                    }
+                });
+            }
+        };
         if (query.isEmpty()) {
             mUsers = mUsersCopy;
             swapAdapter();
         } else {
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mUsers = mDataManager.searchUsers(query.toUpperCase());
-                    swapAdapter();
-                }
-            }, AppConfig.SEARCH_DELAY);
+            searchTimer.schedule(searchTask, AppConfig.SEARCH_DELAY);
         }
     }
 

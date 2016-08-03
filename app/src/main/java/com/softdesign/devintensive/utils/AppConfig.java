@@ -27,6 +27,7 @@ public interface AppConfig {
                     + "(/(?:(?:[" + Patterns.GOOD_IRI_CHAR + ";/\\?:@&=#~"
                     + "\\-\\.\\+!\\*'\\(\\),_]){3,}|(?:%[a-fA-F0-9]{3,}))*)+"
                     + "(?:\\b|$))");
+
     Pattern GIT_URL_VALIDATE = Pattern.compile(
             "((?:(http|https|Http|Https|rtsp|Rtsp)://|)"
                     + "(?:github\\.com)"
@@ -44,5 +45,5 @@ public interface AppConfig {
     // Time configs
     long MAX_CONNECT_TIMEOUT = 15_000;
     long MAX_READ_TIMEOUT = 15_000;
-    long SEARCH_DELAY = 2500;
+    long SEARCH_DELAY = 1000;
 }
