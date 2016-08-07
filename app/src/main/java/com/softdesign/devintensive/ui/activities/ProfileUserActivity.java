@@ -52,13 +52,13 @@ public class ProfileUserActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        Intent parentIntent = getSupportParentActivityIntent();
-        if (parentIntent != null) {
-            parentIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
         }
-        startActivity(parentIntent);
+        return super.onOptionsItemSelected(item);
     }
+
 
     private void setupToolbar() {
         setSupportActionBar(mToolbar);

@@ -32,7 +32,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.activities.MainActivity"/>
+        <activity android:name=".ui.activities.MainActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
 
         <activity android:name=".ui.activities.ProfileUserActivity"/>
 

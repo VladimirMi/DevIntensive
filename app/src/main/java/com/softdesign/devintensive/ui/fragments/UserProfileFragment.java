@@ -1,13 +1,9 @@
 package com.softdesign.devintensive.ui.fragments;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
@@ -17,8 +13,6 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.ui.activities.MainActivity;
@@ -26,14 +20,11 @@ import com.softdesign.devintensive.ui.views.RepositoryDeviderView;
 import com.softdesign.devintensive.ui.views.RepositoryView;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.softdesign.devintensive.utils.MyTextWatcher;
-import com.softdesign.devintensive.utils.UiHelper;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
-import butterknife.BindViews;
 import butterknife.ButterKnife;
 
 
@@ -71,7 +62,6 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
         super.onAttach(context);
         if (context instanceof MainActivity) {
             mActivity = (MainActivity) context;
-            mEditMode = mActivity.mEditMode;
         }
     }
 
@@ -80,6 +70,7 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
         super.onDetach();
         mActivity = null;
     }
+
 
     @Nullable
     @Override
@@ -124,13 +115,18 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putBoolean(ConstantManager.EDIT_MODE_KEY, mEditMode);
         saveUserInfo();
     }
 
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        loadUserInfo();
+        if (savedInstanceState != null) {
+            mEditMode = savedInstanceState.getBoolean(ConstantManager.EDIT_MODE_KEY, false);
+            setupEditMode();
+            loadUserInfo();
+        }
     }
 
     @Override
@@ -193,10 +189,7 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
     }
 
 
-    /**
-     * переключает режим редактирования
-     */
-    public void setupEditMode() {
+    private void setupEditMode() {
         if (mEditMode) {
             for (EditText userValue : mUserInfoViews) {
                 userValue.setFocusableInTouchMode(true);
@@ -217,7 +210,6 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
             }
             mNestedScrollView.scrollTo(0, 0);
         }
-
     }
 
     private void loadUserInfo() {

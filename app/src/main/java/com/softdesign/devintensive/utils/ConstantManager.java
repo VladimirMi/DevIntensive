@@ -17,13 +17,15 @@ public interface ConstantManager {
     String USER_ID_KEY = "USER_ID_KEY";
     String USER_NAME_KEY = "USER_NAME_KEY";
     String USERS_LIST_EXISTS_KEY = "USERS_LIST_EXISTS_KEY";
+    String STATISTIC_VISIBILITY_KEY = "STATISTIC_VISIBILITY_KEY";
 
     // Misc constants
     String TAG_PREFIX = "DEV ";
     String EXTENSION_JPEG = ".jpg";
 
-    // Dialog ids
-    int LOAD_PROFILE_PHOTO = 1;
+    // Dialog fragment actions
+    int LOAD_FROM_CAMERA = 1;
+    int LOAD_FROM_GALLERY = 2;
 
     // Intent request codes
     int REQUEST_CAMERA_PICTURE = 50;
@@ -54,4 +56,9 @@ public interface ConstantManager {
     String USER_LIST_UPDATED = "USER_LIST_UPDATED";
     String USER_LIST_CREATED = "USER_LIST_CREATED";
     String USER_LIST_FAIL = "USER_LIST_FAIL";
+
+
+    String USER_STATISTIC_FRAGMENT_TAG = "USER_STATISTIC_FRAGMENT_TAG";
+    String USER_PROFILE_FRAGMENT_TAG = "USER_PROFILE_FRAGMENT_TAG";
+    String USER_LIST_FRAGMENT_TAG = "USER_LIST_FRAGMENT_TAG";
 }

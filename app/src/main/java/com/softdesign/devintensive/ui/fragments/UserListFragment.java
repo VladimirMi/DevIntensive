@@ -4,16 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -58,7 +59,7 @@ public class UserListFragment extends BaseFragment {
 
     private MainActivity mActivity;
 
-    private TimerTask searchTask;
+    private TimerTask mSearchTask;
 
     @Override
     public void onAttach(Context context) {
@@ -80,6 +81,9 @@ public class UserListFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_user_list, container, false);
         ButterKnife.bind(this, view);
 
+        mRecyclerView.setNestedScrollingEnabled(false);
+        setupToolbar();
+
         ChronosOperation<List<User>> loadUsersListTask = new LoadUsersList();
         runOperation(loadUsersListTask);
         ChronosOperation<HashMap<String, List<Repository>>> loadRepositoriesTask = new LoadRepositories();
@@ -87,6 +91,7 @@ public class UserListFragment extends BaseFragment {
 
         return view;
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -110,7 +115,6 @@ public class UserListFragment extends BaseFragment {
     }
 
     private void setupToolbar() {
-        mActivity.setSupportActionBar(mToolbar);
         ActionBar actionBar = mActivity.getSupportActionBar();
 
         if (actionBar != null) {
@@ -204,11 +208,11 @@ public class UserListFragment extends BaseFragment {
     public void search(final String query) {
         Timer searchTimer = new Timer();
 
-        if (searchTask != null) {
-            searchTask.cancel();
+        if (mSearchTask != null) {
+            mSearchTask.cancel();
         }
 
-        searchTask = new TimerTask() {
+        mSearchTask = new TimerTask() {
             @Override
             public void run() {
                 mUsers = mDataManager.searchUsers(query.toUpperCase());
@@ -224,7 +228,7 @@ public class UserListFragment extends BaseFragment {
             mUsers = mUsersCopy;
             swapAdapter();
         } else {
-            searchTimer.schedule(searchTask, AppConfig.SEARCH_DELAY);
+            searchTimer.schedule(mSearchTask, AppConfig.SEARCH_DELAY);
         }
     }
 

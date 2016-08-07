@@ -1,13 +1,13 @@
 package com.softdesign.devintensive.ui.fragments;
 
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 
 import com.redmadrobot.chronos.ChronosConnector;
 import com.redmadrobot.chronos.ChronosOperation;

@@ -1,17 +1,11 @@
 package com.softdesign.devintensive.ui.activities;
 
 import android.Manifest;
-import android.app.Dialog;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -23,51 +17,38 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.NestedScrollView;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.network.CustomGlideModule;
 import com.softdesign.devintensive.data.network.res.UploadImageRes;
+import com.softdesign.devintensive.ui.fragments.LoadPhotoDialogFragment;
 import com.softdesign.devintensive.ui.fragments.UserListFragment;
 import com.softdesign.devintensive.ui.fragments.UserProfileFragment;
 import com.softdesign.devintensive.ui.fragments.UserStatisticFragment;
-import com.softdesign.devintensive.ui.views.RepositoryDeviderView;
-import com.softdesign.devintensive.ui.views.RepositoryView;
 import com.softdesign.devintensive.utils.AppConfig;
 import com.softdesign.devintensive.utils.ConstantManager;
-import com.softdesign.devintensive.utils.ExStorageState;
 import com.softdesign.devintensive.utils.Helper;
-import com.softdesign.devintensive.utils.MyTextWatcher;
-import com.softdesign.devintensive.utils.UiHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import butterknife.BindView;
-import butterknife.BindViews;
 import butterknife.ButterKnife;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -76,12 +57,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener, LoadPhotoDialogFragment.OnDialogFragmentClickListener {
 
     private static final String TAG = ConstantManager.TAG_PREFIX + "Main Activity";
     @BindView(R.id.main_coordinator_container) CoordinatorLayout mCoordinatorLayout;
-    @BindView(R.id.appbar_layout) public AppBarLayout mAppBarLayout;
-    @BindView(R.id.collapsing_toolbar) public CollapsingToolbarLayout mCollapsingToolbar;
+    @BindView(R.id.appbar_layout) AppBarLayout mAppBarLayout;
+    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.navigation_drawer) DrawerLayout mNavigationDrawer;
     @BindView(R.id.navigation_view) NavigationView mNavigationView;
@@ -90,10 +71,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @BindView(R.id.profile_photo) ImageView mProfilePhoto;
 
     @BindView(R.id.fragment_statistic_container) FrameLayout mStatisticContainer;
-    @BindView(R.id.profile_photo_container) FrameLayout mPhotoContainer;
+    @BindView(R.id.fragment_content_container) FrameLayout mContentContainer;
 
-
-    public boolean mEditMode;
+    private boolean mEditMode;
     private File mPhotoFile = null;
     private AppBarLayout.LayoutParams mAppBarParams = null;
     private Uri mOriginPhotoUri;
@@ -109,30 +89,41 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d(TAG, "onCreate");
         ButterKnife.bind(this);
 
-        mFragmentManager = getFragmentManager();
+        mFragmentManager = getSupportFragmentManager();
 
         mFab.setOnClickListener(this);
         mProfilePlaceholder.setOnClickListener(this);
+
+        mUserStatisticFragment = (UserStatisticFragment) mFragmentManager.findFragmentByTag(ConstantManager.USER_STATISTIC_FRAGMENT_TAG);
+        mUserProfileFragment = (UserProfileFragment) mFragmentManager.findFragmentByTag(ConstantManager.USER_PROFILE_FRAGMENT_TAG);
+        mUserListFragment = (UserListFragment) mFragmentManager.findFragmentByTag(ConstantManager.USER_LIST_FRAGMENT_TAG);
+
+        if (mUserStatisticFragment == null) {
+            mUserStatisticFragment = new UserStatisticFragment();
+        }
+        if (mUserProfileFragment == null) {
+            mUserProfileFragment = new UserProfileFragment();
+        }
+        if (mUserListFragment == null) {
+            mUserListFragment = new UserListFragment();
+        }
+
+        if (savedInstanceState == null) {
+            mFragmentManager.beginTransaction()
+                            .add(R.id.fragment_statistic_container, mUserStatisticFragment, ConstantManager.USER_STATISTIC_FRAGMENT_TAG)
+                            .add(R.id.fragment_content_container, mUserProfileFragment, ConstantManager.USER_PROFILE_FRAGMENT_TAG)
+                            .commit();
+
+            mNavigationView.getMenu().getItem(0).setChecked(true);
+        }
 
         setupToolbar();
         setupDrawer();
         setupEditMode();
 
         loadUserPhoto();
-        if (savedInstanceState == null) {
-            FragmentTransaction transaction = mFragmentManager.beginTransaction();
-            mUserStatisticFragment = new UserStatisticFragment();
-            mUserProfileFragment = new UserProfileFragment();
-
-            transaction.add(R.id.fragment_statistic_container, mUserStatisticFragment);
-            transaction.replace(R.id.fragment_content_container, mUserProfileFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-            mNavigationView.getMenu().getItem(0).setChecked(true);
-        }
     }
 
     @Override
@@ -147,7 +138,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.profile_placeholder:
-                showDialog(ConstantManager.LOAD_PROFILE_PHOTO);
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                LoadPhotoDialogFragment loadPhotoDialog = new LoadPhotoDialogFragment();
+                loadPhotoDialog.show(ft, "dialog");
                 break;
             case R.id.fab:
                 if (mUserProfileFragment.onFabClick()) {
@@ -174,20 +167,33 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ConstantManager.EDIT_MODE_KEY, mEditMode);
+        outState.putInt(ConstantManager.STATISTIC_VISIBILITY_KEY, mStatisticContainer.getVisibility());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mEditMode = savedInstanceState.getBoolean(ConstantManager.EDIT_MODE_KEY, false);
+        if (savedInstanceState.getInt(ConstantManager.STATISTIC_VISIBILITY_KEY) == View.VISIBLE) {
+            mStatisticContainer.setVisibility(View.VISIBLE);
+        } else {
+            mStatisticContainer.setVisibility(View.GONE);
+        }
+        setupEditMode();
     }
 
     @Override
     public void onBackPressed() {
         if (mNavigationDrawer.isDrawerOpen(GravityCompat.START)) {
             mNavigationDrawer.closeDrawer(GravityCompat.START);
+
+        } else if (mUserListFragment.isVisible()) {
+            mNavigationView.getMenu().performIdentifierAction(R.id.user_profile_menu, 0);
+            mNavigationView.getMenu().getItem(0).setChecked(true);
+
         } else if (mEditMode) {
             mFab.performClick();
+
         } else {
             super.onBackPressed();
         }
@@ -217,38 +223,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        switch (id) {
-            case ConstantManager.LOAD_PROFILE_PHOTO:
-                String[] selectItems = {getString(R.string.user_profile_dialog_gallery),
-                        getString(R.string.user_profile_diallog_camera),
-                        getString(R.string.user_profile_dialog_cancel)};
-
-                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.user_profile_dialog_title);
-                builder.setItems(selectItems, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int choiceItem) {
-                        switch (choiceItem) {
-                            case 0:
-                                loadPhotoFromGallery();
-                                break;
-                            case 1:
-                                loadPhotoFromCamera();
-                                break;
-                            case 2:
-                                dialogInterface.cancel();
-                                break;
-                        }
-                    }
-                });
-                return builder.create();
-            default:
-                return null;
-        }
-    }
-
     private void showSnackBar(String message) {
         Snackbar.make(mCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
@@ -266,31 +240,29 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 int itemId = item.getItemId();
                 switch (itemId) {
                     case R.id.user_profile_menu:
-                        unlockToolbar();
+                        mStatisticContainer.setVisibility(View.VISIBLE);
                         expandToolbar();
-                        mPhotoContainer.setVisibility(View.VISIBLE);
-                        mSearchItem.setVisible(false);
-                        FragmentTransaction transaction = mFragmentManager.beginTransaction();
-                        mUserStatisticFragment = new UserStatisticFragment();
-                        mUserProfileFragment = new UserProfileFragment();
 
-                        transaction.add(R.id.fragment_statistic_container, mUserStatisticFragment);
-                        transaction.replace(R.id.fragment_content_container, mUserProfileFragment);
-                        transaction.addToBackStack(null);
-                        transaction.commit();
+                        mSearchItem.setVisible(false);
+
+                        mFragmentManager.beginTransaction()
+                                        .setCustomAnimations(R.anim.fade_in, R.anim.slide_out_bottom)
+                                        .replace(R.id.fragment_content_container, mUserProfileFragment, ConstantManager.USER_PROFILE_FRAGMENT_TAG)
+                                        .commit();
                         return true;
 
                     case R.id.team_menu:
-                        collapseToolbar();
-                        lockToolbar();
-                        mSearchItem.setVisible(true);
-                        transaction = mFragmentManager.beginTransaction();
-                        mUserListFragment = new UserListFragment();
 
-                        transaction.remove(mUserStatisticFragment);
-                        transaction.replace(R.id.fragment_content_container, mUserListFragment);
-                        transaction.addToBackStack(null);
-                        transaction.commit();
+                        collapseToolbar();
+                        mStatisticContainer.setVisibility(View.GONE);
+                        mContentContainer.setPadding(0, 0, 0, 0);
+
+                        mSearchItem.setVisible(true);
+
+                        mFragmentManager.beginTransaction()
+                                        .setCustomAnimations(R.anim.slide_in_bottom, R.anim.fade_out)
+                                        .replace(R.id.fragment_content_container, mUserListFragment, ConstantManager.USER_LIST_FRAGMENT_TAG)
+                                        .commit();
                         return true;
 
                     case R.id.login_menu:
@@ -321,7 +293,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void setupEditMode() {
         if (mEditMode) {
-
             mProfilePlaceholder.setVisibility(View.VISIBLE);
 //            lockToolbar();
             mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
@@ -492,11 +463,27 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                mUserListFragment.filter(newText);
+                mUserListFragment.search(newText);
                 return true;
             }
         });
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onFragmentClick(int action) {
+        switch (action) {
+            case ConstantManager.LOAD_FROM_CAMERA:
+                loadPhotoFromCamera();
+                break;
+            case ConstantManager.LOAD_FROM_GALLERY:
+                loadPhotoFromGallery();
+                break;
+        }
+    }
+
+    public boolean isEditMode() {
+        return mEditMode;
     }
 }

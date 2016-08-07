@@ -3,11 +3,9 @@ package com.softdesign.devintensive.ui.behaviors;
 import android.content.Context;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.v4.widget.NestedScrollView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.utils.ConstantManager;
@@ -38,8 +36,10 @@ public class UserStatisticBehavior extends AppBarLayout.ScrollingViewBehavior {
         child.setPadding(0, padding, 0, padding);
 
         FrameLayout fragmentContent = (FrameLayout) parent.getChildAt(2);
-        fragmentContent.setPadding(fragmentContent.getPaddingLeft(), child.getHeight(),
-                fragmentContent.getPaddingRight(), fragmentContent.getPaddingBottom());
+
+        if (child.getVisibility()==View.VISIBLE) {
+            fragmentContent.setPadding(0, child.getHeight(), 0, 0);
+        }
 
         return super.onDependentViewChanged(parent, child, dependency);
     }
